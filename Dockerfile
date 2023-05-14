@@ -12,4 +12,6 @@ RUN stack build --only-dependencies
 
 COPY . /opt/mysite
 
-CMD ["stack" "build"]
+RUN stack build
+
+CMD ["stack", "exec", "mysite", "build"]

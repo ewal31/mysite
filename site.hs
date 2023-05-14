@@ -1,6 +1,14 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid (mappend)
+import           System.FilePath (splitPath, joinPath)
+import           Text.Pandoc.Options (
+                                       readerExtensions
+                                     , extensionsFromList
+                                     , Extension ( Ext_tex_math_single_backslash, Ext_tex_math_double_backslash, Ext_tex_math_dollars, Ext_latex_macros )
+                                     , writerHTMLMathMethod
+                                     , HTMLMathMethod( MathJax )
+                                     )
 import           Hakyll
 
 
@@ -11,19 +19,23 @@ main = hakyllWith config $ do
         route   idRoute
         compile copyFileCompiler
 
+    match "static/**" $ do
+        route   rootRoute
+        compile copyFileCompiler
+
     match "css/*" $ do
         route   idRoute
         compile compressCssCompiler
 
-    match (fromList ["about.rst", "contact.markdown"]) $ do
-        route   $ setExtension "html"
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
-            >>= relativizeUrls
+    -- match (fromList ["about.rst", "contact.markdown"]) $ do
+    --     route   $ setExtension "html"
+    --     compile $ pandocCompiler
+    --         >>= loadAndApplyTemplate "templates/default.html" defaultContext
+    --         >>= relativizeUrls
 
     match "posts/*" $ do
         route $ setExtension "html"
-        compile $ pandocCompiler
+        compile $ postCompiler
             >>= loadAndApplyTemplate "templates/post.html"    postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
@@ -59,8 +71,38 @@ main = hakyllWith config $ do
 
     match "templates/*" $ compile templateCompiler
 
+
+rootRoute :: Routes
+rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
+    where
+        dropDirectory []       = []
+        dropDirectory ("/":ds) = dropDirectory ds
+        dropDirectory ds       = tail ds
+
+
+postCompiler :: Compiler (Item String)
+postCompiler = pandocCompilerWith postReaderOptions postWriterOptions
+    where
+        postReaderOptions = defaultHakyllReaderOptions {
+            readerExtensions = extensionsFromList
+                [
+                  Ext_tex_math_single_backslash  -- TeX math btw (..) [..]
+                , Ext_tex_math_double_backslash  -- TeX math btw \(..\) \[..\]
+                , Ext_tex_math_dollars           -- TeX math between $..$ or $$..$$
+                , Ext_latex_macros               -- Parse LaTeX macro definitions (for math only)
+                ]
+        }
+        postWriterOptions = defaultHakyllWriterOptions {
+            writerHTMLMathMethod = MathJax ""
+        }
+    
+
+
 config :: Configuration
-config = defaultConfiguration {destinationDirectory = "docs"}
+config = defaultConfiguration {
+        destinationDirectory = "docs",
+        previewHost = "0.0.0.0"
+    }
 
 --------------------------------------------------------------------------------
 postCtx :: Context String
