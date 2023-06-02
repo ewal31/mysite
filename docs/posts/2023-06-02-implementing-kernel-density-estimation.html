@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Implementing Kernel Density Estimation - Univariate</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <!-- <a href="/about.html">About</a> -->
+                <!-- <a href="/contact.html">Contact</a> -->
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Implementing Kernel Density Estimation - Univariate</h1>
+
+            <div class="info">
+    Posted on June  2, 2023
+    
+</div>
+
+<p><img src="../img/2023/Hist2Kernel.gif" id="imgexpandtoborder" class="img" alt="distribution.gif" /></p>
+<h3>Introduction</h3>
+<p>Kernel Density Estimation is a technique typically used to approximate a probability density function via collected samples. The approach has two hyperparameters to consider: the choice of Kernel and its bandwidth. This article will build up an implementation in the <a href="https://julialang.org/">Julia</a> programming language for 1-dimensional data and explore possibilities for automatically determining the bandwidth.</p>
+<h3>Kernel Smoothing</h3>
+<p>A Kernel function acts as a weighted measure of distance between objects. It is not restricted exclusively to points in a space - see, for example, the <a href="https://en.wikipedia.org/wiki/String_kernel">string kernel</a> - it should, however, in most cases be both <em>symmetric</em> and <em>non-negative</em>. For example, a Kernel function operating on real numbers generally has the following form:</p>
+<p><span class="math display">\[
+K_{h}(\bm{x}^*, \bm{x}_i) = D \left( \frac{ \left || \bm{x}_i - \bm{x}^* \right || }{ h(\bm{x}^*) } \right )
+\]</span></p>
+<p>where</p>
+<ul>
+<li><span class="math inline">\(\bm{x}^* \in \mathbb{R}^p\)</span> is the specific point for which we are calculating an estimate</li>
+<li><span class="math inline">\(\bm{x}_i \in \mathbb{R}^p\)</span> are the other points in the space</li>
+<li><span class="math inline">\(\left || ... \right ||\)</span> is a Norm, be that Euclidean or otherwise</li>
+<li><span class="math inline">\(h(\bm{x}^*)\)</span> determines the radius of the Kernel, or equivalently the weighting of a given comparison</li>
+<li><span class="math inline">\(D(...)\)</span> is a real-valued function</li>
+</ul>
+<p>Several Kernels fitting this mould can be seen <a href="https://en.wikipedia.org/wiki/Kernel_(statistics)">here</a>.</p>
+<p>Given a Kernel, we can create a continuous function that connects a set of points, i.e. <em>smooths</em> the data. In order to do this, we construct a local weighted average across a dataset. The form this average takes is a generalisation of the traditional weighted arithmetic mean,</p>
+<p><span class="math display">\[
+\bar{x} = \frac{\sum_{i = 1}^N w_i x_i}{\sum_{i = 1}^N w_i}
+\]</span></p>
+<p>which, given <span class="math inline">\(N\)</span> observations <span class="math inline">\(x_i\)</span> and corresponding weights <span class="math inline">\(w_i\)</span>, constructs a global average of a given set of points.</p>
+<p>The generalisation, named after Èlizbar Nadaraya and Geoffrey Watson, replaces the weights <span class="math inline">\(w_i\)</span> with the result of the Kernel function producing the following form:</p>
+<p><span class="math display">\[
+\hat{Y} (\bm{x}^*) = \frac{ \sum_{i=1}^N K_{h}(\bm{x}^*, \bm{x}_i) Y(\bm{x}_i) }{ \sum_{i=1}^N K_{h}(\bm{x}^*, \bm{x}_i) }
+\]</span></p>
+<p>Here,</p>
+<ul>
+<li><span class="math inline">\(Y(\bm{x}_i)\)</span> returns the magnitude of the sample at <span class="math inline">\(\bm{x}_i\)</span></li>
+<li>and <span class="math inline">\(N\)</span> is the number of samples available to build an estimate from</li>
+</ul>
+<p><img src="../img/2023/KernelSmoothingIllustration.png" id="imgexpandtoborder" class="img" alt="KernelSmoothingIllustration.png" /></p>
+<p>For example, given a Kernel function that weights an estimate via the Euclidean distance to its surrounding points, we expect something like the <span class="math inline">\(+\)</span> for the point <span class="math inline">\(\bm{x}^*\)</span> in the image above, as <span class="math inline">\(d1\)</span> is much smaller than <span class="math inline">\(d2\)</span> and <span class="math inline">\(d3\)</span>. Therefore, the point with the most influence on the estimate is the point directly to the left.</p>
+<h3>Gaussian Kernel Smoothing</h3>
+<p>We create the Gaussian Kernel from the above more general form by setting <span class="math inline">\(D(u)\)</span> to <span class="math inline">\(\text{exp}( -1/2 u^2)\)</span> and <span class="math inline">\(h(x^*)\)</span> to <span class="math inline">\(\sigma\)</span>. In this case, the correct norm is the <span class="math inline">\(L_2\)</span> or Euclidean norm.</p>
+<p><span class="math display">\[
+K_{\text{smoother}}(x^*, x) = \text{exp} \left ( - \frac{1}{2} \left ( \frac{ x - x^* }{\sigma} \right )^2 \right )
+\]</span></p>
+<p>Using this Kernel function and the Nadaraya-Watson estimator, we can then build an estimate for each point <span class="math inline">\(x^*\)</span>. The weighting contributed by each surrounding point falls off in a bell curve-like manner with increased distance. The red, green and yellow curves in the image below show this relative weighting as the <span class="math inline">\(\sigma\)</span> value of the Kernel is varied.</p>
+<p><img src="../img/2023/GaussianSmoothing.gif" id="imgexpandtoborder" class="img" alt="GaussianSmoothing.gif" /></p>
+<p>These two equations can be almost directly written as Julia code giving us the following implementation.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Ksmoother</span>(x_star, x, σ) <span class="op">=</span> <span class="cn">ℯ</span><span class="op">^</span>( <span class="op">-</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> (x_star <span class="op">-</span> xs)<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> σ<span class="op">^</span><span class="fl">2</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">NadarayaWatsonEstimate</span>(x_star, xs, Ys, σ)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    W <span class="op">=</span> <span class="fu">Ksmoother</span>.(x_star, xs, σ)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>( W <span class="op">.*</span> Ys ) <span class="op">/</span> <span class="fu">sum</span>( W )</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>Having chosen a value <span class="math inline">\(\sigma\)</span>, our estimate for a specific point <span class="math inline">\(x^*\)</span> can then be found as follows</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>σ <span class="op">=</span> <span class="fl">0.75</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Surrounding Points</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> [ <span class="fl">0</span>,       <span class="fl">4.21</span>, <span class="fl">5.79</span>,  <span class="fl">7.37</span>, <span class="fl">9.47</span> ]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> [ <span class="fl">0.03</span>, <span class="fl">0.08</span>, <span class="fl">0.93</span>, <span class="fl">0.91</span>, <span class="fl">0.99</span> ]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Yhat <span class="op">=</span> <span class="fu">NadarayaWatsonEstimate</span>(x_star, x, Y, σ)</span></code></pre></div>
+<h3>Gaussian Kernel Density Estimate</h3>
+<p>The main difference between the smoother we constructed, and a density estimate is that we haven't ensured that the area under the curve integrates to <span class="math inline">\(1\)</span>. Our first step is to add the missing normalising term of the <a href="https://en.wikipedia.org/wiki/Normal_distribution">Gaussian normal density function</a> to our Kernel from before, producing</p>
+<p><span class="math display">\[
+K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2} \left ( \frac{x^* - x}{\sigma} \right )^2 \right )
+\]</span></p>
+<p>or in Julia</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">K</span>(x_star, x, σ) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span>(σ <span class="op">*</span> <span class="fu">√</span>(<span class="fl">2</span><span class="op">*</span><span class="cn">π</span>)) <span class="op">*</span> <span class="cn">ℯ</span><span class="op">^</span>( <span class="op">-</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> (x_star <span class="op">-</span> x)<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> σ<span class="op">^</span><span class="fl">2</span>)</span></code></pre></div>
+<p>Instead of the mean <span class="math inline">\(\mu\)</span> typical of the definition, we have one of the samples, <span class="math inline">\(x\)</span>. In fact, to construct an estimate of our density, we build a mixture from <span class="math inline">\(N\)</span> Gaussian distributions, with the mean of each being one of the samples <span class="math inline">\(x_i\)</span>. Observing this fact then leads to the equation for our probability density estimate.</p>
+<p><span class="math display">\[
+\hat{f}(x | \sigma, x) = \frac{1}{N} \sum_i^N K_\sigma(x, x_i)
+\]</span></p>
+<p>In Julia we can write this as</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(x, σ, xs) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fu">length</span>(xs) <span class="op">*</span> <span class="fu">sum</span>(<span class="fu">K</span>.(x, xs, σ))</span></code></pre></div>
+<p>We can similarly construct the cumulative density function estimate by taking the average of the cumulative density of each of the Gaussian distributions. The cumulative density of a single Gaussian, where <span class="math inline">\(\text{erf}\)</span> is the error function, is as follows.</p>
+<p><span class="math display">\[
+\Phi(x | \mu, \sigma) = \frac{1}{2} \left [ 1 + \text{erf} \left ( \frac{x - \mu}{\sigma \sqrt{2}} \right) \right ]
+\]</span></p>
+<p>As in the case of the probability density function, our estimate is created by averaging each of the cumulative density functions.</p>
+<p><span class="math display">\[
+\hat{\text{cdf}} (x| \sigma, x) = \frac{1}{N} \sum_i^N \Phi(x | x_i, \sigma)
+\]</span></p>
+<p>By making use of the <code>SpecialFunctions</code> package, we implement these two equations in Julia.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">SpecialFunctions</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">Φ</span>(x, μ, σ) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> (<span class="fl">1</span> <span class="op">+</span> <span class="fu">erf</span>((x <span class="op">-</span> μ) <span class="op">/</span> (σ <span class="op">*</span> √<span class="fl">2</span>)))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cdf</span>(x, σ, xs) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fu">length</span>(xs) <span class="op">*</span> <span class="fu">sum</span>(<span class="fu">Φ</span>.(x, xs, σ))</span></code></pre></div>
+<p>We can test these functions by generating samples from a known Gaussian distribution to see whether the estimates match.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Distributions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>μ <span class="op">=</span> <span class="fl">4</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>σ <span class="op">=</span> <span class="fl">2</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>true_distribution <span class="op">=</span> <span class="fu">Normal</span>(μ, σ)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> <span class="fu">rand</span>(true_distribution, <span class="fl">50</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.12098536225957168, 0.11422110383127826)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.17603266338214976, 0.13346968556474678)</span></span></code></pre></div>
+<p><img src="../img/2023/GaussianKernelDensity.gif" id="imgexpandtoborder" class="img" alt="GaussianKernelDensity.gif" /></p>
+<p>What becomes apparent when plotting the estimate and actual distributions is that the estimate does not match exactly even when the true variance is known and there are several samples. This is because the estimate is not a single density but an average of many.</p>
+<h3>Estimating Bandwidth</h3>
+<p>The discrepancy we have just seen suggests we need an alternative approach for determining our estimator's <span class="math inline">\(\sigma\)</span> value. In the more general case, where we are not just considering the Gaussian kernel, this weighting is known as the bandwidth. It corresponds to the <span class="math inline">\(h(\bm{x}^*)\)</span> in our original, more general form above. There are two types of approaches for determining the bandwidth, <em>cross-validation</em> and <em>rule-of-thumb</em>. We will focus on the second here.</p>
+<p>Many of the <em>rule-of-thumb</em> approaches start by attempting to minimise the Mean Integrated Square Error (MISE) but simplify its calculation by introducing estimates and simplifications. Given a true probability density function <span class="math inline">\(f\)</span>, and a kernel estimate <span class="math inline">\(\hat{f}\)</span>, the MISE is as follows.</p>
+<p><span class="math display">\[\begin{aligned}
+\text{MISE}(\hat{f}) &amp;= \int \text{E} \left[ \left( \hat{f}(x) - f(x) \right)^2 \right ] \text{d}x \\
+							   &amp;= \int \left( \text{E} \left [ \hat{f}(x) \right ] - f(x) \right )^2 \text{d}x + \int \text{var} \hat{f}(x) \text{d}x
+\end{aligned}
+\]</span></p>
+<p>This can be understood as the sum of the <strong>integrated square bias</strong> and <strong>integrated variance</strong>. During this part of the derivation, we are not restricting ourselves exclusively to the Gaussian Kernel, so we continue with a slightly more general form for our estimate.</p>
+<p><span class="math display">\[
+\hat{f}(x) = \frac{1}{n} \sum_{i}^n \frac{K \left( \left ( x - y \right ) / h \right )}{h}
+\]</span></p>
+<p>As a reminder, we require that our Kernel is <em>symmetric</em>, <em>non-negative</em> and as we use it for density estimation, it should <em>integrate to <span class="math inline">\(1\)</span></em>.</p>
+<blockquote>
+<p>A quick sidenote:
+To fit this form of <span class="math inline">\(\hat{f}\)</span> our Gaussian Kernel is defined
+<span class="math display">\[
+K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
+\]</span>
+This results in the same form as we had above
+<span class="math display">\[
+\frac{K \left( \left ( x - y \right ) / \sigma \right )}{\sigma} = \frac{1}{\sigma \sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} \left( \frac{x -y}{\sigma} \right )^2 \right ) = K_\sigma(x, y)
+\]</span></p>
+</blockquote>
+<p>To simplify the <strong>bias</strong> term we make use of the variable substitution <span class="math inline">\(y = x - hu\)</span>, <span class="math inline">\(\text{d}y = h \text{d}u\)</span> and the Taylor expansion</p>
+<p><span class="math display">\[
+f(x - hu) = f(x) - h u f'(x) + \frac{1}{2}h^2 u^2 f''(x) + ...
+\]</span></p>
+<p>to get</p>
+<p><span class="math display">\[\begin{aligned}
+\text{bias} &amp;= \text{E} \left [ \hat{f}(x) \right ] - f(x) \\
+                 &amp;= \int \frac{K \left( (x-y) / h \right )}{h} f(y) \text{d}y - f(x) \\
+				 &amp;= \int K(u) f(x - hu) \text{d}u - f(x) \\
+				 &amp;= \int K(u) \left ( f(x - hu) - f(x) \right ) \text{d}u \\
+				 &amp;= -h f'(x) \int u K(u) du + \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
+\end{aligned}
+\]</span></p>
+<p>Due to the required symmetric property, we also have the equality</p>
+<p><span class="math display">\[
+\int_0^\infty u K(u) \text{d}u + \int_{-\infty}^0 u K(u) \text{d}u = 0 = \int u K(u) \text{d}u
+\]</span></p>
+<p>as integrating either side of <span class="math inline">\(0\)</span> results in the same absolute area, only the second side will be negative due to <span class="math inline">\(u\)</span>. Consequently, both sides of the integral cancel each other out.</p>
+<p>Using this equality, we further simplify the <strong>bias</strong> term to</p>
+<p><span class="math display">\[
+\text{bias} = \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
+\]</span></p>
+<p>The term <span class="math inline">\(\int u^2 K(u)du\)</span> is the variance of the Kernel. Replacing it with <span class="math inline">\(k\)</span> and plugging the result we found for the <strong>bias</strong> of the Kernel gives us a second-degree approximation of the <strong>integrated square bias</strong></p>
+<p><span class="math display">\[
+\frac{1}{4} h^4 k^2 \int f''(x)^2 dx
+\]</span></p>
+<p>Recalling that <strong>variance</strong> can be expressed</p>
+<p><span class="math display">\[
+\text{var} \hat{f}(x) = \text{E} \left [ (X - \mu)^2 \right ] = \text{E} \left[ X^2 \right ] - \text{E} \left[ X \right ]^2
+\]</span></p>
+<p>we can use the same process on the variance term to simplify the remaining MISE term</p>
+<p><span class="math display">\[\begin{aligned}
+\text{variance} &amp;=\frac{1}{n} \int \frac{K \left ( \left ( x - y \right ) / h \right )^2}{h^2} f(y) \text{d}y - \frac{\left ( f(x)  + \text{bias} \right )^2}{n} \\
+                        &amp;= \frac{1}{n h} \int f(x - h u) K (u)^2 \text{d}u - \frac{1}{n} \left ( f(x)  + \text{bias} \right )^2 \\
+						&amp;= \frac{1}{n h} \int \left( f(x) - htf'(x) + ... \right ) K (u)^2 \text{d}u - \frac{1}{n} \left ( f(x)  + \text{bias} \right )^2
+\end{aligned}
+\]</span></p>
+<p>Typically, this is further simplified by considering only the case where the number of samples <span class="math inline">\(n\)</span> is large and our bandwidth <span class="math inline">\(h\)</span> is quite small. Under this assumption, the additional Taylor series terms approach zero relative to the initial <span class="math inline">\(f(x)\)</span> term and the <span class="math inline">\(\frac{1}{n} \left ( f(x) + \text{bias} \right )^2\)</span> approaches <span class="math inline">\(0\)</span>. Our <strong>variance</strong> is then</p>
+<p><span class="math display">\[
+\text{variance} \approx \frac{f(x)}{n h} \int K (u)^2 \text{d}u
+\]</span></p>
+<p>Raising this term to the power of two and integrating over the <span class="math inline">\(f(x)\)</span> term, which being a probability distribution integrates to one, gives us our <strong>integrated variance</strong> estimate</p>
+<p><span class="math display">\[
+\int \text{variance } \text{d}x \approx \frac{1}{nh} \int K(u)^2 \text{d}u
+\]</span></p>
+<p>Together these terms build the Asymptotic Mean Integrated Square Error (AMISE) approximation, used in many bandwidth <em>rule-of-thumb</em> approaches.</p>
+<p><span class="math display">\[
+\text{AMISE}(h) = \frac{1}{nh} \int K(u)^2 \text{d}u + \frac{1}{4} h^4 k^2 \int f''(x)^2 k dx
+\]</span></p>
+<p>In the literature this is often shorted to <span class="math inline">\(\frac{R(K)}{nh} + \frac{h^4 k^2 R(f'')}{4}\)</span>, where <span class="math inline">\(R(g) = \int g(x)^2 \text{d}x\)</span>.</p>
+<p>We can then find an optimal bandwidth <span class="math inline">\(h\)</span> by deriving our approximation with respect to <span class="math inline">\(h\)</span> and equating it with <span class="math inline">\(0\)</span>.</p>
+<p><span class="math display">\[\begin{aligned}
+\frac{\text{d}}{\text{d}h} \text{AMISE}(h) &amp; = \frac{\text{d}}{\text{d}h} \frac{R(K)}{nh} + \frac{\text{d}}{\text{d}h} \frac{h^4 k^2 R(f'')}{4} \\
+0 &amp;= - \frac{R(K)}{nh^2} + \frac{4 h^3 k^2 R(f'')}{4} \\
+h^3 k^2 R(f'') &amp;= \frac{R(K)}{nh^2} \\
+h^5 &amp;= \frac{R(K)}{k^2 R(f'')n} \\
+h &amp;= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
+\end{aligned}
+\]</span></p>
+<hr />
+<p>To be continued...</p>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+
+        <!-- TODO This all needs to be revamped, just wanted to see if could get it to work -->
+        <link rel="stylesheet" href="../katex/katex.min.css">
+        <script defer src="../katex/katex.min.js"></script>
+        <script type="text/javascript" script defer src="../katex/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+		<link rel="stylesheet" href="../css/syntax.css" />
+
+    </body>
+</html>
