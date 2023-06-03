@@ -78,7 +78,7 @@ Having chosen a value $\sigma$, our estimate for a specific point $x^*$ can then
 σ = 0.75
 
 # Surrounding Points
-x = [ 0,    4.21, 5.79,  7.37, 9.47 ]
+x = [ 0,    4.21, 5.79, 7.37, 9.47 ]
 Y = [ 0.03, 0.08, 0.93, 0.91, 0.99 ]
 
 Yhat = NadarayaWatsonEstimate(x_star, x, Y, σ)
@@ -144,10 +144,13 @@ samples = rand(true_distribution, 50)
 pdf_estimate(x) = f.(x, σ, Ref(samples))
 
 @show pdf(true_distribution, 2), pdf_estimate(2)
-# (0.12098536225957168, 0.11422110383127826)
+# (0.121, 0.115)
+
+@show pdf(true_distribution, 3), pdf_estimate(3)
+# (0.176, 0.141)
 
 @show pdf(true_distribution, 5), pdf_estimate(5)
-# (0.17603266338214976, 0.13346968556474678)
+# (0.176, 0.137)
 ```
 
 ![GaussianKernelDensity.gif](/img/2023/GaussianKernelDensity.gif){#img#imgexpandtoborder .img}
@@ -215,7 +218,7 @@ $$
 \text{bias} = \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
 $$
 
-The term $\int u^2 K(u)du$ is the variance of the Kernel. Replacing it with $k$ and plugging the result we found for the **bias** of the Kernel gives us a second-degree approximation of the **integrated square bias**
+The term $\int u^2 K(u)du$ is the variance of the Kernel. We replacing it with the variable $k$ for convenience. Now squaring and integrating the result nets us a second-degree approximation of the **integrated square bias**
 
 $$
 \frac{1}{4} h^4 k^2 \int f''(x)^2 dx
@@ -267,6 +270,81 @@ h &= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
 \end{aligned}
 $$
 
+A more concise derivation of this approximation can be found in both [@SilvermanDensityEstimationForStatistics 36-40] and [@WandJonesKernelSmoothing 19-22].
+
+
+### Optimal Bandwidth For Univariate Gaussian
+
+Hoping to improve our Julia implementation above, we follow Silverman's treatment in [@SilvermanDensityEstimationForStatistics pages 45-48] and use this approximation to estimate the optimal $h$ in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.
+
+Starting with the $R(K)$ term, we integrate over the square of our Gaussian Kernel.
+
+$$\begin{aligned}
+R(K) &= \int \left ( \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
+        &= \frac{1}{2 \pi} \int \left ( \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
+		&= \frac{\sqrt{\pi}}{2 \pi} \\
+        &= \frac{1}{2\sqrt{\pi}}
+\end{aligned}
+$$
+
+Next, using our assumption that the true distribution is Gaussian, i.e. that $f = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right )$, we can solve for the $R(f'')$ term. 
+
+$$\begin{aligned}
+R(f'') &= \int \left( \frac{\text{d}^2}{\text{d}x} \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right ) \right )^2 \text{d} x \\
+       &= \frac{1}{\sigma^{10} 2 \pi}  \int \left( (x^2 - \sigma^2) \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right ) \right )^2 \text{d} x \\
+       &= \frac{1}{\sigma^{10} 2 \pi} \left( \frac{3 \sqrt{\pi} \sigma^5 }{4} \right ) \\
+       &= \frac{3}{8 \sigma^{5} \sqrt{\pi}}
+\end{aligned}
+$$
+
+Remembering that $k$ is the variance of our Kernel, in this case, equal to $1$ as our Kernel is a standard Gaussian, our approximate optimal bandwidth is
+
+$$\begin{aligned}
+h &= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
+   &= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
+   &\approx 1.06 \sigma n^{-1/5}
+\end{aligned}
+$$
+
+We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our $\sigma$.
+
+```julia
+function h_est_normal(samples)
+    μ = sum(samples) / length(samples)
+    unbiased_variance = sum((samples .- μ) .^ 2) / ( length(samples) - 1 )
+    1.06 * √(unbiased_variance) * length(samples) ^ (-1 / 5)
+end
+```
+
+Comparing this new estimate with our previous estimate and the true probability, we see an improvement in the predicted values. This is because the bandwidth of the Kernels is smaller, causing less smoothing and allowing for a larger range of predicted values.
+
+```julia
+μ = 4
+σ = 2
+true_distribution = Normal(μ, σ)
+
+samples = rand(true_distribution, 50)
+pdf_estimate(x) = f.(x, σ, Ref(samples))
+pdf_estimate_gaus_opt_h(x) = f.(x, h_est_normal(samples), Ref(samples))
+
+@show pdf(true_distribution, 2), pdf_estimate(2), pdf_estimate_gaus_opt_h(2)
+# (0.121, 0.115, 0.111)
+
+@show pdf(true_distribution, 3), pdf_estimate(3), pdf_estimate_gaus_opt_h(3)
+# (0.176, 0.141, 0.185)
+
+@show pdf(true_distribution, 5), pdf_estimate(5), pdf_estimate_gaus_opt_h(5)
+# (0.176, 0.137, 0.173)
+
+@show h_est_normal(samples)
+# 0.907
+```
+
+![EstimateComparison.png](/img/2023/EstimateComparison.png){#img#imgexpandtoborder .img}
+
+
+**To be continued...**
+
 ---
 
-To be continued...
+### References

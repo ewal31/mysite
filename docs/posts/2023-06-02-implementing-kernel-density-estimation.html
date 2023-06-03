@@ -4,6 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Implementing Kernel Density Estimation - Univariate</title>
+		<link rel="stylesheet" href="../css/syntax.css" />
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
     </head>
     <body>
@@ -79,7 +80,7 @@ K_{\text{smoother}}(x^*, x) = \text{exp} \left ( - \frac{1}{2} \left ( \frac{ x 
 <div class="sourceCode" id="cb2"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>σ <span class="op">=</span> <span class="fl">0.75</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Surrounding Points</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> [ <span class="fl">0</span>,    <span class="fl">4.21</span>, <span class="fl">5.79</span>,  <span class="fl">7.37</span>, <span class="fl">9.47</span> ]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> [ <span class="fl">0</span>,    <span class="fl">4.21</span>, <span class="fl">5.79</span>, <span class="fl">7.37</span>, <span class="fl">9.47</span> ]</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> [ <span class="fl">0.03</span>, <span class="fl">0.08</span>, <span class="fl">0.93</span>, <span class="fl">0.91</span>, <span class="fl">0.99</span> ]</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Yhat <span class="op">=</span> <span class="fu">NadarayaWatsonEstimate</span>(x_star, x, Y, σ)</span></code></pre></div>
@@ -120,10 +121,13 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.12098536225957168, 0.11422110383127826)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115)</span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.17603266338214976, 0.13346968556474678)</span></span></code></pre></div>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>), <span class="fu">pdf_estimate</span>(<span class="fl">3</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.141)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137)</span></span></code></pre></div>
 <p><img src="../img/2023/GaussianKernelDensity.gif" id="imgexpandtoborder" class="img" alt="GaussianKernelDensity.gif" /></p>
 <p>What becomes apparent when plotting the estimate and actual distributions is that the estimate does not match exactly even when the true variance is known and there are several samples. This is because the estimate is not a single density but an average of many.</p>
 <h3>Estimating Bandwidth</h3>
@@ -172,7 +176,7 @@ f(x - hu) = f(x) - h u f'(x) + \frac{1}{2}h^2 u^2 f''(x) + ...
 <p><span class="math display">\[
 \text{bias} = \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
 \]</span></p>
-<p>The term <span class="math inline">\(\int u^2 K(u)du\)</span> is the variance of the Kernel. Replacing it with <span class="math inline">\(k\)</span> and plugging the result we found for the <strong>bias</strong> of the Kernel gives us a second-degree approximation of the <strong>integrated square bias</strong></p>
+<p>The term <span class="math inline">\(\int u^2 K(u)du\)</span> is the variance of the Kernel. We replacing it with the variable <span class="math inline">\(k\)</span> for convenience. Now squaring and integrating the result nets us a second-degree approximation of the <strong>integrated square bias</strong></p>
 <p><span class="math display">\[
 \frac{1}{4} h^4 k^2 \int f''(x)^2 dx
 \]</span></p>
@@ -209,8 +213,70 @@ h^5 &amp;= \frac{R(K)}{k^2 R(f'')n} \\
 h &amp;= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
 \end{aligned}
 \]</span></p>
+<p>A more concise derivation of this approximation can be found in both <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, 36–40)</span> and <span class="citation" data-cites="WandJonesKernelSmoothing">(Wand 1994, 19–22)</span>.</p>
+<h3>Optimal Bandwidth For Univariate Gaussian</h3>
+<p>Hoping to improve our Julia implementation above, we follow Silverman's treatment in <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, 45–48)</span> and use this approximation to estimate the optimal <span class="math inline">\(h\)</span> in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.</p>
+<p>Starting with the <span class="math inline">\(R(K)\)</span> term, we integrate over the square of our Gaussian Kernel.</p>
+<p><span class="math display">\[\begin{aligned}
+R(K) &amp;= \int \left ( \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
+        &amp;= \frac{1}{2 \pi} \int \left ( \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
+		&amp;= \frac{\sqrt{\pi}}{2 \pi} \\
+        &amp;= \frac{1}{2\sqrt{\pi}}
+\end{aligned}
+\]</span></p>
+<p>Next, using our assumption that the true distribution is Gaussian, i.e. that <span class="math inline">\(f = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right )\)</span>, we can solve for the <span class="math inline">\(R(f'')\)</span> term.</p>
+<p><span class="math display">\[\begin{aligned}
+R(f'') &amp;= \int \left( \frac{\text{d}^2}{\text{d}x} \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right ) \right )^2 \text{d} x \\
+       &amp;= \frac{1}{\sigma^{10} 2 \pi}  \int \left( (x^2 - \sigma^2) \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right ) \right )^2 \text{d} x \\
+       &amp;= \frac{1}{\sigma^{10} 2 \pi} \left( \frac{3 \sqrt{\pi} \sigma^5 }{4} \right ) \\
+       &amp;= \frac{3}{8 \sigma^{5} \sqrt{\pi}}
+\end{aligned}
+\]</span></p>
+<p>Remembering that <span class="math inline">\(k\)</span> is the variance of our Kernel, in this case, equal to <span class="math inline">\(1\)</span> as our Kernel is a standard Gaussian, our approximate optimal bandwidth is</p>
+<p><span class="math display">\[\begin{aligned}
+h &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
+   &amp;= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
+   &amp;\approx 1.06 \sigma n^{-1/5}
+\end{aligned}
+\]</span></p>
+<p>We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our <span class="math inline">\(\sigma\)</span>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_normal</span>(samples)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.06</span> <span class="op">*</span> <span class="fu">√</span>(unbiased_variance) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>Comparing this new estimate with our previous estimate and the true probability, we see an improvement in the predicted values. This is because the bandwidth of the Kernels is smaller, causing less smoothing and allowing for a larger range of predicted values.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>μ <span class="op">=</span> <span class="fl">4</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>σ <span class="op">=</span> <span class="fl">2</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>true_distribution <span class="op">=</span> <span class="fu">Normal</span>(μ, σ)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> <span class="fu">rand</span>(true_distribution, <span class="fl">50</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate_gaus_opt_h</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, <span class="fu">h_est_normal</span>(samples), <span class="fu">Ref</span>(samples))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">2</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115, 0.111)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>), <span class="fu">pdf_estimate</span>(<span class="fl">3</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">3</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.141, 0.185)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">5</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137, 0.173)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_normal</span>(samples)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.907</span></span></code></pre></div>
+<p><img src="../img/2023/EstimateComparison.png" id="imgexpandtoborder" class="img" alt="EstimateComparison.png" /></p>
+<p><strong>To be continued...</strong></p>
 <hr />
-<p>To be continued...</p>
+<h3 class="unnumbered">References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-SilvermanDensityEstimationForStatistics" class="csl-entry" role="doc-biblioentry">
+Silverman, B. W. 1998. <em>Density estimation for statistics and data analysis</em>. 1st ed. Routledge. <a href="https://doi.org/10.1201/9781315140919">https://doi.org/10.1201/9781315140919</a>.
+</div>
+<div id="ref-WandJonesKernelSmoothing" class="csl-entry" role="doc-biblioentry">
+Wand, &amp; Jones, M. P. 1994. <em>Kernel smoothing</em>. 1st ed. Chapman; Hall/CRC. <a href="https://doi.org/10.1201/b14876">https://doi.org/10.1201/b14876</a>.
+</div>
+</div>
 
         </div>
         <div id="footer">
@@ -222,7 +288,6 @@ h &amp;= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
         <link rel="stylesheet" href="../katex/katex.min.css">
         <script defer src="../katex/katex.min.js"></script>
         <script type="text/javascript" script defer src="../katex/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
-		<link rel="stylesheet" href="../css/syntax.css" />
 
     </body>
 </html>
