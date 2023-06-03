@@ -78,7 +78,7 @@ Having chosen a value $\sigma$, our estimate for a specific point $x^*$ can then
 σ = 0.75
 
 # Surrounding Points
-x = [ 0,       4.21, 5.79,  7.37, 9.47 ]
+x = [ 0,    4.21, 5.79,  7.37, 9.47 ]
 Y = [ 0.03, 0.08, 0.93, 0.91, 0.99 ]
 
 Yhat = NadarayaWatsonEstimate(x_star, x, Y, σ)
