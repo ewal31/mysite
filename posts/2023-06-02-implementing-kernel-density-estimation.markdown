@@ -177,7 +177,6 @@ $$
 
 As a reminder, we require that our Kernel is *symmetric*, *non-negative* and as we use it for density estimation, it should *integrate to $1$*.
 
-> A quick sidenote:
 > To fit this form of $\hat{f}$ our Gaussian Kernel is defined
 > $$
 K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
@@ -270,12 +269,12 @@ h &= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
 \end{aligned}
 $$
 
-A more concise derivation of this approximation can be found in both [@SilvermanDensityEstimationForStatistics 36-40] and [@WandJonesKernelSmoothing 19-22].
+A more concise derivation of this approximation can be found in both [@SilvermanDensityEstimationForStatistics{}, pages 36-40] and [@WandJonesKernelSmoothing{}, pages 19-22].
 
 
 ### Optimal Bandwidth For Univariate Gaussian
 
-Hoping to improve our Julia implementation above, we follow Silverman's treatment in [@SilvermanDensityEstimationForStatistics pages 45-48] and use this approximation to estimate the optimal $h$ in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.
+Hoping to improve our Julia implementation above, we follow Silverman's treatment in [@SilvermanDensityEstimationForStatistics{}, pages 45-48] and use this approximation to estimate the optimal $h$ in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.
 
 Starting with the $R(K)$ term, we integrate over the square of our Gaussian Kernel.
 
@@ -300,16 +299,24 @@ $$
 Remembering that $k$ is the variance of our Kernel, in this case, equal to $1$ as our Kernel is a standard Gaussian, our approximate optimal bandwidth is
 
 $$\begin{aligned}
-h &= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
-   &= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
-   &\approx 1.06 \sigma n^{-1/5}
+h_{gaussian} &= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
+             &= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
+             &\approx 1.06 \sigma n^{-1/5}
+\end{aligned}
+$$
+
+> The unbiased standard deviation can be calculated as follows
+> $$
+\begin{aligned}
+\bar{x} &= \frac{\sum_i^n x_i}{n} \\
+s &= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 \end{aligned}
 $$
 
 We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our $\sigma$.
 
 ```julia
-function h_est_normal(samples)
+function h_est_gaussian(samples)
     μ = sum(samples) / length(samples)
     unbiased_variance = sum((samples .- μ) .^ 2) / ( length(samples) - 1 )
     1.06 * √(unbiased_variance) * length(samples) ^ (-1 / 5)
@@ -325,7 +332,7 @@ true_distribution = Normal(μ, σ)
 
 samples = rand(true_distribution, 50)
 pdf_estimate(x) = f.(x, σ, Ref(samples))
-pdf_estimate_gaus_opt_h(x) = f.(x, h_est_normal(samples), Ref(samples))
+pdf_estimate_gaus_opt_h(x) = f.(x, h_est_gaussian(samples), Ref(samples))
 
 @show pdf(true_distribution, 2), pdf_estimate(2), pdf_estimate_gaus_opt_h(2)
 # (0.121, 0.115, 0.111)
@@ -336,12 +343,23 @@ pdf_estimate_gaus_opt_h(x) = f.(x, h_est_normal(samples), Ref(samples))
 @show pdf(true_distribution, 5), pdf_estimate(5), pdf_estimate_gaus_opt_h(5)
 # (0.176, 0.137, 0.173)
 
-@show h_est_normal(samples)
+@show h_est_gaussian(samples)
 # 0.907
 ```
 
 ![EstimateComparison.png](/img/2023/EstimateComparison.png){#img#imgexpandtoborder .img}
 
+In the same way, we could formulate an approximately optimal bandwidth for all potential density functions $f$, assuming we can find $f$'s second derivative. We do not, however, in general, know the true distribution $f$; our motivation to use Kernel density estimation in place of directly fitting a distribution. The true distribution may be multimodal or skewed heavily, causing over-smoothing. Silverman's now ubiquitous *Rule of Thumb* takes the previously derived optimal $h_{gaussian}$ and tries to account for some of these possibilities. His first suggestion is to use the interquartile range (IQR) when it is smaller than the standard deviation of the data. Therefore, in the case of skewed distributions, fewer samples will influence the estimate at each point, reducing overall smoothing and allowing for a more locally defined estimate. In other words, we reduce the influence of our choosing a Gaussian Kernel when it seems less likely that the data follows a Gaussian distribution. Following similar reasoning, he also suggests reducing the $1.06$ term to $0.9$ with experiments showing improvement when $f$ is skewed or bimodal with marginal degradation in the case of a Gaussian. The result of these modifications is Silverman's *Rule of Thumb*
+
+$$
+h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
+$$
+
+[@SilvermanDensityEstimationForStatistics{}, page 48]
+
+> In the case of a standard Gaussian distribution, the IQR is approximately $1.34\sigma$
+
+Instead of making assumptions about the true distribution $f$, we can opt for a nonparametric approach. One such method is explored in [@SheaterJonesReliableDataBasedBandwidth].
 
 **To be continued...**
 

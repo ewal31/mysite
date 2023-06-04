@@ -144,8 +144,7 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 \]</span></p>
 <p>As a reminder, we require that our Kernel is <em>symmetric</em>, <em>non-negative</em> and as we use it for density estimation, it should <em>integrate to <span class="math inline">\(1\)</span></em>.</p>
 <blockquote>
-<p>A quick sidenote:
-To fit this form of <span class="math inline">\(\hat{f}\)</span> our Gaussian Kernel is defined
+<p>To fit this form of <span class="math inline">\(\hat{f}\)</span> our Gaussian Kernel is defined
 <span class="math display">\[
 K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
 \]</span>
@@ -213,9 +212,9 @@ h^5 &amp;= \frac{R(K)}{k^2 R(f'')n} \\
 h &amp;= \left ( \frac{R(K)}{k^2 R(f'')n} \right ) ^{1/5}
 \end{aligned}
 \]</span></p>
-<p>A more concise derivation of this approximation can be found in both <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, 36–40)</span> and <span class="citation" data-cites="WandJonesKernelSmoothing">(Wand 1994, 19–22)</span>.</p>
+<p>A more concise derivation of this approximation can be found in both <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, pages 36-40)</span> and <span class="citation" data-cites="WandJonesKernelSmoothing">(Wand 1994, pages 19-22)</span>.</p>
 <h3>Optimal Bandwidth For Univariate Gaussian</h3>
-<p>Hoping to improve our Julia implementation above, we follow Silverman's treatment in <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, 45–48)</span> and use this approximation to estimate the optimal <span class="math inline">\(h\)</span> in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.</p>
+<p>Hoping to improve our Julia implementation above, we follow Silverman's treatment in <span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, pages 45-48)</span> and use this approximation to estimate the optimal <span class="math inline">\(h\)</span> in the case of a Gaussian Kernel while under the assumption that the true density is a Gaussian distribution.</p>
 <p>Starting with the <span class="math inline">\(R(K)\)</span> term, we integrate over the square of our Gaussian Kernel.</p>
 <p><span class="math display">\[\begin{aligned}
 R(K) &amp;= \int \left ( \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
@@ -234,13 +233,22 @@ R(f'') &amp;= \int \left( \frac{\text{d}^2}{\text{d}x} \frac{1}{\sigma \sqrt{2 \
 \]</span></p>
 <p>Remembering that <span class="math inline">\(k\)</span> is the variance of our Kernel, in this case, equal to <span class="math inline">\(1\)</span> as our Kernel is a standard Gaussian, our approximate optimal bandwidth is</p>
 <p><span class="math display">\[\begin{aligned}
-h &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
-   &amp;= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
-   &amp;\approx 1.06 \sigma n^{-1/5}
+h_{gaussian} &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right )^{-1/5} (1^2 n)^{-1/5} \\
+             &amp;= \left ( \frac{8}{6} \right )^{1/5} \sigma n^{-1/5} \\
+             &amp;\approx 1.06 \sigma n^{-1/5}
 \end{aligned}
 \]</span></p>
+<blockquote>
+<p>The unbiased standard deviation can be calculated as follows
+<span class="math display">\[
+\begin{aligned}
+\bar{x} &amp;= \frac{\sum_i^n x_i}{n} \\
+s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
+\end{aligned}
+\]</span></p>
+</blockquote>
 <p>We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our <span class="math inline">\(\sigma\)</span>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_normal</span>(samples)</span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_gaussian</span>(samples)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.06</span> <span class="op">*</span> <span class="fu">√</span>(unbiased_variance) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
@@ -252,7 +260,7 @@ h &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right 
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> <span class="fu">rand</span>(true_distribution, <span class="fl">50</span>)</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate_gaus_opt_h</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, <span class="fu">h_est_normal</span>(samples), <span class="fu">Ref</span>(samples))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate_gaus_opt_h</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, <span class="fu">h_est_gaussian</span>(samples), <span class="fu">Ref</span>(samples))</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">2</span>)</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115, 0.111)</span></span>
@@ -263,13 +271,25 @@ h &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} \right 
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">5</span>)</span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137, 0.173)</span></span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_normal</span>(samples)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_gaussian</span>(samples)</span>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.907</span></span></code></pre></div>
 <p><img src="../img/2023/EstimateComparison.png" id="imgexpandtoborder" class="img" alt="EstimateComparison.png" /></p>
+<p>In the same way, we could formulate an approximately optimal bandwidth for all potential density functions <span class="math inline">\(f\)</span>, assuming we can find <span class="math inline">\(f\)</span>'s second derivative. We do not, however, in general, know the true distribution <span class="math inline">\(f\)</span>; our motivation to use Kernel density estimation in place of directly fitting a distribution. The true distribution may be multimodal or skewed heavily, causing over-smoothing. Silverman's now ubiquitous <em>Rule of Thumb</em> takes the previously derived optimal <span class="math inline">\(h_{gaussian}\)</span> and tries to account for some of these possibilities. His first suggestion is to use the interquartile range (IQR) when it is smaller than the standard deviation of the data. Therefore, in the case of skewed distributions, fewer samples will influence the estimate at each point, reducing overall smoothing and allowing for a more locally defined estimate. In other words, we reduce the influence of our choosing a Gaussian Kernel when it seems less likely that the data follows a Gaussian distribution. Following similar reasoning, he also suggests reducing the <span class="math inline">\(1.06\)</span> term to <span class="math inline">\(0.9\)</span> with experiments showing improvement when <span class="math inline">\(f\)</span> is skewed or bimodal with marginal degradation in the case of a Gaussian. The result of these modifications is Silverman's <em>Rule of Thumb</em></p>
+<p><span class="math display">\[
+h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
+\]</span></p>
+<p><span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, page 48)</span></p>
+<blockquote>
+<p>In the case of a standard Gaussian distribution, the IQR is approximately <span class="math inline">\(1.34\sigma\)</span></p>
+</blockquote>
+<p>Instead of making assumptions about the true distribution <span class="math inline">\(f\)</span>, we can opt for a nonparametric approach. One such method is explored in <span class="citation" data-cites="SheaterJonesReliableDataBasedBandwidth">(Sheather and Jones 1991)</span>.</p>
 <p><strong>To be continued...</strong></p>
 <hr />
 <h3 class="unnumbered">References</h3>
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-SheaterJonesReliableDataBasedBandwidth" class="csl-entry" role="doc-biblioentry">
+Sheather, S. J., and M. C. Jones. 1991. <span>“A reliable data-based bandwidth selection method for kernel density estimation.”</span> <em>Journal of the Royal Statistical Society. Series B (Methodological)</em> 53 (3): 683–690. <a href="http://www.jstor.org/stable/2345597">http://www.jstor.org/stable/2345597</a>.
+</div>
 <div id="ref-SilvermanDensityEstimationForStatistics" class="csl-entry" role="doc-biblioentry">
 Silverman, B. W. 1998. <em>Density estimation for statistics and data analysis</em>. 1st ed. Routledge. <a href="https://doi.org/10.1201/9781315140919">https://doi.org/10.1201/9781315140919</a>.
 </div>

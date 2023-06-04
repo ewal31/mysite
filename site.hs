@@ -10,12 +10,14 @@ import           Text.Pandoc.Options (
 									       Ext_backtick_code_blocks
 									     , Ext_citations
 										 , Ext_fenced_code_blocks
-										 , Ext_tex_math_single_backslash
-										 , Ext_tex_math_double_backslash
-										 , Ext_tex_math_dollars
-										 , Ext_latex_macros
 										 , Ext_inline_code_attributes
+										 , Ext_latex_macros
 										 , Ext_link_attributes
+										 --, Ext_markdown_in_html_blocks
+										 --, Ext_raw_attribute
+										 , Ext_tex_math_dollars
+										 , Ext_tex_math_double_backslash
+										 , Ext_tex_math_single_backslash
 									   )
 									 , HTMLMathMethod( MathJax )
 									 , readerExtensions
@@ -100,13 +102,17 @@ rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
         dropDirectory ("/":ds) = dropDirectory ds
         dropDirectory ds       = tail ds
 
-
+--	csl <- load (fromFilePath "assets/csl/chicago.csl")
+--	bib <- load (fromFilePath "assets/bibliography/General.bib")
+--	liftM (writePandocWith postWriterOptions) (getResourceBody >>= readPandocBiblio postReaderOptions csl bib)	
 -- TODO need to modify this to only include what is necessary for the page
 postCompiler :: Compiler (Item String)
 postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
 	csl <- load (fromFilePath "assets/csl/chicago.csl")
 	bib <- load (fromFilePath "assets/bibliography/General.bib")
-	liftM (writePandocWith postWriterOptions) (getResourceBody >>= readPandocBiblio postReaderOptions csl bib)
+	body <- getResourceBody
+	parsed <- readPandocBiblio postReaderOptions csl bib body
+	return (writePandocWith postWriterOptions parsed)
     where
         postReaderOptions = defaultHakyllReaderOptions {
             readerExtensions = extensionsFromList
@@ -120,6 +126,8 @@ postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
                 , Ext_latex_macros               -- Parse LaTeX macro definitions (for math only)
 				, Ext_inline_code_attributes     -- Allow attributes on inline code
 				, Ext_link_attributes            -- link and image attributes
+				--, Ext_raw_attribute
+				--, Ext_markdown_in_html_blocks
                 ]
         }
         postWriterOptions = defaultHakyllWriterOptions {
