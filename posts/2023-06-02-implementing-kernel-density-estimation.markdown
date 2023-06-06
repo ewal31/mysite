@@ -141,15 +141,15 @@ using Distributions
 true_distribution = Normal(μ, σ)
 
 samples = rand(true_distribution, 50)
-pdf_estimate(x) = f.(x, σ, Ref(samples))
+pdf_estimate = f
 
-@show pdf(true_distribution, 2), pdf_estimate(2)
+@show pdf(true_distribution, 2), pdf_estimate(2, σ, samples)
 # (0.121, 0.115)
 
-@show pdf(true_distribution, 3), pdf_estimate(3)
+@show pdf(true_distribution, 3), pdf_estimate(3, σ, samples)
 # (0.176, 0.141)
 
-@show pdf(true_distribution, 5), pdf_estimate(5)
+@show pdf(true_distribution, 5), pdf_estimate(5, σ, samples)
 # (0.176, 0.137)
 ```
 
@@ -313,7 +313,7 @@ s &= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 \end{aligned}
 $$
 
-We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our $\sigma$.
+We can now implement this approximation in Julia, equating $\sigma^2$ with an unbiased estimate of the variance of our samples.
 
 ```julia
 function h_est_gaussian(samples)
@@ -331,16 +331,22 @@ Comparing this new estimate with our previous estimate and the true probability,
 true_distribution = Normal(μ, σ)
 
 samples = rand(true_distribution, 50)
-pdf_estimate(x) = f.(x, σ, Ref(samples))
-pdf_estimate_gaus_opt_h(x) = f.(x, h_est_gaussian(samples), Ref(samples))
+pdf_estimate = f
+pdf_estimate_gaus_opt_h(x, samples) = f(x, h_est_gaussian(samples), samples)
 
-@show pdf(true_distribution, 2), pdf_estimate(2), pdf_estimate_gaus_opt_h(2)
+@show pdf(true_distribution, 2),
+      pdf_estimate(2, σ, samples),
+      pdf_estimate_gaus_opt_h(2, samples)
 # (0.121, 0.115, 0.111)
 
-@show pdf(true_distribution, 3), pdf_estimate(3), pdf_estimate_gaus_opt_h(3)
+@show pdf(true_distribution, 3),
+      pdf_estimate(3, σ, samples),
+      pdf_estimate_gaus_opt_h(3, samples)
 # (0.176, 0.141, 0.185)
 
-@show pdf(true_distribution, 5), pdf_estimate(5), pdf_estimate_gaus_opt_h(5)
+@show pdf(true_distribution, 5),
+      pdf_estimate(5, σ, samples),
+      pdf_estimate_gaus_opt_h(5, samples)
 # (0.176, 0.137, 0.173)
 
 @show h_est_gaussian(samples)
@@ -359,7 +365,98 @@ $$
 
 > In the case of a standard Gaussian distribution, the IQR is approximately $1.34\sigma$
 
-Instead of making assumptions about the true distribution $f$, we can opt for a nonparametric approach. One such method is explored in [@SheaterJonesReliableDataBasedBandwidth].
+In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance
+
+```julia
+function h_est_silverman(samples)
+    μ = sum(samples) / length(samples)
+    unbiased_variance = sum((samples .- μ) .^ 2) / ( length(samples) - 1 )
+    (q1, q3) = quantile(samples, [0.25, 0.75])
+    IQR = q3 - q1
+    0.9 * min( √(unbiased_variance) , IQR / 1.34) * length(samples) ^ (-1 / 5)
+end
+```
+
+![EstimateComparison2.png](/img/2023/EstimateComparison2.png){#img#imgexpandtoborder .img}
+
+Instead of making assumptions about the true distribution $f$, we can opt for a nonparametric approach. One such method is explored in [@SheaterJonesReliableDataBasedBandwidth]. In the paper, the authors also proceed from the AMISE and, through a somewhat more involved derivation, reach the following result (equation 12 in the paper), similar to our above approximately optimal $h$ form, but with the $R(f'')$ term where we made assumptions about the true density modified.
+
+$$
+\left ( \frac{R(K)}{n k^2 \hat{S}_D(\hat{\alpha}_2(h))} \right)^{\frac{1}{5}} - h = 0
+$$
+
+where
+
+$$\begin{aligned}
+\hat{S}_D(\alpha) &= \frac{1}{\alpha^5 n(n-1)} \sum_i^n \sum_j^n \phi^{\text{iv}} \left ( \frac{X_i-X_j}{\alpha} \right ) \\
+\hat{T}_D(b) &= - \frac{1}{b^7 n(n-1)} \sum_i^n \sum_j^n \phi^{\text{vi}} \left( \frac{X_i-X_j}{b} \right ) \\
+\hat{\alpha}_2(h) &= 1.357 \left ( \frac{\hat{S}_D(\alpha)}{\hat{T}_D(b)} \right )^{1/7} h^{5/7} \\
+a &= \frac{0.920 \times \text{IQR}}{n^{1/7}} \\
+b &= \frac{0.912 \times IQR}{n^{1/9}}
+\end{aligned}
+$$
+
+In contrast to Silverman's *Rule of Thumb*, this approach additionally considers an estimate of the third derivative of our true density $f$ and requires we calculate the fourth ($\phi^{\text{iv}}$) and sixth ($\phi^{\text{vi}}$) derivative of our chosen Kernel function.
+
+Continuing our example with the Gaussian Kernel, these derivatives would be
+
+$$
+\begin{aligned}
+\phi^{\text{iv}} &= \frac{\text{d}^4}{\text{d}u^4} K(u) = \frac{u^4 - 6u^2 + 3}{\sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right ) \\
+\phi^{\text{vi}} &= \frac{\text{d}^6}{\text{d}u^6} K(u) = \frac{u^6 - 15u^4 + 45u^2 - 15}{\sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right ) \\
+\end{aligned}
+$$
+
+
+It is now necessary for us to search for a bandwidth $h$ that minimises the equation. Instead of implementing a solver ourselves, we can use the Julia `Optim` package.
+
+```julia
+using Optim
+
+function h_est_sheatherjones(samples)
+    n = length(samples)
+
+    # 4th and 6th derivatives of the Kernel
+    # ϕ is the standard normal density
+    ϕIV(u) = (u^4 - 6*u^2 + 3) * 1/√(2π) * ℯ^(-1/2 * u^2)
+    ϕVI(u) = (u^6 - 15*u^4 + 45*u^2 - 15) * 1/√(2π) * ℯ^(-1/2 * u^2)
+
+    (q1, q3) = quantile(samples, [0.25, 0.75])
+    IQR = q3 - q1
+	
+    a = 0.92 * IQR * n ^ (-1 / 7)
+    b = 0.912 * IQR * n ^ (-1 / 9)
+
+    # Bottom Triangular Matrix
+    samplediffs = zeros(Int(n*(n-1)/2))
+    idx = 1
+    for r in 1:n, c in 1:r-1
+        # (r-1) * (r-2) ÷ 2 + c
+        samplediffs[idx] = samples[r] - samples[c]
+        idx += 1
+    end
+
+    # Multiplied by 2 as only summing over half of the full distance matrix
+    TDb = -2 / (n * (n-1) * b^7) * sum( ϕVI.(samplediffs ./ b) )
+    SDα =  2 / (n * (n-1) * a^5) * sum( ϕIV.(samplediffs ./ a) )
+
+    function f(h)
+        h = h[1]
+		
+        α2h = 1.357 * ( SDα / TDb ) ^ (1/7) * h ^ (5/7)
+
+        SDα2 = 2 / (n * (n-1) * α2h^5) * sum( ϕIV.(samplediffs ./ α2h) )
+
+        abs( (1 / (2 * √π * SDα2 * n)) ^ (1/5) - h ) # Want == 0
+    end
+
+    result = optimize(f, 0, h_est_silverman(samples) * 1000, Brent())
+    @assert Optim.converged(result)
+    Optim.minimizer(result)[1]
+end
+```
+
+![EstimateComparison3.png](/img/2023/EstimateComparison3.png){#img#imgexpandtoborder .img}
 
 **To be continued...**
 

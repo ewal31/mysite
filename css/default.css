@@ -75,3 +75,7 @@ blockquote p {
     background: #eee;
     border-radius: 5px;
 }
+
+div.csl-entry {
+	margin-top: 20px;	
+}

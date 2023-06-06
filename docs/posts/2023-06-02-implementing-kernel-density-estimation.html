@@ -118,15 +118,15 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>true_distribution <span class="op">=</span> <span class="fu">Normal</span>(μ, σ)</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> <span class="fu">rand</span>(true_distribution, <span class="fl">50</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>pdf_estimate <span class="op">=</span> f</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>, σ, samples)</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115)</span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>), <span class="fu">pdf_estimate</span>(<span class="fl">3</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>), <span class="fu">pdf_estimate</span>(<span class="fl">3</span>, σ, samples)</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.141)</span></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>, σ, samples)</span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137)</span></span></code></pre></div>
 <p><img src="../img/2023/GaussianKernelDensity.gif" id="imgexpandtoborder" class="img" alt="GaussianKernelDensity.gif" /></p>
 <p>What becomes apparent when plotting the estimate and actual distributions is that the estimate does not match exactly even when the true variance is known and there are several samples. This is because the estimate is not a single density but an average of many.</p>
@@ -247,7 +247,7 @@ s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 \end{aligned}
 \]</span></p>
 </blockquote>
-<p>We can now implement this approximation in Julia, using an unbiased estimate of the variance of the samples as our <span class="math inline">\(\sigma\)</span>.</p>
+<p>We can now implement this approximation in Julia, equating <span class="math inline">\(\sigma^2\)</span> with an unbiased estimate of the variance of our samples.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_gaussian</span>(samples)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
@@ -259,20 +259,26 @@ s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>true_distribution <span class="op">=</span> <span class="fu">Normal</span>(μ, σ)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> <span class="fu">rand</span>(true_distribution, <span class="fl">50</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, σ, <span class="fu">Ref</span>(samples))</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate_gaus_opt_h</span>(x) <span class="op">=</span> <span class="fu">f</span>.(x, <span class="fu">h_est_gaussian</span>(samples), <span class="fu">Ref</span>(samples))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>pdf_estimate <span class="op">=</span> f</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pdf_estimate_gaus_opt_h</span>(x, samples) <span class="op">=</span> <span class="fu">f</span>(x, <span class="fu">h_est_gaussian</span>(samples), samples)</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>), <span class="fu">pdf_estimate</span>(<span class="fl">2</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">2</span>)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115, 0.111)</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>), <span class="fu">pdf_estimate</span>(<span class="fl">3</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">3</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.141, 0.185)</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>), <span class="fu">pdf_estimate</span>(<span class="fl">5</span>), <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">5</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137, 0.173)</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_gaussian</span>(samples)</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.907</span></span></code></pre></div>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">2</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate</span>(<span class="fl">2</span>, σ, samples),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">2</span>, samples)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.121, 0.115, 0.111)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">3</span>),</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate</span>(<span class="fl">3</span>, σ, samples),</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">3</span>, samples)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.141, 0.185)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">pdf</span>(true_distribution, <span class="fl">5</span>),</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate</span>(<span class="fl">5</span>, σ, samples),</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">pdf_estimate_gaus_opt_h</span>(<span class="fl">5</span>, samples)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co"># (0.176, 0.137, 0.173)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_gaussian</span>(samples)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.907</span></span></code></pre></div>
 <p><img src="../img/2023/EstimateComparison.png" id="imgexpandtoborder" class="img" alt="EstimateComparison.png" /></p>
 <p>In the same way, we could formulate an approximately optimal bandwidth for all potential density functions <span class="math inline">\(f\)</span>, assuming we can find <span class="math inline">\(f\)</span>'s second derivative. We do not, however, in general, know the true distribution <span class="math inline">\(f\)</span>; our motivation to use Kernel density estimation in place of directly fitting a distribution. The true distribution may be multimodal or skewed heavily, causing over-smoothing. Silverman's now ubiquitous <em>Rule of Thumb</em> takes the previously derived optimal <span class="math inline">\(h_{gaussian}\)</span> and tries to account for some of these possibilities. His first suggestion is to use the interquartile range (IQR) when it is smaller than the standard deviation of the data. Therefore, in the case of skewed distributions, fewer samples will influence the estimate at each point, reducing overall smoothing and allowing for a more locally defined estimate. In other words, we reduce the influence of our choosing a Gaussian Kernel when it seems less likely that the data follows a Gaussian distribution. Following similar reasoning, he also suggests reducing the <span class="math inline">\(1.06\)</span> term to <span class="math inline">\(0.9\)</span> with experiments showing improvement when <span class="math inline">\(f\)</span> is skewed or bimodal with marginal degradation in the case of a Gaussian. The result of these modifications is Silverman's <em>Rule of Thumb</em></p>
 <p><span class="math display">\[
@@ -282,7 +288,81 @@ h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
 <blockquote>
 <p>In the case of a standard Gaussian distribution, the IQR is approximately <span class="math inline">\(1.34\sigma\)</span></p>
 </blockquote>
-<p>Instead of making assumptions about the true distribution <span class="math inline">\(f\)</span>, we can opt for a nonparametric approach. One such method is explored in <span class="citation" data-cites="SheaterJonesReliableDataBasedBandwidth">(Sheather and Jones 1991)</span>.</p>
+<p>In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_silverman</span>(samples)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> q3 <span class="op">-</span> q1</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.9</span> <span class="op">*</span> <span class="fu">min</span>( <span class="fu">√</span>(unbiased_variance) , IQR <span class="op">/</span> <span class="fl">1.34</span>) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p><img src="../img/2023/EstimateComparison2.png" id="imgexpandtoborder" class="img" alt="EstimateComparison2.png" /></p>
+<p>Instead of making assumptions about the true distribution <span class="math inline">\(f\)</span>, we can opt for a nonparametric approach. One such method is explored in <span class="citation" data-cites="SheaterJonesReliableDataBasedBandwidth">(Sheather and Jones 1991)</span>. In the paper, the authors also proceed from the AMISE and, through a somewhat more involved derivation, reach the following result (equation 12 in the paper), similar to our above approximately optimal <span class="math inline">\(h\)</span> form, but with the <span class="math inline">\(R(f'')\)</span> term where we made assumptions about the true density modified.</p>
+<p><span class="math display">\[
+\left ( \frac{R(K)}{n k^2 \hat{S}_D(\hat{\alpha}_2(h))} \right)^{\frac{1}{5}} - h = 0
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\begin{aligned}
+\hat{S}_D(\alpha) &amp;= \frac{1}{\alpha^5 n(n-1)} \sum_i^n \sum_j^n \phi^{\text{iv}} \left ( \frac{X_i-X_j}{\alpha} \right ) \\
+\hat{T}_D(b) &amp;= - \frac{1}{b^7 n(n-1)} \sum_i^n \sum_j^n \phi^{\text{vi}} \left( \frac{X_i-X_j}{b} \right ) \\
+\hat{\alpha}_2(h) &amp;= 1.357 \left ( \frac{\hat{S}_D(\alpha)}{\hat{T}_D(b)} \right )^{1/7} h^{5/7} \\
+a &amp;= \frac{0.920 \times \text{IQR}}{n^{1/7}} \\
+b &amp;= \frac{0.912 \times IQR}{n^{1/9}}
+\end{aligned}
+\]</span></p>
+<p>In contrast to Silverman's <em>Rule of Thumb</em>, this approach additionally considers an estimate of the third derivative of our true density <span class="math inline">\(f\)</span> and requires we calculate the fourth (<span class="math inline">\(\phi^{\text{iv}}\)</span>) and sixth (<span class="math inline">\(\phi^{\text{vi}}\)</span>) derivative of our chosen Kernel function.</p>
+<p>Continuing our example with the Gaussian Kernel, these derivatives would be</p>
+<p><span class="math display">\[
+\begin{aligned}
+\phi^{\text{iv}} &amp;= \frac{\text{d}^4}{\text{d}u^4} K(u) = \frac{u^4 - 6u^2 + 3}{\sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right ) \\
+\phi^{\text{vi}} &amp;= \frac{\text{d}^6}{\text{d}u^6} K(u) = \frac{u^6 - 15u^4 + 45u^2 - 15}{\sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right ) \\
+\end{aligned}
+\]</span></p>
+<p>It is now necessary for us to search for a bandwidth <span class="math inline">\(h\)</span> that minimises the equation. Instead of implementing a solver ourselves, we can use the Julia <code>Optim</code> package.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Optim</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_sheatherjones</span>(samples)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="fu">length</span>(samples)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4th and 6th derivatives of the Kernel</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ϕ is the standard normal density</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ϕIV</span>(u) <span class="op">=</span> (u<span class="op">^</span><span class="fl">4</span> <span class="op">-</span> <span class="fl">6</span><span class="op">*</span>u<span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fl">3</span>) <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="fu">√</span>(<span class="fl">2</span>π) <span class="op">*</span> <span class="cn">ℯ</span><span class="op">^</span>(<span class="op">-</span><span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> u<span class="op">^</span><span class="fl">2</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ϕVI</span>(u) <span class="op">=</span> (u<span class="op">^</span><span class="fl">6</span> <span class="op">-</span> <span class="fl">15</span><span class="op">*</span>u<span class="op">^</span><span class="fl">4</span> <span class="op">+</span> <span class="fl">45</span><span class="op">*</span>u<span class="op">^</span><span class="fl">2</span> <span class="op">-</span> <span class="fl">15</span>) <span class="op">*</span> <span class="fl">1</span><span class="op">/</span><span class="fu">√</span>(<span class="fl">2</span>π) <span class="op">*</span> <span class="cn">ℯ</span><span class="op">^</span>(<span class="op">-</span><span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> u<span class="op">^</span><span class="fl">2</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> q3 <span class="op">-</span> q1</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>	</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> <span class="fl">0.92</span> <span class="op">*</span> IQR <span class="op">*</span> n <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">7</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> <span class="fl">0.912</span> <span class="op">*</span> IQR <span class="op">*</span> n <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">9</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Bottom Triangular Matrix</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    samplediffs <span class="op">=</span> <span class="fu">zeros</span>(<span class="fu">Int</span>(<span class="fu">n*</span>(n<span class="op">-</span><span class="fl">1</span>)<span class="op">/</span><span class="fl">2</span>))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> <span class="fl">1</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>n, c <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>r<span class="op">-</span><span class="fl">1</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (r-1) * (r-2) ÷ 2 + c</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        samplediffs[idx] <span class="op">=</span> samples[r] <span class="op">-</span> samples[c]</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">+=</span> <span class="fl">1</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Multiplied by 2 as only summing over half of the full distance matrix</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    TDb <span class="op">=</span> <span class="op">-</span><span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> b<span class="op">^</span><span class="fl">7</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕVI</span>.(samplediffs <span class="op">./</span> b) )</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    SDα <span class="op">=</span>  <span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> a<span class="op">^</span><span class="fl">5</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕIV</span>.(samplediffs <span class="op">./</span> a) )</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">function</span> <span class="fu">f</span>(h)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> h[<span class="fl">1</span>]</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>		</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        α<span class="fl">2</span>h <span class="op">=</span> <span class="fl">1.357</span> <span class="op">*</span> ( SDα <span class="op">/</span> TDb ) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">7</span>) <span class="op">*</span> h <span class="op">^</span> (<span class="fl">5</span><span class="op">/</span><span class="fl">7</span>)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        SDα<span class="fl">2</span> <span class="op">=</span> <span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> α<span class="fl">2</span>h<span class="op">^</span><span class="fl">5</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕIV</span>.(samplediffs <span class="op">./</span> α<span class="fl">2</span>h) )</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">abs</span>( (<span class="fl">1</span> <span class="op">/</span> (<span class="fl">2</span> <span class="op">*</span> √π <span class="op">*</span> SDα<span class="fl">2</span> <span class="op">*</span> n)) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">5</span>) <span class="op">-</span> h ) <span class="co"># Want == 0</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="fu">optimize</span>(f, <span class="fl">0</span>, <span class="fu">h_est_silverman</span>(samples) <span class="op">*</span> <span class="fl">1000</span>, <span class="fu">Brent</span>())</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@assert</span> Optim.<span class="fu">converged</span>(result)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    Optim.<span class="fu">minimizer</span>(result)[<span class="fl">1</span>]</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p><img src="../img/2023/EstimateComparison3.png" id="imgexpandtoborder" class="img" alt="EstimateComparison3.png" /></p>
 <p><strong>To be continued...</strong></p>
 <hr />
 <h3 class="unnumbered">References</h3>
