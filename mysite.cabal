@@ -20,6 +20,7 @@ executable mysite
   build-depends:       base >= 4.7 && < 5,
                        hakyll
                      , pandoc
+                     , pandoc-sidenote
                      , filepath
   ghc-options:         -Wall
                        -Wcompat

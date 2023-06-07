@@ -175,14 +175,16 @@ $$
 \hat{f}(x) = \frac{1}{n} \sum_{i}^n \frac{K \left( \left ( x - y \right ) / h \right )}{h}
 $$
 
+[^GeneralKernelForm]
+
 As a reminder, we require that our Kernel is *symmetric*, *non-negative* and as we use it for density estimation, it should *integrate to $1$*.
 
-> To fit this form of $\hat{f}$ our Gaussian Kernel is defined
-> $$
+[^GeneralKernelForm]: To fit this form of $\hat{f}$ our Gaussian Kernel is defined
+$$
 K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
 $$
-> This results in the same form as we had above
-> $$
+This results in the same form as we had above
+$$
 \frac{K \left( \left ( x - y \right ) / \sigma \right )}{\sigma} = \frac{1}{\sigma \sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} \left( \frac{x -y}{\sigma} \right )^2 \right ) = K_\sigma(x, y)
 $$
 
@@ -305,15 +307,16 @@ h_{gaussian} &= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\pi}} 
 \end{aligned}
 $$
 
-> The unbiased standard deviation can be calculated as follows
-> $$
+
+We can now implement this approximation in Julia, equating $\sigma^2$ with an unbiased estimate of the variance of our samples[^unbiasedstandarddeviation].
+
+[^unbiasedstandarddeviation]: The unbiased standard deviation can be calculated as follows
+$$
 \begin{aligned}
 \bar{x} &= \frac{\sum_i^n x_i}{n} \\
 s &= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 \end{aligned}
 $$
-
-We can now implement this approximation in Julia, equating $\sigma^2$ with an unbiased estimate of the variance of our samples.
 
 ```julia
 function h_est_gaussian(samples)
@@ -361,9 +364,9 @@ $$
 h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
 $$
 
-[@SilvermanDensityEstimationForStatistics{}, page 48]
+[@SilvermanDensityEstimationForStatistics{}, page 48] [^IQRConv]
 
-> In the case of a standard Gaussian distribution, the IQR is approximately $1.34\sigma$
+[^IQRConv]: In the case of a standard Gaussian distribution, the IQR is approximately $1.34\sigma$
 
 In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance
 
@@ -427,7 +430,8 @@ function h_est_sheatherjones(samples)
     a = 0.92 * IQR * n ^ (-1 / 7)
     b = 0.912 * IQR * n ^ (-1 / 9)
 
-    # Bottom Triangular Matrix
+    # Only calculate half of the distances as each side is symmetric
+    # storing in a bottom triangular matrix
     samplediffs = zeros(Int(n*(n-1)/2))
     idx = 1
     for r in 1:n, c in 1:r-1
@@ -436,23 +440,28 @@ function h_est_sheatherjones(samples)
         idx += 1
     end
 
-    # Multiplied by 2 as only summing over half of the full distance matrix
+    # Multiplied by 2 as only have half of the distance matrix
     TDb = -2 / (n * (n-1) * b^7) * sum( ϕVI.(samplediffs ./ b) )
     SDα =  2 / (n * (n-1) * a^5) * sum( ϕIV.(samplediffs ./ a) )
 
-    function f(h)
+    function absolute_error(h)
         h = h[1]
 		
         α2h = 1.357 * ( SDα / TDb ) ^ (1/7) * h ^ (5/7)
-
         SDα2 = 2 / (n * (n-1) * α2h^5) * sum( ϕIV.(samplediffs ./ α2h) )
 
-        abs( (1 / (2 * √π * SDα2 * n)) ^ (1/5) - h ) # Want == 0
+        # Want == 0
+        abs( (1 / (2 * √π * SDα2 * n)) ^ (1/5) - h )
     end
 
-    result = optimize(f, 0, h_est_silverman(samples) * 1000, Brent())
+    result = optimize(
+        absolute_error,
+        0,                               # Search Min Bound
+        h_est_silverman(samples) * 1000, # Search Max Bound
+        Brent()
+    )
     @assert Optim.converged(result)
-    Optim.minimizer(result)[1]
+    h = Optim.minimizer(result)[1]
 end
 ```
 

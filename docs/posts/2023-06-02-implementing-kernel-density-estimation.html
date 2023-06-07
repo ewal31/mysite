@@ -142,17 +142,17 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 <p><span class="math display">\[
 \hat{f}(x) = \frac{1}{n} \sum_{i}^n \frac{K \left( \left ( x - y \right ) / h \right )}{h}
 \]</span></p>
-<p>As a reminder, we require that our Kernel is <em>symmetric</em>, <em>non-negative</em> and as we use it for density estimation, it should <em>integrate to <span class="math inline">\(1\)</span></em>.</p>
-<blockquote>
-<p>To fit this form of <span class="math inline">\(\hat{f}\)</span> our Gaussian Kernel is defined
+<p><span class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle" /><span class="sidenote">To fit this form of <span class="math inline">\(\hat{f}\)</span> our Gaussian Kernel is defined
 <span class="math display">\[
 K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
 \]</span>
 This results in the same form as we had above
 <span class="math display">\[
 \frac{K \left( \left ( x - y \right ) / \sigma \right )}{\sigma} = \frac{1}{\sigma \sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} \left( \frac{x -y}{\sigma} \right )^2 \right ) = K_\sigma(x, y)
-\]</span></p>
-</blockquote>
+\]</span><br />
+<br />
+</span></span></p>
+<p>As a reminder, we require that our Kernel is <em>symmetric</em>, <em>non-negative</em> and as we use it for density estimation, it should <em>integrate to <span class="math inline">\(1\)</span></em>.</p>
 <p>To simplify the <strong>bias</strong> term we make use of the variable substitution <span class="math inline">\(y = x - hu\)</span>, <span class="math inline">\(\text{d}y = h \text{d}u\)</span> and the Taylor expansion</p>
 <p><span class="math display">\[
 f(x - hu) = f(x) - h u f'(x) + \frac{1}{2}h^2 u^2 f''(x) + ...
@@ -238,16 +238,15 @@ h_{gaussian} &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\p
              &amp;\approx 1.06 \sigma n^{-1/5}
 \end{aligned}
 \]</span></p>
-<blockquote>
-<p>The unbiased standard deviation can be calculated as follows
+<p>We can now implement this approximation in Julia, equating <span class="math inline">\(\sigma^2\)</span> with an unbiased estimate of the variance of our samples<span class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle" /><span class="sidenote">The unbiased standard deviation can be calculated as follows
 <span class="math display">\[
 \begin{aligned}
 \bar{x} &amp;= \frac{\sum_i^n x_i}{n} \\
 s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 \end{aligned}
-\]</span></p>
-</blockquote>
-<p>We can now implement this approximation in Julia, equating <span class="math inline">\(\sigma^2\)</span> with an unbiased estimate of the variance of our samples.</p>
+\]</span><br />
+<br />
+</span></span>.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_gaussian</span>(samples)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
@@ -284,10 +283,9 @@ s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 <p><span class="math display">\[
 h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
 \]</span></p>
-<p><span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, page 48)</span></p>
-<blockquote>
-<p>In the case of a standard Gaussian distribution, the IQR is approximately <span class="math inline">\(1.34\sigma\)</span></p>
-</blockquote>
+<p><span class="citation" data-cites="SilvermanDensityEstimationForStatistics">(Silverman 1998, page 48)</span> <span class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle" /><span class="sidenote">In the case of a standard Gaussian distribution, the IQR is approximately <span class="math inline">\(1.34\sigma\)</span><br />
+<br />
+</span></span></p>
 <p>In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_silverman</span>(samples)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
@@ -335,33 +333,39 @@ b &amp;= \frac{0.912 \times IQR}{n^{1/9}}
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> <span class="fl">0.92</span> <span class="op">*</span> IQR <span class="op">*</span> n <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">7</span>)</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> <span class="fl">0.912</span> <span class="op">*</span> IQR <span class="op">*</span> n <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">9</span>)</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Bottom Triangular Matrix</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    samplediffs <span class="op">=</span> <span class="fu">zeros</span>(<span class="fu">Int</span>(<span class="fu">n*</span>(n<span class="op">-</span><span class="fl">1</span>)<span class="op">/</span><span class="fl">2</span>))</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> <span class="fl">1</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>n, c <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>r<span class="op">-</span><span class="fl">1</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (r-1) * (r-2) ÷ 2 + c</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        samplediffs[idx] <span class="op">=</span> samples[r] <span class="op">-</span> samples[c]</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">+=</span> <span class="fl">1</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Multiplied by 2 as only summing over half of the full distance matrix</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    TDb <span class="op">=</span> <span class="op">-</span><span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> b<span class="op">^</span><span class="fl">7</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕVI</span>.(samplediffs <span class="op">./</span> b) )</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    SDα <span class="op">=</span>  <span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> a<span class="op">^</span><span class="fl">5</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕIV</span>.(samplediffs <span class="op">./</span> a) )</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">function</span> <span class="fu">f</span>(h)</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> h[<span class="fl">1</span>]</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>		</span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        α<span class="fl">2</span>h <span class="op">=</span> <span class="fl">1.357</span> <span class="op">*</span> ( SDα <span class="op">/</span> TDb ) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">7</span>) <span class="op">*</span> h <span class="op">^</span> (<span class="fl">5</span><span class="op">/</span><span class="fl">7</span>)</span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Only calculate half of the distances as each side is symmetric</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># storing in a bottom triangular matrix</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    samplediffs <span class="op">=</span> <span class="fu">zeros</span>(<span class="fu">Int</span>(<span class="fu">n*</span>(n<span class="op">-</span><span class="fl">1</span>)<span class="op">/</span><span class="fl">2</span>))</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> <span class="fl">1</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>n, c <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>r<span class="op">-</span><span class="fl">1</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (r-1) * (r-2) ÷ 2 + c</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        samplediffs[idx] <span class="op">=</span> samples[r] <span class="op">-</span> samples[c]</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">+=</span> <span class="fl">1</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Multiplied by 2 as only have half of the distance matrix</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    TDb <span class="op">=</span> <span class="op">-</span><span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> b<span class="op">^</span><span class="fl">7</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕVI</span>.(samplediffs <span class="op">./</span> b) )</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    SDα <span class="op">=</span>  <span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> a<span class="op">^</span><span class="fl">5</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕIV</span>.(samplediffs <span class="op">./</span> a) )</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">function</span> <span class="fu">absolute_error</span>(h)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> h[<span class="fl">1</span>]</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>		</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        α<span class="fl">2</span>h <span class="op">=</span> <span class="fl">1.357</span> <span class="op">*</span> ( SDα <span class="op">/</span> TDb ) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">7</span>) <span class="op">*</span> h <span class="op">^</span> (<span class="fl">5</span><span class="op">/</span><span class="fl">7</span>)</span>
 <span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        SDα<span class="fl">2</span> <span class="op">=</span> <span class="fl">2</span> <span class="op">/</span> (n <span class="op">*</span> (n<span class="op">-</span><span class="fl">1</span>) <span class="op">*</span> α<span class="fl">2</span>h<span class="op">^</span><span class="fl">5</span>) <span class="op">*</span> <span class="fu">sum</span>( <span class="fu">ϕIV</span>.(samplediffs <span class="op">./</span> α<span class="fl">2</span>h) )</span>
 <span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">abs</span>( (<span class="fl">1</span> <span class="op">/</span> (<span class="fl">2</span> <span class="op">*</span> √π <span class="op">*</span> SDα<span class="fl">2</span> <span class="op">*</span> n)) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">5</span>) <span class="op">-</span> h ) <span class="co"># Want == 0</span></span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="fu">optimize</span>(f, <span class="fl">0</span>, <span class="fu">h_est_silverman</span>(samples) <span class="op">*</span> <span class="fl">1000</span>, <span class="fu">Brent</span>())</span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@assert</span> Optim.<span class="fu">converged</span>(result)</span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    Optim.<span class="fu">minimizer</span>(result)[<span class="fl">1</span>]</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Want == 0</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">abs</span>( (<span class="fl">1</span> <span class="op">/</span> (<span class="fl">2</span> <span class="op">*</span> √π <span class="op">*</span> SDα<span class="fl">2</span> <span class="op">*</span> n)) <span class="op">^</span> (<span class="fl">1</span><span class="op">/</span><span class="fl">5</span>) <span class="op">-</span> h )</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="fu">optimize</span>(</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        absolute_error,</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0</span>,                               <span class="co"># Search Min Bound</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">h_est_silverman</span>(samples) <span class="op">*</span> <span class="fl">1000</span>, <span class="co"># Search Max Bound</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Brent</span>()</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@assert</span> Optim.<span class="fu">converged</span>(result)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> Optim.<span class="fu">minimizer</span>(result)[<span class="fl">1</span>]</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
 <p><img src="../img/2023/EstimateComparison3.png" id="imgexpandtoborder" class="img" alt="EstimateComparison3.png" /></p>
 <p><strong>To be continued...</strong></p>
 <hr />

@@ -10,6 +10,7 @@ import           Text.Pandoc.Options (
 									       Ext_backtick_code_blocks
 									     , Ext_citations
 										 , Ext_fenced_code_blocks
+										 , Ext_footnotes
 										 , Ext_inline_code_attributes
 										 , Ext_latex_macros
 										 , Ext_link_attributes
@@ -24,6 +25,7 @@ import           Text.Pandoc.Options (
                                      , writerHighlightStyle
 									 , writerHTMLMathMethod
                                      )
+import           Text.Pandoc.SideNote (usingSideNotes)
 import           Hakyll
 
 
@@ -110,9 +112,11 @@ postCompiler :: Compiler (Item String)
 postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
 	csl <- load (fromFilePath "assets/csl/chicago.csl")
 	bib <- load (fromFilePath "assets/bibliography/General.bib")
-	body <- getResourceBody
-	parsed <- readPandocBiblio postReaderOptions csl bib body
-	return (writePandocWith postWriterOptions parsed)
+	(writePandocWith postWriterOptions) <$> (getResourceBody >>= readPandocBiblio postReaderOptions csl bib
+	                                                         >>= traverse (return . usingSideNotes))
+	--body <- getResourceBody
+	--parsed <- (readPandocBiblio postReaderOptions csl bib body)
+	--return (writePandocWith postWriterOptions parsed)
     where
         postReaderOptions = defaultHakyllReaderOptions {
             readerExtensions = extensionsFromList
@@ -120,6 +124,7 @@ postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
 				  Ext_backtick_code_blocks       -- GitHub style ``` code blocks
 				, Ext_citations                  -- Pandoc/citeproc citations
 				, Ext_fenced_code_blocks         -- Parse fenced code blocks
+				, Ext_footnotes
                 , Ext_tex_math_single_backslash  -- TeX math btw (..) [..]
                 , Ext_tex_math_double_backslash  -- TeX math btw \(..\) \[..\]
                 , Ext_tex_math_dollars           -- TeX math between $..$ or $$..$$
