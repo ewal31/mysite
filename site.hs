@@ -1,8 +1,10 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Control.Monad (liftM)
+import           Data.Function (on)
+import           Data.List (groupBy)
 import           Data.Monoid (mappend)
-import           System.FilePath (splitPath, joinPath)
+import           System.FilePath (joinPath, splitPath, takeDirectory)
 import           Text.Pandoc.Highlighting (Style, kate, styleToCss)
 import           Text.Pandoc.Options (
                                        extensionsFromList
@@ -80,6 +82,34 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
                 >>= relativizeUrls
 
+    match "notes/**" $ do
+        route $ setExtension "html"
+        compile $ postCompiler
+            >>= loadAndApplyTemplate "templates/note.html"    postCtx
+            >>= loadAndApplyTemplate "templates/default.html" postCtx
+            >>= relativizeUrls
+			
+    create ["notes.html"] $ do
+        route idRoute
+        compile $ do
+            groupedNotes <- loadAll "notes/**" >>= return . groupBy (on (==) toDirectory)
+
+			-- TODO don't want the urls to have spaces
+            let groupCtx grp =
+                    constField "notes-group" (joinPath . tail . splitPath . toDirectory . head $ grp) `mappend` 
+                    listField "notes" defaultContext (return grp)
+            
+            htmlGroupLists <- mapM (\grp -> makeItem "" >>= loadAndApplyTemplate "templates/notes-list.html" (groupCtx grp)) groupedNotes
+            
+            let notesCtx =
+                    listField "notes-list" defaultContext (return htmlGroupLists) `mappend`
+                    constField "title" "Notes"                                    `mappend`
+                    defaultContext
+            
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/notes-index.html" notesCtx
+                >>= loadAndApplyTemplate "templates/default.html" notesCtx
+                >>= relativizeUrls
 
     match "index.html" $ do
         route idRoute
@@ -157,3 +187,5 @@ postCtx =
     dateField "date" "%B %e, %Y" `mappend`
     defaultContext
 
+toDirectory :: Item a -> FilePath
+toDirectory = takeDirectory . toFilePath . itemIdentifier
