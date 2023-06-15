@@ -30,12 +30,13 @@
 </div>
 
 <p><img src="../img/2023/Hist2Kernel.gif" id="imgexpandtoborder" class="img" alt="distribution.gif" /></p>
-<h3>Introduction</h3>
-<p>Kernel Density Estimation is a technique typically used to approximate a probability density function via collected samples. The approach has two hyperparameters to consider: the choice of Kernel and its bandwidth. This article will build up an implementation in the <a href="https://julialang.org/">Julia</a> programming language for 1-dimensional data and explore possibilities for automatically determining the bandwidth.</p>
+<h3>Summary</h3>
+<p>Kernel Density Estimation approximates a probability density function from collected samples. In contrast to a histogram, we do not need first to discretise the data by placing it into bins, instead building a continuous estimate. Applied to height measurements of adults, for example, we obtain a continuous density describing the likelihood of each possible height.</p>
+<p>This article will first introduce the concept of a Kernel as applied to smoothing data points before implementing it in the <a href="https://julialang.org/">Julia</a> programming language. Next, this implementation will be modified to calculate the Kernel Density Estimate of 1-dimensional data before exploring possibilities for determining an optimal bandwidth.</p>
 <h3>Kernel Smoothing</h3>
 <p>A Kernel function acts as a weighted measure of distance between objects. It is not restricted exclusively to points in a space - see, for example, the <a href="https://en.wikipedia.org/wiki/String_kernel">string kernel</a> - it should, however, in most cases be both <em>symmetric</em> and <em>non-negative</em>. For example, a Kernel function operating on real numbers generally has the following form:</p>
 <p><span class="math display">\[
-K_{h}(\bm{x}^*, \bm{x}_i) = D \left( \frac{ \left || \bm{x}_i - \bm{x}^* \right || }{ h(\bm{x}^*) } \right )
+K_{h}(x^*, \bm{x}_i) = D \left( \frac{ \left || \bm{x}_i - x^* \right || }{ h(x^*) } \right )
 \]</span></p>
 <p>where</p>
 <ul>
@@ -53,7 +54,7 @@ K_{h}(\bm{x}^*, \bm{x}_i) = D \left( \frac{ \left || \bm{x}_i - \bm{x}^* \right 
 <p>which, given <span class="math inline">\(N\)</span> observations <span class="math inline">\(x_i\)</span> and corresponding weights <span class="math inline">\(w_i\)</span>, constructs a global average of a given set of points.</p>
 <p>The generalisation, named after Èlizbar Nadaraya and Geoffrey Watson, replaces the weights <span class="math inline">\(w_i\)</span> with the result of the Kernel function producing the following form:</p>
 <p><span class="math display">\[
-\hat{Y} (\bm{x}^*) = \frac{ \sum_{i=1}^N K_{h}(\bm{x}^*, \bm{x}_i) Y(\bm{x}_i) }{ \sum_{i=1}^N K_{h}(\bm{x}^*, \bm{x}_i) }
+\hat{Y} (x^*) = \frac{ \sum_{i=1}^N K_{h}(x^*, \bm{x}_i) Y(\bm{x}_i) }{ \sum_{i=1}^N K_{h}(x^*, \bm{x}_i) }
 \]</span></p>
 <p>Here,</p>
 <ul>
@@ -93,7 +94,7 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 <div class="sourceCode" id="cb3"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">K</span>(x_star, x, σ) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span>(σ <span class="op">*</span> <span class="fu">√</span>(<span class="fl">2</span><span class="op">*</span><span class="cn">π</span>)) <span class="op">*</span> <span class="cn">ℯ</span><span class="op">^</span>( <span class="op">-</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2</span> <span class="op">*</span> (x_star <span class="op">-</span> x)<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> σ<span class="op">^</span><span class="fl">2</span>)</span></code></pre></div>
 <p>Instead of the mean <span class="math inline">\(\mu\)</span> typical of the definition, we have one of the samples, <span class="math inline">\(x\)</span>. In fact, to construct an estimate of our density, we build a mixture from <span class="math inline">\(N\)</span> Gaussian distributions, with the mean of each being one of the samples <span class="math inline">\(x_i\)</span>. Observing this fact then leads to the equation for our probability density estimate.</p>
 <p><span class="math display">\[
-\hat{f}(x | \sigma, x) = \frac{1}{N} \sum_i^N K_\sigma(x, x_i)
+\hat{f}(x | \sigma, \bm{x}) = \frac{1}{N} \sum_i^N K_\sigma(x, \bm{x}_i)
 \]</span></p>
 <p>In Julia we can write this as</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(x, σ, xs) <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fu">length</span>(xs) <span class="op">*</span> <span class="fu">sum</span>(<span class="fu">K</span>.(x, xs, σ))</span></code></pre></div>
@@ -103,7 +104,7 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 \]</span></p>
 <p>As in the case of the probability density function, our estimate is created by averaging each of the cumulative density functions.</p>
 <p><span class="math display">\[
-\hat{\text{cdf}} (x| \sigma, x) = \frac{1}{N} \sum_i^N \Phi(x | x_i, \sigma)
+\hat{\text{cdf}} (x| \sigma, \bm{x}) = \frac{1}{N} \sum_i^N \Phi(x | \bm{x}_i, \sigma)
 \]</span></p>
 <p>By making use of the <code>SpecialFunctions</code> package, we implement these two equations in Julia.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">SpecialFunctions</span></span>
@@ -131,7 +132,7 @@ K_\sigma(x^*, x) = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left ( - \frac{1}{2
 <p><img src="../img/2023/GaussianKernelDensity.gif" id="imgexpandtoborder" class="img" alt="GaussianKernelDensity.gif" /></p>
 <p>What becomes apparent when plotting the estimate and actual distributions is that the estimate does not match exactly even when the true variance is known and there are several samples. This is because the estimate is not a single density but an average of many.</p>
 <h3>Estimating Bandwidth</h3>
-<p>The discrepancy we have just seen suggests we need an alternative approach for determining our estimator's <span class="math inline">\(\sigma\)</span> value. In the more general case, where we are not just considering the Gaussian kernel, this weighting is known as the bandwidth. It corresponds to the <span class="math inline">\(h(\bm{x}^*)\)</span> in our original, more general form above. There are two types of approaches for determining the bandwidth, <em>cross-validation</em> and <em>rule-of-thumb</em>. We will focus on the second here.</p>
+<p>The discrepancy we have just seen suggests we need an alternative approach for determining our estimator's <span class="math inline">\(\sigma\)</span> value. In the more general case, where we are not just considering the Gaussian kernel, this weighting is known as the bandwidth. It corresponds to the <span class="math inline">\(h(x^*)\)</span> in our original, more general form above. There are two types of approaches for determining the bandwidth, <em>cross-validation</em> and <em>rule-of-thumb</em>. We will focus on the second here.</p>
 <p>Many of the <em>rule-of-thumb</em> approaches start by attempting to minimise the Mean Integrated Square Error (MISE) but simplify its calculation by introducing estimates and simplifications. Given a true probability density function <span class="math inline">\(f\)</span>, and a kernel estimate <span class="math inline">\(\hat{f}\)</span>, the MISE is as follows.</p>
 <p><span class="math display">\[\begin{aligned}
 \text{MISE}(\hat{f}) &amp;= \int \text{E} \left[ \left( \hat{f}(x) - f(x) \right)^2 \right ] \text{d}x \\
@@ -238,11 +239,11 @@ h_{gaussian} &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\p
              &amp;\approx 1.06 \sigma n^{-1/5}
 \end{aligned}
 \]</span></p>
-<p>We can now implement this approximation in Julia, equating <span class="math inline">\(\sigma^2\)</span> with an unbiased estimate of the variance of our samples<span class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle" /><span class="sidenote">The unbiased standard deviation can be calculated as follows
+<p>We can now implement this approximation in Julia, equating <span class="math inline">\(\sigma^2\)</span> with an unbiased estimate of the variance of our samples<span class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle" /><span class="sidenote">The unbiased variance can be calculated as follows
 <span class="math display">\[
 \begin{aligned}
 \bar{x} &amp;= \frac{\sum_i^n x_i}{n} \\
-s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
+s^2 &amp;= \frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}
 \end{aligned}
 \]</span><br />
 <br />
@@ -278,7 +279,7 @@ s &amp;= \sqrt{\frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}}
 <span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="pp">@show</span> <span class="fu">h_est_gaussian</span>(samples)</span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 0.907</span></span></code></pre></div>
-<p><img src="../img/2023/EstimateComparison.png" id="imgexpandtoborder" class="img" alt="EstimateComparison.png" /></p>
+<p><img src="../img/2023/EstimateComparison.svg" id="imgexpandtoborder" class="img" alt="EstimateComparison.svg" /></p>
 <p>In the same way, we could formulate an approximately optimal bandwidth for all potential density functions <span class="math inline">\(f\)</span>, assuming we can find <span class="math inline">\(f\)</span>'s second derivative. We do not, however, in general, know the true distribution <span class="math inline">\(f\)</span>; our motivation to use Kernel density estimation in place of directly fitting a distribution. The true distribution may be multimodal or skewed heavily, causing over-smoothing. Silverman's now ubiquitous <em>Rule of Thumb</em> takes the previously derived optimal <span class="math inline">\(h_{gaussian}\)</span> and tries to account for some of these possibilities. His first suggestion is to use the interquartile range (IQR) when it is smaller than the standard deviation of the data. Therefore, in the case of skewed distributions, fewer samples will influence the estimate at each point, reducing overall smoothing and allowing for a more locally defined estimate. In other words, we reduce the influence of our choosing a Gaussian Kernel when it seems less likely that the data follows a Gaussian distribution. Following similar reasoning, he also suggests reducing the <span class="math inline">\(1.06\)</span> term to <span class="math inline">\(0.9\)</span> with experiments showing improvement when <span class="math inline">\(f\)</span> is skewed or bimodal with marginal degradation in the case of a Gaussian. The result of these modifications is Silverman's <em>Rule of Thumb</em></p>
 <p><span class="math display">\[
 h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
@@ -287,13 +288,15 @@ h = 0.9 \text{ min} \left ( \sigma , \frac{IQR}{1.34}  \right ) n^{-1/5}
 <br />
 </span></span></p>
 <p>In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_silverman</span>(samples)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> q3 <span class="op">-</span> q1</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.9</span> <span class="op">*</span> <span class="fu">min</span>( <span class="fu">√</span>(unbiased_variance) , IQR <span class="op">/</span> <span class="fl">1.34</span>) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Statistics</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_silverman</span>(samples)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(samples) <span class="op">/</span> <span class="fu">length</span>(samples)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>((samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">length</span>(samples) <span class="op">-</span> <span class="fl">1</span> )</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> q3 <span class="op">-</span> q1</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.9</span> <span class="op">*</span> <span class="fu">min</span>( <span class="fu">√</span>(unbiased_variance) , IQR <span class="op">/</span> <span class="fl">1.34</span>) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
 <p><img src="../img/2023/EstimateComparison2.png" id="imgexpandtoborder" class="img" alt="EstimateComparison2.png" /></p>
 <p>Instead of making assumptions about the true distribution <span class="math inline">\(f\)</span>, we can opt for a nonparametric approach. One such method is explored in <span class="citation" data-cites="SheaterJonesReliableDataBasedBandwidth">(Sheather and Jones 1991)</span>. In the paper, the authors also proceed from the AMISE and, through a somewhat more involved derivation, reach the following result (equation 12 in the paper), similar to our above approximately optimal <span class="math inline">\(h\)</span> form, but with the <span class="math inline">\(R(f'')\)</span> term where we made assumptions about the true density modified.</p>
 <p><span class="math display">\[
@@ -367,7 +370,54 @@ b &amp;= \frac{0.912 \times IQR}{n^{1/9}}
 <span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> Optim.<span class="fu">minimizer</span>(result)[<span class="fl">1</span>]</span>
 <span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
 <p><img src="../img/2023/EstimateComparison3.png" id="imgexpandtoborder" class="img" alt="EstimateComparison3.png" /></p>
-<p><strong>To be continued...</strong></p>
+<h3>Working With Weighted Samples</h3>
+<p>Sometimes we want the influence of each sample on the result to differ. For example, when constructing a customer spending model, we could weight each transaction with the customer's transaction frequency. This would reduce the bias of high-volume customers on the model.</p>
+<p>There are two types of weights; integer count weights and fractional proportions (our example is the second). We can still create an unbiased estimate via Bessel correction in the first case, as in the implementations above. In the proportion case, however, we have no information about the total size of our sample.<span class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle" /><span class="sidenote">This topic has provoked discussion on the statics StachExchange. See <a href="https://stats.stackexchange.com/questions/47325/bias-correction-in-weighted-variance#">Bias correction in weighted variance</a>, <a href="https://stats.stackexchange.com/questions/51442/weighted-variance-one-more-time/61285#">Weighted Variance, one more time</a> and <a href="https://stats.stackexchange.com/questions/61225/correct-equation-for-weighted-unbiased-sample-covariance/61298#61298">Correct equation for weighted unbiased sample covariance</a>.<br />
+<br />
+</span></span> We may, therefore, choose to forego applying the correction or instead attempt to approximate the number of samples. For example, via Kish's <em>Rule of Thumb</em>.</p>
+<p><span class="math display">\[
+n_{\text{eff}} = \frac{\left ( \sum_i^n w_i \right ) ^2}{\sum_i^n w_i^2}
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle" /><span class="sidenote">When all weights are equal
+<span class="math display">\[
+n_{\text{eff}} = \frac{\left ( \sum_i^n \frac{1}{n} \right ) ^2}{\sum_i^n \frac{1}{n^2}} = \frac{1^2}{\frac{n}{n^2}} = n
+\]</span><br />
+<br />
+</span></span></p>
+<p>If we have integer-type weights or choose to use Kish's <em>Rule of Thumb</em>, we end up with an analogous term to the Bessel correction for individual equally weighted samples. The <span class="math inline">\(n\)</span> in the <span class="math inline">\(1 - \left( 1 / n \right)\)</span> correction term is effectively replaced by <span class="math inline">\(n_{\text{eff}}\)</span> giving us the following form for an unbiased weighted variance. The <a href="https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_variance">Wikipedia page</a> has a full derivation.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\bar{x}_{\text{weighted}} &amp;= \frac{\sum_i^n w_i \times x_i}{\sum_i^n w_i} \\
+s_{\text{weighted}} &amp;= \frac{ \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right ) }{ \left ( \left ( \sum_i^n w_i \right ) - \left( \left ( \sum_i^n w_i \right ) / n_{\text{eff}} \right ) \right ) } \\
+\end{aligned}
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle" /><span class="sidenote">If all of the samples have a weight of one, we recover the traditional equation for non-biased variance, as both <span class="math inline">\(\sum_i^n w_i\)</span> and <span class="math inline">\(n_{\text{eff}}\)</span> will equal <span class="math inline">\(n\)</span>.<br />
+<br />
+</span></span></p>
+<p>Using this definition we can modify Silverman's <em>Rule of Thumb</em> for weighted samples</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">StatsBase</span>: quantile, Weights</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_silverman</span>(samples, ws)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(ws <span class="op">.*</span> samples) <span class="op">/</span> <span class="fu">sum</span>(ws)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>	</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    neff <span class="op">=</span> <span class="fu">sum</span>(ws)<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu">sum</span>(ws <span class="op">.^</span> <span class="fl">2</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>(ws <span class="op">.*</span> (samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">sum</span>(ws) <span class="op">-</span> <span class="fu">sum</span>(ws) <span class="op">/</span> neff )</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>	</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We also calculate a weighted IQR</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, <span class="fu">Weights</span>(ws), [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    IQR <span class="op">=</span> q3 <span class="op">-</span> q1</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>	</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.9</span> <span class="op">*</span> <span class="fu">min</span>( <span class="fu">√</span>(unbiased_variance) , IQR <span class="op">/</span> <span class="fl">1.34</span>) <span class="op">*</span> <span class="fu">length</span>(samples) <span class="op">^</span> (<span class="op">-</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">5</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p><span class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle" /><span class="sidenote">The weighted IQR can also make use of Kish's <em>Rule of Thumb</em>. A wonderful outline can be found <a href="https://aakinshin.net/posts/weighted-quantiles/">here</a>.<br />
+<br />
+</span></span></p>
+<p>To account for the weights, we must also modify our estimator definition. We have the following form: analogous to the difference between a mean and a weighted mean.</p>
+<p><span class="math display">\[
+\hat{f}(x | \sigma, \bm{x}, \bm{w}) = \frac{ \sum_i^N \bm{w}_i K_\sigma(x, \bm{x}_i) }{\sum_i^N \bm{w}_i}
+\]</span></p>
+<p>In Julia we can write this as</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(x, σ, xs, ws) <span class="op">=</span> <span class="fu">sum</span>(ws <span class="op">.*</span> <span class="fu">K</span>.(x, xs, σ)) <span class="op">/</span> <span class="fu">sum</span>(ws)</span></code></pre></div>
 <hr />
 <h3 class="unnumbered">References</h3>
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">

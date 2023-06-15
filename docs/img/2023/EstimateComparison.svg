@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:gadfly="http://www.gadflyjl.org/ns"
+     version="1.2"
+     width="150mm" height="80mm" viewBox="0 0 150 80"
+     stroke="none"
+     fill="#000000"
+     stroke-width="0.3"
+     font-size="3.88"
+>
+<defs>
+  <marker id="arrow" markerWidth="15" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
+  </marker>
+</defs>
+<g class="plotroot xscalable yscalable" id="img-89b295c5-1">
+  <g font-size="3.88" font-family="'PT Sans','Helvetica Neue','Helvetica',sans-serif" fill="#564A55" stroke="#000000" stroke-opacity="0.000" id="img-89b295c5-2">
+    <g transform="translate(57.54,69.88)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">x</text>
+      </g>
+    </g>
+  </g>
+  <g class="guide xlabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-89b295c5-3">
+    <g transform="translate(15.35,63.41)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">0</text>
+      </g>
+    </g>
+    <g transform="translate(36.44,63.41)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">2</text>
+      </g>
+    </g>
+    <g transform="translate(57.54,63.41)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">4</text>
+      </g>
+    </g>
+    <g transform="translate(78.63,63.41)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">6</text>
+      </g>
+    </g>
+    <g transform="translate(99.73,63.41)">
+      <g class="primitive">
+        <text text-anchor="middle" dy="0.6em">8</text>
+      </g>
+    </g>
+  </g>
+  <g class="guide colorkey" id="img-89b295c5-4">
+    <g fill="#4C404B" font-size="2.82" font-family="'PT Sans','Helvetica Neue','Helvetica',sans-serif" id="img-89b295c5-5">
+      <g transform="translate(106.9,28.19)" id="img-89b295c5-6">
+        <g class="primitive">
+          <text dy="0.35em">True Density</text>
+        </g>
+      </g>
+      <g transform="translate(106.9,32.37)" id="img-89b295c5-7">
+        <g class="primitive">
+          <text dy="0.35em">Estimate with h = σ</text>
+        </g>
+      </g>
+      <g transform="translate(106.9,36.54)" id="img-89b295c5-8">
+        <g class="primitive">
+          <text dy="0.35em">Optimal Gaussian Estimate</text>
+        </g>
+      </g>
+      <g transform="translate(106.9,40.72)" id="img-89b295c5-9">
+        <g class="primitive">
+          <text dy="0.35em">Samples</text>
+        </g>
+      </g>
+    </g>
+    <g stroke-width="0.3" id="img-89b295c5-10">
+      <g stroke="#FFFFFF" fill-opacity="1" fill="#8C8C82" id="img-89b295c5-11">
+        <g transform="translate(103.81,40.72)" id="img-89b295c5-12">
+          <path d="M-0.4,-0.9 L-0.4,0.9 0.4,0.9 0.4,-0.9  z" class="primitive"/>
+        </g>
+      </g>
+      <g stroke="#FFFFFF" fill-opacity="1" fill="#ED3B3B" id="img-89b295c5-13">
+        <g transform="translate(103.81,36.54)" id="img-89b295c5-14">
+          <path d="M-0.9,-0.4 L0.9,-0.4 0.9,0.4 -0.9,0.4  z" class="primitive"/>
+        </g>
+      </g>
+      <g stroke="#FFFFFF" fill-opacity="1" fill="#0000FF" id="img-89b295c5-15">
+        <g transform="translate(103.81,32.37)" id="img-89b295c5-16">
+          <path d="M-0.9,-0.4 L0.9,-0.4 0.9,0.4 -0.9,0.4  z" class="primitive"/>
+        </g>
+      </g>
+      <g stroke="#FFFFFF" fill-opacity="1" fill="#000000" id="img-89b295c5-17">
+        <g transform="translate(103.81,28.19)" id="img-89b295c5-18">
+          <path d="M-0.9,-0.4 L0.9,-0.4 0.9,0.4 -0.9,0.4  z" class="primitive"/>
+        </g>
+      </g>
+    </g>
+    <g fill="#362A35" font-size="3.88" font-family="'PT Sans','Helvetica Neue','Helvetica',sans-serif" stroke="#000000" stroke-opacity="0.000" id="img-89b295c5-19">
+      <g transform="translate(102.72,24.61)" id="img-89b295c5-20">
+        <g class="primitive">
+          <text dy="-0em"></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g clip-path="url(#img-89b295c5-21)">
+    <g id="img-89b295c5-22">
+      <g pointer-events="visible" stroke-width="0.3" fill="#000000" fill-opacity="0.000" stroke="#000000" stroke-opacity="0.000" class="guide background" id="img-89b295c5-23">
+        <g transform="translate(57.54,33.71)" id="img-89b295c5-24">
+          <path d="M-44.19,-28.71 L44.19,-28.71 44.19,28.71 -44.19,28.71  z" class="primitive"/>
+        </g>
+      </g>
+      <g class="guide ygridlines xfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-89b295c5-25">
+        <g transform="translate(57.54,60.41)" id="img-89b295c5-26">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,49.73)" id="img-89b295c5-27">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,39.05)" id="img-89b295c5-28">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,28.37)" id="img-89b295c5-29">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,17.68)" id="img-89b295c5-30">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,7)" id="img-89b295c5-31">
+          <path fill="none" d="M-44.19,0 L44.19,0 " class="primitive"/>
+        </g>
+      </g>
+      <g class="guide xgridlines yfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-89b295c5-32">
+        <g transform="translate(15.35,33.71)" id="img-89b295c5-33">
+          <path fill="none" d="M0,-28.71 L0,28.71 " class="primitive"/>
+        </g>
+        <g transform="translate(36.44,33.71)" id="img-89b295c5-34">
+          <path fill="none" d="M0,-28.71 L0,28.71 " class="primitive"/>
+        </g>
+        <g transform="translate(57.54,33.71)" id="img-89b295c5-35">
+          <path fill="none" d="M0,-28.71 L0,28.71 " class="primitive"/>
+        </g>
+        <g transform="translate(78.63,33.71)" id="img-89b295c5-36">
+          <path fill="none" d="M0,-28.71 L0,28.71 " class="primitive"/>
+        </g>
+        <g transform="translate(99.73,33.71)" id="img-89b295c5-37">
+          <path fill="none" d="M0,-28.71 L0,28.71 " class="primitive"/>
+        </g>
+      </g>
+      <g class="plotpanel" id="img-89b295c5-38">
+        <metadata>
+          <boundingbox value="13.349999999999994mm 5.0mm 88.37500000000001mm 57.41388888888889mm"/>
+          <unitbox value="-0.1896296296296296 0.2593608611992304 8.379259259259259 -0.2687217223984607"/>
+        </metadata>
+        <g class="geometry" id="img-89b295c5-39">
+          <g stroke-width="0" id="img-89b295c5-40">
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-41">
+              <g class="marker" id="img-89b295c5-42">
+                <g transform="translate(49.05,60.41)" id="img-89b295c5-43">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-44">
+              <g class="marker" id="img-89b295c5-45">
+                <g transform="translate(59.89,60.41)" id="img-89b295c5-46">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-47">
+              <g class="marker" id="img-89b295c5-48">
+                <g transform="translate(77.19,60.41)" id="img-89b295c5-49">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-50">
+              <g class="marker" id="img-89b295c5-51">
+                <g transform="translate(87.62,60.41)" id="img-89b295c5-52">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-53">
+              <g class="marker" id="img-89b295c5-54">
+                <g transform="translate(44.09,60.41)" id="img-89b295c5-55">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-56">
+              <g class="marker" id="img-89b295c5-57">
+                <g transform="translate(56.83,60.41)" id="img-89b295c5-58">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-59">
+              <g class="marker" id="img-89b295c5-60">
+                <g transform="translate(56.5,60.41)" id="img-89b295c5-61">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-62">
+              <g class="marker" id="img-89b295c5-63">
+                <g transform="translate(60.1,60.41)" id="img-89b295c5-64">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-65">
+              <g class="marker" id="img-89b295c5-66">
+                <g transform="translate(47.14,60.41)" id="img-89b295c5-67">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-68">
+              <g class="marker" id="img-89b295c5-69">
+                <g transform="translate(43.34,60.41)" id="img-89b295c5-70">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-71">
+              <g class="marker" id="img-89b295c5-72">
+                <g transform="translate(81.72,60.41)" id="img-89b295c5-73">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-74">
+              <g class="marker" id="img-89b295c5-75">
+                <g transform="translate(34.09,60.41)" id="img-89b295c5-76">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-77">
+              <g class="marker" id="img-89b295c5-78">
+                <g transform="translate(54.67,60.41)" id="img-89b295c5-79">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-80">
+              <g class="marker" id="img-89b295c5-81">
+                <g transform="translate(69.21,60.41)" id="img-89b295c5-82">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-83">
+              <g class="marker" id="img-89b295c5-84">
+                <g transform="translate(96.72,60.41)" id="img-89b295c5-85">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-86">
+              <g class="marker" id="img-89b295c5-87">
+                <g transform="translate(26.97,60.41)" id="img-89b295c5-88">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-89">
+              <g class="marker" id="img-89b295c5-90">
+                <g transform="translate(16.83,60.41)" id="img-89b295c5-91">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-92">
+              <g class="marker" id="img-89b295c5-93">
+                <g transform="translate(26.21,60.41)" id="img-89b295c5-94">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-95">
+              <g class="marker" id="img-89b295c5-96">
+                <g transform="translate(51.59,60.41)" id="img-89b295c5-97">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-98">
+              <g class="marker" id="img-89b295c5-99">
+                <g transform="translate(56.82,60.41)" id="img-89b295c5-100">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-101">
+              <g class="marker" id="img-89b295c5-102">
+                <g transform="translate(64.94,60.41)" id="img-89b295c5-103">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-104">
+              <g class="marker" id="img-89b295c5-105">
+                <g transform="translate(46.87,60.41)" id="img-89b295c5-106">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-107">
+              <g class="marker" id="img-89b295c5-108">
+                <g transform="translate(59.08,60.41)" id="img-89b295c5-109">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-110">
+              <g class="marker" id="img-89b295c5-111">
+                <g transform="translate(54.33,60.41)" id="img-89b295c5-112">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-113">
+              <g class="marker" id="img-89b295c5-114">
+                <g transform="translate(44.14,60.41)" id="img-89b295c5-115">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-116">
+              <g class="marker" id="img-89b295c5-117">
+                <g transform="translate(48.81,60.41)" id="img-89b295c5-118">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-119">
+              <g class="marker" id="img-89b295c5-120">
+                <g transform="translate(47.97,60.41)" id="img-89b295c5-121">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-122">
+              <g class="marker" id="img-89b295c5-123">
+                <g transform="translate(40.95,60.41)" id="img-89b295c5-124">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-125">
+              <g class="marker" id="img-89b295c5-126">
+                <g transform="translate(75.71,60.41)" id="img-89b295c5-127">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-128">
+              <g class="marker" id="img-89b295c5-129">
+                <g transform="translate(68.29,60.41)" id="img-89b295c5-130">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-131">
+              <g class="marker" id="img-89b295c5-132">
+                <g transform="translate(46.72,60.41)" id="img-89b295c5-133">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-134">
+              <g class="marker" id="img-89b295c5-135">
+                <g transform="translate(61.78,60.41)" id="img-89b295c5-136">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-137">
+              <g class="marker" id="img-89b295c5-138">
+                <g transform="translate(52.84,60.41)" id="img-89b295c5-139">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-140">
+              <g class="marker" id="img-89b295c5-141">
+                <g transform="translate(30.75,60.41)" id="img-89b295c5-142">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-143">
+              <g class="marker" id="img-89b295c5-144">
+                <g transform="translate(98.83,60.41)" id="img-89b295c5-145">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-146">
+              <g class="marker" id="img-89b295c5-147">
+                <g transform="translate(30.14,60.41)" id="img-89b295c5-148">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-149">
+              <g class="marker" id="img-89b295c5-150">
+                <g transform="translate(72.18,60.41)" id="img-89b295c5-151">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-152">
+              <g class="marker" id="img-89b295c5-153">
+                <g transform="translate(71.72,60.41)" id="img-89b295c5-154">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-155">
+              <g class="marker" id="img-89b295c5-156">
+                <g transform="translate(77.89,60.41)" id="img-89b295c5-157">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-158">
+              <g class="marker" id="img-89b295c5-159">
+                <g transform="translate(61.94,60.41)" id="img-89b295c5-160">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-161">
+              <g class="marker" id="img-89b295c5-162">
+                <g transform="translate(73.88,60.41)" id="img-89b295c5-163">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-164">
+              <g class="marker" id="img-89b295c5-165">
+                <g transform="translate(65.41,60.41)" id="img-89b295c5-166">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-167">
+              <g class="marker" id="img-89b295c5-168">
+                <g transform="translate(50.57,60.41)" id="img-89b295c5-169">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-170">
+              <g class="marker" id="img-89b295c5-171">
+                <g transform="translate(66.81,60.41)" id="img-89b295c5-172">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-173">
+              <g class="marker" id="img-89b295c5-174">
+                <g transform="translate(26.52,60.41)" id="img-89b295c5-175">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-176">
+              <g class="marker" id="img-89b295c5-177">
+                <g transform="translate(49.5,60.41)" id="img-89b295c5-178">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-179">
+              <g class="marker" id="img-89b295c5-180">
+                <g transform="translate(64.61,60.41)" id="img-89b295c5-181">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-182">
+              <g class="marker" id="img-89b295c5-183">
+                <g transform="translate(53.4,60.41)" id="img-89b295c5-184">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-185">
+              <g class="marker" id="img-89b295c5-186">
+                <g transform="translate(25.18,60.41)" id="img-89b295c5-187">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+            <g class="color_RGBA{Float32}(0.55f0,0.55f0,0.51f0,1.0f0)" fill-opacity="1" stroke="#FFFFFF" fill="#8C8C82" id="img-89b295c5-188">
+              <g class="marker" id="img-89b295c5-189">
+                <g transform="translate(73.38,60.41)" id="img-89b295c5-190">
+                  <path d="M-0.18,-0.4 L0.18,-0.4 0.18,0.4 -0.18,0.4  z" class="primitive"/>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g stroke-width="0.3" fill="#000000" fill-opacity="0.000" class="geometry" id="img-89b295c5-191">
+          <g class="color_RGBA{Float64}(0.0,0.0,0.0,1.0)" stroke-dasharray="none" stroke="#000000" id="img-89b295c5-192">
+            <g transform="translate(57.54,34.94)" id="img-89b295c5-193">
+              <path fill="none" d="M-42.19,19.7 L-42.1,19.66 -42.02,19.61 -41.93,19.56 -41.85,19.52 -41.77,19.47 -41.68,19.42 -41.6,19.37 -41.51,19.33 -41.43,19.28 -41.34,19.23 -41.26,19.18 -41.17,19.13 -41.09,19.08 -41.01,19.03 -40.92,18.98 -40.84,18.93 -40.75,18.88 -40.67,18.83 -40.58,18.78 -40.5,18.72 -40.41,18.67 -40.33,18.62 -40.24,18.57 -40.16,18.51 -40.08,18.46 -39.99,18.41 -39.91,18.35 -39.82,18.3 -39.74,18.25 -39.65,18.19 -39.57,18.14 -39.48,18.08 -39.4,18.03 -39.32,17.97 -39.23,17.91 -39.15,17.86 -39.06,17.8 -38.98,17.74 -38.89,17.69 -38.81,17.63 -38.72,17.57 -38.64,17.51 -38.56,17.45 -38.47,17.39 -38.39,17.34 -38.3,17.28 -38.22,17.22 -38.13,17.16 -38.05,17.1 -37.96,17.03 -37.88,16.97 -37.8,16.91 -37.71,16.85 -37.63,16.79 -37.54,16.73 -37.46,16.66 -37.37,16.6 -37.29,16.54 -37.2,16.48 -37.12,16.41 -37.04,16.35 -36.95,16.28 -36.87,16.22 -36.78,16.15 -36.7,16.09 -36.61,16.02 -36.53,15.96 -36.44,15.89 -36.36,15.82 -36.28,15.76 -36.19,15.69 -36.11,15.62 -36.02,15.56 -35.94,15.49 -35.85,15.42 -35.77,15.35 -35.68,15.28 -35.6,15.21 -35.52,15.14 -35.43,15.07 -35.35,15 -35.26,14.93 -35.18,14.86 -35.09,14.79 -35.01,14.72 -34.92,14.65 -34.84,14.58 -34.76,14.5 -34.67,14.43 -34.59,14.36 -34.5,14.29 -34.42,14.21 -34.33,14.14 -34.25,14.07 -34.16,13.99 -34.08,13.92 -33.99,13.84 -33.91,13.77 -33.83,13.69 -33.74,13.62 -33.66,13.54 -33.57,13.46 -33.49,13.39 -33.4,13.31 -33.32,13.23 -33.23,13.15 -33.15,13.08 -33.07,13 -32.98,12.92 -32.9,12.84 -32.81,12.76 -32.73,12.68 -32.64,12.6 -32.56,12.52 -32.47,12.44 -32.39,12.36 -32.31,12.28 -32.22,12.2 -32.14,12.12 -32.05,12.04 -31.97,11.96 -31.88,11.87 -31.8,11.79 -31.71,11.71 -31.63,11.63 -31.55,11.54 -31.46,11.46 -31.38,11.37 -31.29,11.29 -31.21,11.21 -31.12,11.12 -31.04,11.04 -30.95,10.95 -30.87,10.87 -30.79,10.78 -30.7,10.69 -30.62,10.61 -30.53,10.52 -30.45,10.44 -30.36,10.35 -30.28,10.26 -30.19,10.17 -30.11,10.09 -30.03,10 -29.94,9.91 -29.86,9.82 -29.77,9.73 -29.69,9.64 -29.6,9.55 -29.52,9.46 -29.43,9.37 -29.35,9.28 -29.27,9.19 -29.18,9.1 -29.1,9.01 -29.01,8.92 -28.93,8.83 -28.84,8.74 -28.76,8.65 -28.67,8.55 -28.59,8.46 -28.51,8.37 -28.42,8.28 -28.34,8.18 -28.25,8.09 -28.17,8 -28.08,7.9 -28,7.81 -27.91,7.72 -27.83,7.62 -27.74,7.53 -27.66,7.43 -27.58,7.34 -27.49,7.24 -27.41,7.15 -27.32,7.05 -27.24,6.96 -27.15,6.86 -27.07,6.77 -26.98,6.67 -26.9,6.57 -26.82,6.48 -26.73,6.38 -26.65,6.28 -26.56,6.19 -26.48,6.09 -26.39,5.99 -26.31,5.89 -26.22,5.79 -26.14,5.7 -26.06,5.6 -25.97,5.5 -25.89,5.4 -25.8,5.3 -25.72,5.2 -25.63,5.11 -25.55,5.01 -25.46,4.91 -25.38,4.81 -25.3,4.71 -25.21,4.61 -25.13,4.51 -25.04,4.41 -24.96,4.31 -24.87,4.21 -24.79,4.11 -24.7,4.01 -24.62,3.91 -24.54,3.8 -24.45,3.7 -24.37,3.6 -24.28,3.5 -24.2,3.4 -24.11,3.3 -24.03,3.2 -23.94,3.1 -23.86,2.99 -23.78,2.89 -23.69,2.79 -23.61,2.69 -23.52,2.59 -23.44,2.48 -23.35,2.38 -23.27,2.28 -23.18,2.18 -23.1,2.07 -23.02,1.97 -22.93,1.87 -22.85,1.77 -22.76,1.66 -22.68,1.56 -22.59,1.46 -22.51,1.35 -22.42,1.25 -22.34,1.15 -22.26,1.04 -22.17,0.94 -22.09,0.84 -22,0.73 -21.92,0.63 -21.83,0.53 -21.75,0.42 -21.66,0.32 -21.58,0.22 -21.49,0.11 -21.41,0.01 -21.33,-0.09 -21.24,-0.2 -21.16,-0.3 -21.07,-0.4 -20.99,-0.51 -20.9,-0.61 -20.82,-0.71 -20.73,-0.82 -20.65,-0.92 -20.57,-1.02 -20.48,-1.13 -20.4,-1.23 -20.31,-1.33 -20.23,-1.44 -20.14,-1.54 -20.06,-1.64 -19.97,-1.75 -19.89,-1.85 -19.81,-1.95 -19.72,-2.06 -19.64,-2.16 -19.55,-2.26 -19.47,-2.37 -19.38,-2.47 -19.3,-2.57 -19.21,-2.67 -19.13,-2.78 -19.05,-2.88 -18.96,-2.98 -18.88,-3.08 -18.79,-3.19 -18.71,-3.29 -18.62,-3.39 -18.54,-3.49 -18.45,-3.59 -18.37,-3.7 -18.29,-3.8 -18.2,-3.9 -18.12,-4 -18.03,-4.1 -17.95,-4.2 -17.86,-4.3 -17.78,-4.4 -17.69,-4.51 -17.61,-4.61 -17.53,-4.71 -17.44,-4.81 -17.36,-4.91 -17.27,-5.01 -17.19,-5.11 -17.1,-5.21 -17.02,-5.31 -16.93,-5.41 -16.85,-5.5 -16.77,-5.6 -16.68,-5.7 -16.6,-5.8 -16.51,-5.9 -16.43,-6 -16.34,-6.1 -16.26,-6.19 -16.17,-6.29 -16.09,-6.39 -16.01,-6.49 -15.92,-6.58 -15.84,-6.68 -15.75,-6.78 -15.67,-6.87 -15.58,-6.97 -15.5,-7.06 -15.41,-7.16 -15.33,-7.26 -15.24,-7.35 -15.16,-7.45 -15.08,-7.54 -14.99,-7.63 -14.91,-7.73 -14.82,-7.82 -14.74,-7.92 -14.65,-8.01 -14.57,-8.1 -14.48,-8.19 -14.4,-8.29 -14.32,-8.38 -14.23,-8.47 -14.15,-8.56 -14.06,-8.65 -13.98,-8.74 -13.89,-8.84 -13.81,-8.93 -13.72,-9.02 -13.64,-9.11 -13.56,-9.19 -13.47,-9.28 -13.39,-9.37 -13.3,-9.46 -13.22,-9.55 -13.13,-9.64 -13.05,-9.72 -12.96,-9.81 -12.88,-9.9 -12.8,-9.98 -12.71,-10.07 -12.63,-10.16 -12.54,-10.24 -12.46,-10.33 -12.37,-10.41 -12.29,-10.49 -12.2,-10.58 -12.12,-10.66 -12.04,-10.74 -11.95,-10.83 -11.87,-10.91 -11.78,-10.99 -11.7,-11.07 -11.61,-11.15 -11.53,-11.23 -11.44,-11.31 -11.36,-11.39 -11.28,-11.47 -11.19,-11.55 -11.11,-11.63 -11.02,-11.71 -10.94,-11.79 -10.85,-11.86 -10.77,-11.94 -10.68,-12.02 -10.6,-12.09 -10.52,-12.17 -10.43,-12.24 -10.35,-12.32 -10.26,-12.39 -10.18,-12.46 -10.09,-12.54 -10.01,-12.61 -9.92,-12.68 -9.84,-12.75 -9.76,-12.82 -9.67,-12.89 -9.59,-12.96 -9.5,-13.03 -9.42,-13.1 -9.33,-13.17 -9.25,-13.24 -9.16,-13.31 -9.08,-13.38 -8.99,-13.44 -8.91,-13.51 -8.83,-13.57 -8.74,-13.64 -8.66,-13.7 -8.57,-13.77 -8.49,-13.83 -8.4,-13.89 -8.32,-13.96 -8.23,-14.02 -8.15,-14.08 -8.07,-14.14 -7.98,-14.2 -7.9,-14.26 -7.81,-14.32 -7.73,-14.38 -7.64,-14.44 -7.56,-14.5 -7.47,-14.55 -7.39,-14.61 -7.31,-14.67 -7.22,-14.72 -7.14,-14.78 -7.05,-14.83 -6.97,-14.88 -6.88,-14.94 -6.8,-14.99 -6.71,-15.04 -6.63,-15.09 -6.55,-15.14 -6.46,-15.19 -6.38,-15.24 -6.29,-15.29 -6.21,-15.34 -6.12,-15.39 -6.04,-15.43 -5.95,-15.48 -5.87,-15.53 -5.79,-15.57 -5.7,-15.62 -5.62,-15.66 -5.53,-15.71 -5.45,-15.75 -5.36,-15.79 -5.28,-15.83 -5.19,-15.87 -5.11,-15.91 -5.03,-15.95 -4.94,-15.99 -4.86,-16.03 -4.77,-16.07 -4.69,-16.11 -4.6,-16.14 -4.52,-16.18 -4.43,-16.21 -4.35,-16.25 -4.27,-16.28 -4.18,-16.32 -4.1,-16.35 -4.01,-16.38 -3.93,-16.41 -3.84,-16.44 -3.76,-16.47 -3.67,-16.5 -3.59,-16.53 -3.51,-16.56 -3.42,-16.59 -3.34,-16.62 -3.25,-16.64 -3.17,-16.67 -3.08,-16.69 -3,-16.72 -2.91,-16.74 -2.83,-16.76 -2.74,-16.79 -2.66,-16.81 -2.58,-16.83 -2.49,-16.85 -2.41,-16.87 -2.32,-16.89 -2.24,-16.91 -2.15,-16.92 -2.07,-16.94 -1.98,-16.96 -1.9,-16.97 -1.82,-16.99 -1.73,-17 -1.65,-17.02 -1.56,-17.03 -1.48,-17.04 -1.39,-17.05 -1.31,-17.06 -1.22,-17.07 -1.14,-17.08 -1.06,-17.09 -0.97,-17.1 -0.89,-17.11 -0.8,-17.12 -0.72,-17.12 -0.63,-17.13 -0.55,-17.13 -0.46,-17.14 -0.38,-17.14 -0.3,-17.14 -0.21,-17.14 -0.13,-17.15 -0.04,-17.15 0.04,-17.15 0.13,-17.15 0.21,-17.14 0.3,-17.14 0.38,-17.14 0.46,-17.14 0.55,-17.13 0.63,-17.13 0.72,-17.12 0.8,-17.12 0.89,-17.11 0.97,-17.1 1.06,-17.09 1.14,-17.08 1.22,-17.07 1.31,-17.06 1.39,-17.05 1.48,-17.04 1.56,-17.03 1.65,-17.02 1.73,-17 1.82,-16.99 1.9,-16.97 1.98,-16.96 2.07,-16.94 2.15,-16.92 2.24,-16.91 2.32,-16.89 2.41,-16.87 2.49,-16.85 2.58,-16.83 2.66,-16.81 2.74,-16.79 2.83,-16.76 2.91,-16.74 3,-16.72 3.08,-16.69 3.17,-16.67 3.25,-16.64 3.34,-16.62 3.42,-16.59 3.51,-16.56 3.59,-16.53 3.67,-16.5 3.76,-16.47 3.84,-16.44 3.93,-16.41 4.01,-16.38 4.1,-16.35 4.18,-16.32 4.27,-16.28 4.35,-16.25 4.43,-16.21 4.52,-16.18 4.6,-16.14 4.69,-16.11 4.77,-16.07 4.86,-16.03 4.94,-15.99 5.03,-15.95 5.11,-15.91 5.19,-15.87 5.28,-15.83 5.36,-15.79 5.45,-15.75 5.53,-15.71 5.62,-15.66 5.7,-15.62 5.79,-15.57 5.87,-15.53 5.95,-15.48 6.04,-15.43 6.12,-15.39 6.21,-15.34 6.29,-15.29 6.38,-15.24 6.46,-15.19 6.55,-15.14 6.63,-15.09 6.71,-15.04 6.8,-14.99 6.88,-14.94 6.97,-14.88 7.05,-14.83 7.14,-14.78 7.22,-14.72 7.31,-14.67 7.39,-14.61 7.47,-14.55 7.56,-14.5 7.64,-14.44 7.73,-14.38 7.81,-14.32 7.9,-14.26 7.98,-14.2 8.07,-14.14 8.15,-14.08 8.23,-14.02 8.32,-13.96 8.4,-13.89 8.49,-13.83 8.57,-13.77 8.66,-13.7 8.74,-13.64 8.83,-13.57 8.91,-13.51 8.99,-13.44 9.08,-13.38 9.16,-13.31 9.25,-13.24 9.33,-13.17 9.42,-13.1 9.5,-13.03 9.59,-12.96 9.67,-12.89 9.76,-12.82 9.84,-12.75 9.92,-12.68 10.01,-12.61 10.09,-12.54 10.18,-12.46 10.26,-12.39 10.35,-12.32 10.43,-12.24 10.52,-12.17 10.6,-12.09 10.68,-12.02 10.77,-11.94 10.85,-11.86 10.94,-11.79 11.02,-11.71 11.11,-11.63 11.19,-11.55 11.28,-11.47 11.36,-11.39 11.44,-11.31 11.53,-11.23 11.61,-11.15 11.7,-11.07 11.78,-10.99 11.87,-10.91 11.95,-10.83 12.04,-10.74 12.12,-10.66 12.2,-10.58 12.29,-10.49 12.37,-10.41 12.46,-10.33 12.54,-10.24 12.63,-10.16 12.71,-10.07 12.8,-9.98 12.88,-9.9 12.96,-9.81 13.05,-9.72 13.13,-9.64 13.22,-9.55 13.3,-9.46 13.39,-9.37 13.47,-9.28 13.56,-9.19 13.64,-9.11 13.72,-9.02 13.81,-8.93 13.89,-8.84 13.98,-8.74 14.06,-8.65 14.15,-8.56 14.23,-8.47 14.32,-8.38 14.4,-8.29 14.48,-8.19 14.57,-8.1 14.65,-8.01 14.74,-7.92 14.82,-7.82 14.91,-7.73 14.99,-7.63 15.08,-7.54 15.16,-7.45 15.24,-7.35 15.33,-7.26 15.41,-7.16 15.5,-7.06 15.58,-6.97 15.67,-6.87 15.75,-6.78 15.84,-6.68 15.92,-6.58 16.01,-6.49 16.09,-6.39 16.17,-6.29 16.26,-6.19 16.34,-6.1 16.43,-6 16.51,-5.9 16.6,-5.8 16.68,-5.7 16.77,-5.6 16.85,-5.5 16.93,-5.41 17.02,-5.31 17.1,-5.21 17.19,-5.11 17.27,-5.01 17.36,-4.91 17.44,-4.81 17.53,-4.71 17.61,-4.61 17.69,-4.51 17.78,-4.4 17.86,-4.3 17.95,-4.2 18.03,-4.1 18.12,-4 18.2,-3.9 18.29,-3.8 18.37,-3.7 18.45,-3.59 18.54,-3.49 18.62,-3.39 18.71,-3.29 18.79,-3.19 18.88,-3.08 18.96,-2.98 19.05,-2.88 19.13,-2.78 19.21,-2.67 19.3,-2.57 19.38,-2.47 19.47,-2.37 19.55,-2.26 19.64,-2.16 19.72,-2.06 19.81,-1.95 19.89,-1.85 19.97,-1.75 20.06,-1.64 20.14,-1.54 20.23,-1.44 20.31,-1.33 20.4,-1.23 20.48,-1.13 20.57,-1.02 20.65,-0.92 20.73,-0.82 20.82,-0.71 20.9,-0.61 20.99,-0.51 21.07,-0.4 21.16,-0.3 21.24,-0.2 21.33,-0.09 21.41,0.01 21.49,0.11 21.58,0.22 21.66,0.32 21.75,0.42 21.83,0.53 21.92,0.63 22,0.73 22.09,0.84 22.17,0.94 22.26,1.04 22.34,1.15 22.42,1.25 22.51,1.35 22.59,1.46 22.68,1.56 22.76,1.66 22.85,1.77 22.93,1.87 23.02,1.97 23.1,2.07 23.18,2.18 23.27,2.28 23.35,2.38 23.44,2.48 23.52,2.59 23.61,2.69 23.69,2.79 23.78,2.89 23.86,2.99 23.94,3.1 24.03,3.2 24.11,3.3 24.2,3.4 24.28,3.5 24.37,3.6 24.45,3.7 24.54,3.8 24.62,3.91 24.7,4.01 24.79,4.11 24.87,4.21 24.96,4.31 25.04,4.41 25.13,4.51 25.21,4.61 25.3,4.71 25.38,4.81 25.46,4.91 25.55,5.01 25.63,5.11 25.72,5.2 25.8,5.3 25.89,5.4 25.97,5.5 26.06,5.6 26.14,5.7 26.22,5.79 26.31,5.89 26.39,5.99 26.48,6.09 26.56,6.19 26.65,6.28 26.73,6.38 26.82,6.48 26.9,6.57 26.98,6.67 27.07,6.77 27.15,6.86 27.24,6.96 27.32,7.05 27.41,7.15 27.49,7.24 27.58,7.34 27.66,7.43 27.74,7.53 27.83,7.62 27.91,7.72 28,7.81 28.08,7.9 28.17,8 28.25,8.09 28.34,8.18 28.42,8.28 28.51,8.37 28.59,8.46 28.67,8.55 28.76,8.65 28.84,8.74 28.93,8.83 29.01,8.92 29.1,9.01 29.18,9.1 29.27,9.19 29.35,9.28 29.43,9.37 29.52,9.46 29.6,9.55 29.69,9.64 29.77,9.73 29.86,9.82 29.94,9.91 30.03,10 30.11,10.09 30.19,10.17 30.28,10.26 30.36,10.35 30.45,10.44 30.53,10.52 30.62,10.61 30.7,10.69 30.79,10.78 30.87,10.87 30.95,10.95 31.04,11.04 31.12,11.12 31.21,11.21 31.29,11.29 31.38,11.37 31.46,11.46 31.55,11.54 31.63,11.63 31.71,11.71 31.8,11.79 31.88,11.87 31.97,11.96 32.05,12.04 32.14,12.12 32.22,12.2 32.31,12.28 32.39,12.36 32.47,12.44 32.56,12.52 32.64,12.6 32.73,12.68 32.81,12.76 32.9,12.84 32.98,12.92 33.07,13 33.15,13.08 33.23,13.15 33.32,13.23 33.4,13.31 33.49,13.39 33.57,13.46 33.66,13.54 33.74,13.62 33.83,13.69 33.91,13.77 33.99,13.84 34.08,13.92 34.16,13.99 34.25,14.07 34.33,14.14 34.42,14.21 34.5,14.29 34.59,14.36 34.67,14.43 34.76,14.5 34.84,14.58 34.92,14.65 35.01,14.72 35.09,14.79 35.18,14.86 35.26,14.93 35.35,15 35.43,15.07 35.52,15.14 35.6,15.21 35.68,15.28 35.77,15.35 35.85,15.42 35.94,15.49 36.02,15.56 36.11,15.62 36.19,15.69 36.28,15.76 36.36,15.82 36.44,15.89 36.53,15.96 36.61,16.02 36.7,16.09 36.78,16.15 36.87,16.22 36.95,16.28 37.04,16.35 37.12,16.41 37.2,16.48 37.29,16.54 37.37,16.6 37.46,16.66 37.54,16.73 37.63,16.79 37.71,16.85 37.8,16.91 37.88,16.97 37.96,17.03 38.05,17.1 38.13,17.16 38.22,17.22 38.3,17.28 38.39,17.34 38.47,17.39 38.56,17.45 38.64,17.51 38.72,17.57 38.81,17.63 38.89,17.69 38.98,17.74 39.06,17.8 39.15,17.86 39.23,17.91 39.32,17.97 39.4,18.03 39.48,18.08 39.57,18.14 39.65,18.19 39.74,18.25 39.82,18.3 39.91,18.35 39.99,18.41 40.08,18.46 40.16,18.51 40.24,18.57 40.33,18.62 40.41,18.67 40.5,18.72 40.58,18.78 40.67,18.83 40.75,18.88 40.84,18.93 40.92,18.98 41.01,19.03 41.09,19.08 41.17,19.13 41.26,19.18 41.34,19.23 41.43,19.28 41.51,19.33 41.6,19.37 41.68,19.42 41.77,19.47 41.85,19.52 41.93,19.56 42.02,19.61 42.1,19.66 42.19,19.7 " class="primitive"/>
+            </g>
+          </g>
+        </g>
+        <g stroke-width="0.3" fill="#000000" fill-opacity="0.000" class="geometry" id="img-89b295c5-194">
+          <g class="color_RGBA{Float64}(0.0,0.0,255.0,1.0)" stroke-dasharray="0.35,0.35" stroke="#0000FF" id="img-89b295c5-195">
+            <g transform="translate(57.54,37.22)" id="img-89b295c5-196">
+              <path fill="none" d="M-42.19,11.97 L-42.1,11.92 -42.02,11.87 -41.93,11.82 -41.85,11.77 -41.77,11.72 -41.68,11.67 -41.6,11.62 -41.51,11.57 -41.43,11.52 -41.34,11.47 -41.26,11.42 -41.17,11.37 -41.09,11.32 -41.01,11.27 -40.92,11.22 -40.84,11.17 -40.75,11.12 -40.67,11.07 -40.58,11.01 -40.5,10.96 -40.41,10.91 -40.33,10.86 -40.24,10.81 -40.16,10.76 -40.08,10.71 -39.99,10.65 -39.91,10.6 -39.82,10.55 -39.74,10.5 -39.65,10.45 -39.57,10.39 -39.48,10.34 -39.4,10.29 -39.32,10.24 -39.23,10.18 -39.15,10.13 -39.06,10.08 -38.98,10.03 -38.89,9.97 -38.81,9.92 -38.72,9.87 -38.64,9.81 -38.56,9.76 -38.47,9.71 -38.39,9.65 -38.3,9.6 -38.22,9.55 -38.13,9.49 -38.05,9.44 -37.96,9.38 -37.88,9.33 -37.8,9.28 -37.71,9.22 -37.63,9.17 -37.54,9.11 -37.46,9.06 -37.37,9 -37.29,8.95 -37.2,8.89 -37.12,8.84 -37.04,8.79 -36.95,8.73 -36.87,8.68 -36.78,8.62 -36.7,8.57 -36.61,8.51 -36.53,8.45 -36.44,8.4 -36.36,8.34 -36.28,8.29 -36.19,8.23 -36.11,8.18 -36.02,8.12 -35.94,8.07 -35.85,8.01 -35.77,7.95 -35.68,7.9 -35.6,7.84 -35.52,7.78 -35.43,7.73 -35.35,7.67 -35.26,7.62 -35.18,7.56 -35.09,7.5 -35.01,7.45 -34.92,7.39 -34.84,7.33 -34.76,7.28 -34.67,7.22 -34.59,7.16 -34.5,7.11 -34.42,7.05 -34.33,6.99 -34.25,6.93 -34.16,6.88 -34.08,6.82 -33.99,6.76 -33.91,6.71 -33.83,6.65 -33.74,6.59 -33.66,6.53 -33.57,6.48 -33.49,6.42 -33.4,6.36 -33.32,6.3 -33.23,6.25 -33.15,6.19 -33.07,6.13 -32.98,6.07 -32.9,6.01 -32.81,5.96 -32.73,5.9 -32.64,5.84 -32.56,5.78 -32.47,5.72 -32.39,5.67 -32.31,5.61 -32.22,5.55 -32.14,5.49 -32.05,5.43 -31.97,5.38 -31.88,5.32 -31.8,5.26 -31.71,5.2 -31.63,5.14 -31.55,5.08 -31.46,5.03 -31.38,4.97 -31.29,4.91 -31.21,4.85 -31.12,4.79 -31.04,4.73 -30.95,4.67 -30.87,4.62 -30.79,4.56 -30.7,4.5 -30.62,4.44 -30.53,4.38 -30.45,4.32 -30.36,4.26 -30.28,4.2 -30.19,4.15 -30.11,4.09 -30.03,4.03 -29.94,3.97 -29.86,3.91 -29.77,3.85 -29.69,3.79 -29.6,3.73 -29.52,3.68 -29.43,3.62 -29.35,3.56 -29.27,3.5 -29.18,3.44 -29.1,3.38 -29.01,3.32 -28.93,3.26 -28.84,3.21 -28.76,3.15 -28.67,3.09 -28.59,3.03 -28.51,2.97 -28.42,2.91 -28.34,2.85 -28.25,2.79 -28.17,2.74 -28.08,2.68 -28,2.62 -27.91,2.56 -27.83,2.5 -27.74,2.44 -27.66,2.38 -27.58,2.32 -27.49,2.27 -27.41,2.21 -27.32,2.15 -27.24,2.09 -27.15,2.03 -27.07,1.97 -26.98,1.91 -26.9,1.86 -26.82,1.8 -26.73,1.74 -26.65,1.68 -26.56,1.62 -26.48,1.56 -26.39,1.51 -26.31,1.45 -26.22,1.39 -26.14,1.33 -26.06,1.27 -25.97,1.22 -25.89,1.16 -25.8,1.1 -25.72,1.04 -25.63,0.98 -25.55,0.93 -25.46,0.87 -25.38,0.81 -25.3,0.75 -25.21,0.7 -25.13,0.64 -25.04,0.58 -24.96,0.52 -24.87,0.47 -24.79,0.41 -24.7,0.35 -24.62,0.29 -24.54,0.24 -24.45,0.18 -24.37,0.12 -24.28,0.07 -24.2,0.01 -24.11,-0.05 -24.03,-0.11 -23.94,-0.16 -23.86,-0.22 -23.78,-0.28 -23.69,-0.33 -23.61,-0.39 -23.52,-0.44 -23.44,-0.5 -23.35,-0.56 -23.27,-0.61 -23.18,-0.67 -23.1,-0.73 -23.02,-0.78 -22.93,-0.84 -22.85,-0.89 -22.76,-0.95 -22.68,-1 -22.59,-1.06 -22.51,-1.11 -22.42,-1.17 -22.34,-1.23 -22.26,-1.28 -22.17,-1.34 -22.09,-1.39 -22,-1.44 -21.92,-1.5 -21.83,-1.55 -21.75,-1.61 -21.66,-1.66 -21.58,-1.72 -21.49,-1.77 -21.41,-1.83 -21.33,-1.88 -21.24,-1.93 -21.16,-1.99 -21.07,-2.04 -20.99,-2.09 -20.9,-2.15 -20.82,-2.2 -20.73,-2.25 -20.65,-2.31 -20.57,-2.36 -20.48,-2.41 -20.4,-2.47 -20.31,-2.52 -20.23,-2.57 -20.14,-2.62 -20.06,-2.68 -19.97,-2.73 -19.89,-2.78 -19.81,-2.83 -19.72,-2.88 -19.64,-2.93 -19.55,-2.99 -19.47,-3.04 -19.38,-3.09 -19.3,-3.14 -19.21,-3.19 -19.13,-3.24 -19.05,-3.29 -18.96,-3.34 -18.88,-3.39 -18.79,-3.44 -18.71,-3.49 -18.62,-3.54 -18.54,-3.59 -18.45,-3.64 -18.37,-3.69 -18.29,-3.74 -18.2,-3.79 -18.12,-3.84 -18.03,-3.89 -17.95,-3.94 -17.86,-3.99 -17.78,-4.03 -17.69,-4.08 -17.61,-4.13 -17.53,-4.18 -17.44,-4.23 -17.36,-4.27 -17.27,-4.32 -17.19,-4.37 -17.1,-4.41 -17.02,-4.46 -16.93,-4.51 -16.85,-4.56 -16.77,-4.6 -16.68,-4.65 -16.6,-4.69 -16.51,-4.74 -16.43,-4.79 -16.34,-4.83 -16.26,-4.88 -16.17,-4.92 -16.09,-4.97 -16.01,-5.01 -15.92,-5.06 -15.84,-5.1 -15.75,-5.14 -15.67,-5.19 -15.58,-5.23 -15.5,-5.28 -15.41,-5.32 -15.33,-5.36 -15.24,-5.41 -15.16,-5.45 -15.08,-5.49 -14.99,-5.53 -14.91,-5.58 -14.82,-5.62 -14.74,-5.66 -14.65,-5.7 -14.57,-5.74 -14.48,-5.78 -14.4,-5.83 -14.32,-5.87 -14.23,-5.91 -14.15,-5.95 -14.06,-5.99 -13.98,-6.03 -13.89,-6.07 -13.81,-6.11 -13.72,-6.15 -13.64,-6.19 -13.56,-6.22 -13.47,-6.26 -13.39,-6.3 -13.3,-6.34 -13.22,-6.38 -13.13,-6.42 -13.05,-6.45 -12.96,-6.49 -12.88,-6.53 -12.8,-6.57 -12.71,-6.6 -12.63,-6.64 -12.54,-6.67 -12.46,-6.71 -12.37,-6.75 -12.29,-6.78 -12.2,-6.82 -12.12,-6.85 -12.04,-6.89 -11.95,-6.92 -11.87,-6.96 -11.78,-6.99 -11.7,-7.02 -11.61,-7.06 -11.53,-7.09 -11.44,-7.13 -11.36,-7.16 -11.28,-7.19 -11.19,-7.22 -11.11,-7.26 -11.02,-7.29 -10.94,-7.32 -10.85,-7.35 -10.77,-7.38 -10.68,-7.41 -10.6,-7.44 -10.52,-7.47 -10.43,-7.5 -10.35,-7.53 -10.26,-7.56 -10.18,-7.59 -10.09,-7.62 -10.01,-7.65 -9.92,-7.68 -9.84,-7.71 -9.76,-7.74 -9.67,-7.77 -9.59,-7.79 -9.5,-7.82 -9.42,-7.85 -9.33,-7.87 -9.25,-7.9 -9.16,-7.93 -9.08,-7.95 -8.99,-7.98 -8.91,-8 -8.83,-8.03 -8.74,-8.06 -8.66,-8.08 -8.57,-8.1 -8.49,-8.13 -8.4,-8.15 -8.32,-8.18 -8.23,-8.2 -8.15,-8.22 -8.07,-8.25 -7.98,-8.27 -7.9,-8.29 -7.81,-8.31 -7.73,-8.33 -7.64,-8.36 -7.56,-8.38 -7.47,-8.4 -7.39,-8.42 -7.31,-8.44 -7.22,-8.46 -7.14,-8.48 -7.05,-8.5 -6.97,-8.52 -6.88,-8.54 -6.8,-8.56 -6.71,-8.57 -6.63,-8.59 -6.55,-8.61 -6.46,-8.63 -6.38,-8.64 -6.29,-8.66 -6.21,-8.68 -6.12,-8.69 -6.04,-8.71 -5.95,-8.73 -5.87,-8.74 -5.79,-8.76 -5.7,-8.77 -5.62,-8.79 -5.53,-8.8 -5.45,-8.81 -5.36,-8.83 -5.28,-8.84 -5.19,-8.86 -5.11,-8.87 -5.03,-8.88 -4.94,-8.89 -4.86,-8.9 -4.77,-8.92 -4.69,-8.93 -4.6,-8.94 -4.52,-8.95 -4.43,-8.96 -4.35,-8.97 -4.27,-8.98 -4.18,-8.99 -4.1,-9 -4.01,-9.01 -3.93,-9.02 -3.84,-9.03 -3.76,-9.03 -3.67,-9.04 -3.59,-9.05 -3.51,-9.06 -3.42,-9.06 -3.34,-9.07 -3.25,-9.08 -3.17,-9.08 -3.08,-9.09 -3,-9.09 -2.91,-9.1 -2.83,-9.1 -2.74,-9.11 -2.66,-9.11 -2.58,-9.12 -2.49,-9.12 -2.41,-9.12 -2.32,-9.13 -2.24,-9.13 -2.15,-9.13 -2.07,-9.13 -1.98,-9.13 -1.9,-9.14 -1.82,-9.14 -1.73,-9.14 -1.65,-9.14 -1.56,-9.14 -1.48,-9.14 -1.39,-9.14 -1.31,-9.14 -1.22,-9.14 -1.14,-9.14 -1.06,-9.13 -0.97,-9.13 -0.89,-9.13 -0.8,-9.13 -0.72,-9.12 -0.63,-9.12 -0.55,-9.12 -0.46,-9.11 -0.38,-9.11 -0.3,-9.11 -0.21,-9.1 -0.13,-9.1 -0.04,-9.09 0.04,-9.09 0.13,-9.08 0.21,-9.07 0.3,-9.07 0.38,-9.06 0.46,-9.05 0.55,-9.05 0.63,-9.04 0.72,-9.03 0.8,-9.02 0.89,-9.01 0.97,-9.01 1.06,-9 1.14,-8.99 1.22,-8.98 1.31,-8.97 1.39,-8.96 1.48,-8.95 1.56,-8.94 1.65,-8.92 1.73,-8.91 1.82,-8.9 1.9,-8.89 1.98,-8.88 2.07,-8.86 2.15,-8.85 2.24,-8.84 2.32,-8.82 2.41,-8.81 2.49,-8.8 2.58,-8.78 2.66,-8.77 2.74,-8.75 2.83,-8.74 2.91,-8.72 3,-8.7 3.08,-8.69 3.17,-8.67 3.25,-8.65 3.34,-8.64 3.42,-8.62 3.51,-8.6 3.59,-8.58 3.67,-8.57 3.76,-8.55 3.84,-8.53 3.93,-8.51 4.01,-8.49 4.1,-8.47 4.18,-8.45 4.27,-8.43 4.35,-8.41 4.43,-8.39 4.52,-8.37 4.6,-8.35 4.69,-8.32 4.77,-8.3 4.86,-8.28 4.94,-8.26 5.03,-8.23 5.11,-8.21 5.19,-8.19 5.28,-8.16 5.36,-8.14 5.45,-8.12 5.53,-8.09 5.62,-8.07 5.7,-8.04 5.79,-8.02 5.87,-7.99 5.95,-7.96 6.04,-7.94 6.12,-7.91 6.21,-7.88 6.29,-7.86 6.38,-7.83 6.46,-7.8 6.55,-7.78 6.63,-7.75 6.71,-7.72 6.8,-7.69 6.88,-7.66 6.97,-7.63 7.05,-7.6 7.14,-7.57 7.22,-7.54 7.31,-7.51 7.39,-7.48 7.47,-7.45 7.56,-7.42 7.64,-7.39 7.73,-7.36 7.81,-7.33 7.9,-7.29 7.98,-7.26 8.07,-7.23 8.15,-7.2 8.23,-7.16 8.32,-7.13 8.4,-7.1 8.49,-7.06 8.57,-7.03 8.66,-7 8.74,-6.96 8.83,-6.93 8.91,-6.89 8.99,-6.86 9.08,-6.82 9.16,-6.79 9.25,-6.75 9.33,-6.71 9.42,-6.68 9.5,-6.64 9.59,-6.6 9.67,-6.57 9.76,-6.53 9.84,-6.49 9.92,-6.45 10.01,-6.42 10.09,-6.38 10.18,-6.34 10.26,-6.3 10.35,-6.26 10.43,-6.22 10.52,-6.18 10.6,-6.14 10.68,-6.1 10.77,-6.06 10.85,-6.02 10.94,-5.98 11.02,-5.94 11.11,-5.9 11.19,-5.86 11.28,-5.82 11.36,-5.78 11.44,-5.74 11.53,-5.69 11.61,-5.65 11.7,-5.61 11.78,-5.57 11.87,-5.52 11.95,-5.48 12.04,-5.44 12.12,-5.39 12.2,-5.35 12.29,-5.31 12.37,-5.26 12.46,-5.22 12.54,-5.17 12.63,-5.13 12.71,-5.08 12.8,-5.04 12.88,-4.99 12.96,-4.95 13.05,-4.9 13.13,-4.86 13.22,-4.81 13.3,-4.77 13.39,-4.72 13.47,-4.67 13.56,-4.63 13.64,-4.58 13.72,-4.53 13.81,-4.49 13.89,-4.44 13.98,-4.39 14.06,-4.34 14.15,-4.29 14.23,-4.25 14.32,-4.2 14.4,-4.15 14.48,-4.1 14.57,-4.05 14.65,-4 14.74,-3.95 14.82,-3.91 14.91,-3.86 14.99,-3.81 15.08,-3.76 15.16,-3.71 15.24,-3.66 15.33,-3.61 15.41,-3.56 15.5,-3.51 15.58,-3.45 15.67,-3.4 15.75,-3.35 15.84,-3.3 15.92,-3.25 16.01,-3.2 16.09,-3.15 16.17,-3.1 16.26,-3.04 16.34,-2.99 16.43,-2.94 16.51,-2.89 16.6,-2.84 16.68,-2.78 16.77,-2.73 16.85,-2.68 16.93,-2.62 17.02,-2.57 17.1,-2.52 17.19,-2.46 17.27,-2.41 17.36,-2.36 17.44,-2.3 17.53,-2.25 17.61,-2.2 17.69,-2.14 17.78,-2.09 17.86,-2.03 17.95,-1.98 18.03,-1.93 18.12,-1.87 18.2,-1.82 18.29,-1.76 18.37,-1.71 18.45,-1.65 18.54,-1.6 18.62,-1.54 18.71,-1.49 18.79,-1.43 18.88,-1.37 18.96,-1.32 19.05,-1.26 19.13,-1.21 19.21,-1.15 19.3,-1.09 19.38,-1.04 19.47,-0.98 19.55,-0.93 19.64,-0.87 19.72,-0.81 19.81,-0.76 19.89,-0.7 19.97,-0.64 20.06,-0.59 20.14,-0.53 20.23,-0.47 20.31,-0.42 20.4,-0.36 20.48,-0.3 20.57,-0.24 20.65,-0.19 20.73,-0.13 20.82,-0.07 20.9,-0.01 20.99,0.04 21.07,0.1 21.16,0.16 21.24,0.22 21.33,0.28 21.41,0.33 21.49,0.39 21.58,0.45 21.66,0.51 21.75,0.57 21.83,0.62 21.92,0.68 22,0.74 22.09,0.8 22.17,0.86 22.26,0.92 22.34,0.98 22.42,1.03 22.51,1.09 22.59,1.15 22.68,1.21 22.76,1.27 22.85,1.33 22.93,1.39 23.02,1.45 23.1,1.5 23.18,1.56 23.27,1.62 23.35,1.68 23.44,1.74 23.52,1.8 23.61,1.86 23.69,1.92 23.78,1.98 23.86,2.04 23.94,2.1 24.03,2.16 24.11,2.21 24.2,2.27 24.28,2.33 24.37,2.39 24.45,2.45 24.54,2.51 24.62,2.57 24.7,2.63 24.79,2.69 24.87,2.75 24.96,2.81 25.04,2.87 25.13,2.93 25.21,2.99 25.3,3.05 25.38,3.11 25.46,3.17 25.55,3.23 25.63,3.28 25.72,3.34 25.8,3.4 25.89,3.46 25.97,3.52 26.06,3.58 26.14,3.64 26.22,3.7 26.31,3.76 26.39,3.82 26.48,3.88 26.56,3.94 26.65,4 26.73,4.06 26.82,4.12 26.9,4.18 26.98,4.24 27.07,4.3 27.15,4.35 27.24,4.41 27.32,4.47 27.41,4.53 27.49,4.59 27.58,4.65 27.66,4.71 27.74,4.77 27.83,4.83 27.91,4.89 28,4.95 28.08,5.01 28.17,5.06 28.25,5.12 28.34,5.18 28.42,5.24 28.51,5.3 28.59,5.36 28.67,5.42 28.76,5.48 28.84,5.54 28.93,5.59 29.01,5.65 29.1,5.71 29.18,5.77 29.27,5.83 29.35,5.89 29.43,5.95 29.52,6 29.6,6.06 29.69,6.12 29.77,6.18 29.86,6.24 29.94,6.3 30.03,6.35 30.11,6.41 30.19,6.47 30.28,6.53 30.36,6.59 30.45,6.64 30.53,6.7 30.62,6.76 30.7,6.82 30.79,6.87 30.87,6.93 30.95,6.99 31.04,7.05 31.12,7.1 31.21,7.16 31.29,7.22 31.38,7.28 31.46,7.33 31.55,7.39 31.63,7.45 31.71,7.5 31.8,7.56 31.88,7.62 31.97,7.67 32.05,7.73 32.14,7.79 32.22,7.84 32.31,7.9 32.39,7.96 32.47,8.01 32.56,8.07 32.64,8.12 32.73,8.18 32.81,8.24 32.9,8.29 32.98,8.35 33.07,8.4 33.15,8.46 33.23,8.51 33.32,8.57 33.4,8.63 33.49,8.68 33.57,8.74 33.66,8.79 33.74,8.85 33.83,8.9 33.91,8.96 33.99,9.01 34.08,9.06 34.16,9.12 34.25,9.17 34.33,9.23 34.42,9.28 34.5,9.34 34.59,9.39 34.67,9.44 34.76,9.5 34.84,9.55 34.92,9.61 35.01,9.66 35.09,9.71 35.18,9.77 35.26,9.82 35.35,9.87 35.43,9.93 35.52,9.98 35.6,10.03 35.68,10.09 35.77,10.14 35.85,10.19 35.94,10.24 36.02,10.3 36.11,10.35 36.19,10.4 36.28,10.45 36.36,10.5 36.44,10.56 36.53,10.61 36.61,10.66 36.7,10.71 36.78,10.76 36.87,10.81 36.95,10.87 37.04,10.92 37.12,10.97 37.2,11.02 37.29,11.07 37.37,11.12 37.46,11.17 37.54,11.22 37.63,11.27 37.71,11.32 37.8,11.37 37.88,11.42 37.96,11.47 38.05,11.52 38.13,11.57 38.22,11.62 38.3,11.67 38.39,11.72 38.47,11.77 38.56,11.82 38.64,11.87 38.72,11.92 38.81,11.97 38.89,12.02 38.98,12.06 39.06,12.11 39.15,12.16 39.23,12.21 39.32,12.26 39.4,12.3 39.48,12.35 39.57,12.4 39.65,12.45 39.74,12.5 39.82,12.54 39.91,12.59 39.99,12.64 40.08,12.68 40.16,12.73 40.24,12.78 40.33,12.82 40.41,12.87 40.5,12.92 40.58,12.96 40.67,13.01 40.75,13.06 40.84,13.1 40.92,13.15 41.01,13.19 41.09,13.24 41.17,13.28 41.26,13.33 41.34,13.38 41.43,13.42 41.51,13.47 41.6,13.51 41.68,13.55 41.77,13.6 41.85,13.64 41.93,13.69 42.02,13.73 42.1,13.78 42.19,13.82 " class="primitive"/>
+            </g>
+          </g>
+        </g>
+        <g stroke-width="0.3" fill="#000000" fill-opacity="0.000" class="geometry" id="img-89b295c5-197">
+          <g class="color_RGBA{Float64}(0.93,0.23,0.23,1.0)" stroke-dasharray="0.35,0.35" stroke="#ED3B3B" id="img-89b295c5-198">
+            <g transform="translate(57.54,34.77)" id="img-89b295c5-199">
+              <path fill="none" d="M-42.19,18.55 L-42.1,18.48 -42.02,18.41 -41.93,18.34 -41.85,18.27 -41.77,18.2 -41.68,18.13 -41.6,18.06 -41.51,17.98 -41.43,17.91 -41.34,17.84 -41.26,17.77 -41.17,17.69 -41.09,17.62 -41.01,17.55 -40.92,17.47 -40.84,17.4 -40.75,17.32 -40.67,17.25 -40.58,17.18 -40.5,17.1 -40.41,17.03 -40.33,16.95 -40.24,16.88 -40.16,16.8 -40.08,16.72 -39.99,16.65 -39.91,16.57 -39.82,16.5 -39.74,16.42 -39.65,16.34 -39.57,16.27 -39.48,16.19 -39.4,16.11 -39.32,16.04 -39.23,15.96 -39.15,15.88 -39.06,15.81 -38.98,15.73 -38.89,15.65 -38.81,15.57 -38.72,15.5 -38.64,15.42 -38.56,15.34 -38.47,15.26 -38.39,15.19 -38.3,15.11 -38.22,15.03 -38.13,14.95 -38.05,14.88 -37.96,14.8 -37.88,14.72 -37.8,14.64 -37.71,14.56 -37.63,14.49 -37.54,14.41 -37.46,14.33 -37.37,14.25 -37.29,14.18 -37.2,14.1 -37.12,14.02 -37.04,13.95 -36.95,13.87 -36.87,13.79 -36.78,13.72 -36.7,13.64 -36.61,13.56 -36.53,13.49 -36.44,13.41 -36.36,13.33 -36.28,13.26 -36.19,13.18 -36.11,13.1 -36.02,13.03 -35.94,12.95 -35.85,12.88 -35.77,12.8 -35.68,12.73 -35.6,12.65 -35.52,12.58 -35.43,12.5 -35.35,12.43 -35.26,12.36 -35.18,12.28 -35.09,12.21 -35.01,12.14 -34.92,12.06 -34.84,11.99 -34.76,11.92 -34.67,11.84 -34.59,11.77 -34.5,11.7 -34.42,11.63 -34.33,11.56 -34.25,11.49 -34.16,11.41 -34.08,11.34 -33.99,11.27 -33.91,11.2 -33.83,11.13 -33.74,11.06 -33.66,10.99 -33.57,10.92 -33.49,10.86 -33.4,10.79 -33.32,10.72 -33.23,10.65 -33.15,10.58 -33.07,10.52 -32.98,10.45 -32.9,10.38 -32.81,10.31 -32.73,10.25 -32.64,10.18 -32.56,10.12 -32.47,10.05 -32.39,9.99 -32.31,9.92 -32.22,9.86 -32.14,9.79 -32.05,9.73 -31.97,9.66 -31.88,9.6 -31.8,9.54 -31.71,9.47 -31.63,9.41 -31.55,9.35 -31.46,9.28 -31.38,9.22 -31.29,9.16 -31.21,9.1 -31.12,9.04 -31.04,8.98 -30.95,8.92 -30.87,8.85 -30.79,8.79 -30.7,8.73 -30.62,8.67 -30.53,8.61 -30.45,8.55 -30.36,8.49 -30.28,8.43 -30.19,8.38 -30.11,8.32 -30.03,8.26 -29.94,8.2 -29.86,8.14 -29.77,8.08 -29.69,8.02 -29.6,7.97 -29.52,7.91 -29.43,7.85 -29.35,7.79 -29.27,7.73 -29.18,7.68 -29.1,7.62 -29.01,7.56 -28.93,7.5 -28.84,7.45 -28.76,7.39 -28.67,7.33 -28.59,7.28 -28.51,7.22 -28.42,7.16 -28.34,7.1 -28.25,7.05 -28.17,6.99 -28.08,6.93 -28,6.87 -27.91,6.82 -27.83,6.76 -27.74,6.7 -27.66,6.64 -27.58,6.59 -27.49,6.53 -27.41,6.47 -27.32,6.41 -27.24,6.35 -27.15,6.29 -27.07,6.24 -26.98,6.18 -26.9,6.12 -26.82,6.06 -26.73,6 -26.65,5.94 -26.56,5.88 -26.48,5.82 -26.39,5.76 -26.31,5.7 -26.22,5.64 -26.14,5.57 -26.06,5.51 -25.97,5.45 -25.89,5.39 -25.8,5.33 -25.72,5.26 -25.63,5.2 -25.55,5.13 -25.46,5.07 -25.38,5.01 -25.3,4.94 -25.21,4.87 -25.13,4.81 -25.04,4.74 -24.96,4.67 -24.87,4.61 -24.79,4.54 -24.7,4.47 -24.62,4.4 -24.54,4.33 -24.45,4.26 -24.37,4.19 -24.28,4.12 -24.2,4.05 -24.11,3.97 -24.03,3.9 -23.94,3.83 -23.86,3.75 -23.78,3.68 -23.69,3.6 -23.61,3.53 -23.52,3.45 -23.44,3.37 -23.35,3.29 -23.27,3.22 -23.18,3.14 -23.1,3.06 -23.02,2.97 -22.93,2.89 -22.85,2.81 -22.76,2.73 -22.68,2.64 -22.59,2.56 -22.51,2.47 -22.42,2.39 -22.34,2.3 -22.26,2.21 -22.17,2.12 -22.09,2.04 -22,1.95 -21.92,1.85 -21.83,1.76 -21.75,1.67 -21.66,1.58 -21.58,1.48 -21.49,1.39 -21.41,1.29 -21.33,1.2 -21.24,1.1 -21.16,1 -21.07,0.9 -20.99,0.8 -20.9,0.7 -20.82,0.6 -20.73,0.5 -20.65,0.4 -20.57,0.29 -20.48,0.19 -20.4,0.08 -20.31,-0.02 -20.23,-0.13 -20.14,-0.24 -20.06,-0.34 -19.97,-0.45 -19.89,-0.56 -19.81,-0.67 -19.72,-0.79 -19.64,-0.9 -19.55,-1.01 -19.47,-1.13 -19.38,-1.24 -19.3,-1.36 -19.21,-1.47 -19.13,-1.59 -19.05,-1.71 -18.96,-1.83 -18.88,-1.95 -18.79,-2.07 -18.71,-2.19 -18.62,-2.31 -18.54,-2.43 -18.45,-2.55 -18.37,-2.68 -18.29,-2.8 -18.2,-2.93 -18.12,-3.05 -18.03,-3.18 -17.95,-3.3 -17.86,-3.43 -17.78,-3.56 -17.69,-3.69 -17.61,-3.82 -17.53,-3.95 -17.44,-4.08 -17.36,-4.21 -17.27,-4.34 -17.19,-4.47 -17.1,-4.61 -17.02,-4.74 -16.93,-4.87 -16.85,-5.01 -16.77,-5.14 -16.68,-5.28 -16.6,-5.41 -16.51,-5.55 -16.43,-5.68 -16.34,-5.82 -16.26,-5.96 -16.17,-6.09 -16.09,-6.23 -16.01,-6.37 -15.92,-6.51 -15.84,-6.65 -15.75,-6.78 -15.67,-6.92 -15.58,-7.06 -15.5,-7.2 -15.41,-7.34 -15.33,-7.48 -15.24,-7.62 -15.16,-7.76 -15.08,-7.9 -14.99,-8.04 -14.91,-8.18 -14.82,-8.32 -14.74,-8.46 -14.65,-8.6 -14.57,-8.74 -14.48,-8.89 -14.4,-9.03 -14.32,-9.17 -14.23,-9.31 -14.15,-9.45 -14.06,-9.59 -13.98,-9.73 -13.89,-9.87 -13.81,-10.01 -13.72,-10.15 -13.64,-10.29 -13.56,-10.42 -13.47,-10.56 -13.39,-10.7 -13.3,-10.84 -13.22,-10.98 -13.13,-11.12 -13.05,-11.25 -12.96,-11.39 -12.88,-11.53 -12.8,-11.66 -12.71,-11.8 -12.63,-11.93 -12.54,-12.07 -12.46,-12.2 -12.37,-12.34 -12.29,-12.47 -12.2,-12.6 -12.12,-12.74 -12.04,-12.87 -11.95,-13 -11.87,-13.13 -11.78,-13.26 -11.7,-13.39 -11.61,-13.52 -11.53,-13.65 -11.44,-13.77 -11.36,-13.9 -11.28,-14.03 -11.19,-14.15 -11.11,-14.27 -11.02,-14.4 -10.94,-14.52 -10.85,-14.64 -10.77,-14.76 -10.68,-14.88 -10.6,-15 -10.52,-15.12 -10.43,-15.24 -10.35,-15.36 -10.26,-15.47 -10.18,-15.59 -10.09,-15.7 -10.01,-15.81 -9.92,-15.92 -9.84,-16.04 -9.76,-16.15 -9.67,-16.25 -9.59,-16.36 -9.5,-16.47 -9.42,-16.57 -9.33,-16.68 -9.25,-16.78 -9.16,-16.88 -9.08,-16.99 -8.99,-17.09 -8.91,-17.18 -8.83,-17.28 -8.74,-17.38 -8.66,-17.47 -8.57,-17.57 -8.49,-17.66 -8.4,-17.75 -8.32,-17.84 -8.23,-17.93 -8.15,-18.02 -8.07,-18.11 -7.98,-18.19 -7.9,-18.28 -7.81,-18.36 -7.73,-18.44 -7.64,-18.53 -7.56,-18.6 -7.47,-18.68 -7.39,-18.76 -7.31,-18.84 -7.22,-18.91 -7.14,-18.98 -7.05,-19.05 -6.97,-19.12 -6.88,-19.19 -6.8,-19.26 -6.71,-19.33 -6.63,-19.39 -6.55,-19.46 -6.46,-19.52 -6.38,-19.58 -6.29,-19.64 -6.21,-19.7 -6.12,-19.75 -6.04,-19.81 -5.95,-19.86 -5.87,-19.92 -5.79,-19.97 -5.7,-20.02 -5.62,-20.07 -5.53,-20.12 -5.45,-20.16 -5.36,-20.21 -5.28,-20.25 -5.19,-20.29 -5.11,-20.33 -5.03,-20.37 -4.94,-20.41 -4.86,-20.45 -4.77,-20.48 -4.69,-20.52 -4.6,-20.55 -4.52,-20.58 -4.43,-20.61 -4.35,-20.64 -4.27,-20.67 -4.18,-20.69 -4.1,-20.72 -4.01,-20.74 -3.93,-20.76 -3.84,-20.78 -3.76,-20.8 -3.67,-20.82 -3.59,-20.84 -3.51,-20.85 -3.42,-20.87 -3.34,-20.88 -3.25,-20.89 -3.17,-20.9 -3.08,-20.91 -3,-20.92 -2.91,-20.93 -2.83,-20.93 -2.74,-20.94 -2.66,-20.94 -2.58,-20.94 -2.49,-20.94 -2.41,-20.94 -2.32,-20.94 -2.24,-20.94 -2.15,-20.93 -2.07,-20.93 -1.98,-20.92 -1.9,-20.91 -1.82,-20.9 -1.73,-20.89 -1.65,-20.88 -1.56,-20.87 -1.48,-20.86 -1.39,-20.84 -1.31,-20.83 -1.22,-20.81 -1.14,-20.79 -1.06,-20.78 -0.97,-20.76 -0.89,-20.73 -0.8,-20.71 -0.72,-20.69 -0.63,-20.67 -0.55,-20.64 -0.46,-20.62 -0.38,-20.59 -0.3,-20.56 -0.21,-20.53 -0.13,-20.5 -0.04,-20.47 0.04,-20.44 0.13,-20.41 0.21,-20.37 0.3,-20.34 0.38,-20.3 0.46,-20.27 0.55,-20.23 0.63,-20.19 0.72,-20.15 0.8,-20.11 0.89,-20.07 0.97,-20.03 1.06,-19.99 1.14,-19.94 1.22,-19.9 1.31,-19.86 1.39,-19.81 1.48,-19.76 1.56,-19.72 1.65,-19.67 1.73,-19.62 1.82,-19.57 1.9,-19.52 1.98,-19.47 2.07,-19.42 2.15,-19.36 2.24,-19.31 2.32,-19.26 2.41,-19.2 2.49,-19.15 2.58,-19.09 2.66,-19.03 2.74,-18.98 2.83,-18.92 2.91,-18.86 3,-18.8 3.08,-18.74 3.17,-18.68 3.25,-18.62 3.34,-18.56 3.42,-18.49 3.51,-18.43 3.59,-18.37 3.67,-18.3 3.76,-18.24 3.84,-18.17 3.93,-18.11 4.01,-18.04 4.1,-17.97 4.18,-17.9 4.27,-17.84 4.35,-17.77 4.43,-17.7 4.52,-17.63 4.6,-17.56 4.69,-17.49 4.77,-17.42 4.86,-17.34 4.94,-17.27 5.03,-17.2 5.11,-17.13 5.19,-17.05 5.28,-16.98 5.36,-16.9 5.45,-16.83 5.53,-16.75 5.62,-16.68 5.7,-16.6 5.79,-16.52 5.87,-16.45 5.95,-16.37 6.04,-16.29 6.12,-16.21 6.21,-16.13 6.29,-16.05 6.38,-15.97 6.46,-15.89 6.55,-15.81 6.63,-15.73 6.71,-15.65 6.8,-15.56 6.88,-15.48 6.97,-15.4 7.05,-15.32 7.14,-15.23 7.22,-15.15 7.31,-15.06 7.39,-14.98 7.47,-14.89 7.56,-14.81 7.64,-14.72 7.73,-14.64 7.81,-14.55 7.9,-14.46 7.98,-14.37 8.07,-14.29 8.15,-14.2 8.23,-14.11 8.32,-14.02 8.4,-13.93 8.49,-13.84 8.57,-13.75 8.66,-13.66 8.74,-13.57 8.83,-13.48 8.91,-13.39 8.99,-13.3 9.08,-13.2 9.16,-13.11 9.25,-13.02 9.33,-12.92 9.42,-12.83 9.5,-12.74 9.59,-12.64 9.67,-12.55 9.76,-12.45 9.84,-12.36 9.92,-12.26 10.01,-12.17 10.09,-12.07 10.18,-11.97 10.26,-11.87 10.35,-11.78 10.43,-11.68 10.52,-11.58 10.6,-11.48 10.68,-11.38 10.77,-11.28 10.85,-11.19 10.94,-11.09 11.02,-10.98 11.11,-10.88 11.19,-10.78 11.28,-10.68 11.36,-10.58 11.44,-10.48 11.53,-10.38 11.61,-10.27 11.7,-10.17 11.78,-10.07 11.87,-9.96 11.95,-9.86 12.04,-9.75 12.12,-9.65 12.2,-9.54 12.29,-9.44 12.37,-9.33 12.46,-9.23 12.54,-9.12 12.63,-9.01 12.71,-8.91 12.8,-8.8 12.88,-8.69 12.96,-8.58 13.05,-8.48 13.13,-8.37 13.22,-8.26 13.3,-8.15 13.39,-8.04 13.47,-7.93 13.56,-7.82 13.64,-7.71 13.72,-7.6 13.81,-7.49 13.89,-7.37 13.98,-7.26 14.06,-7.15 14.15,-7.04 14.23,-6.92 14.32,-6.81 14.4,-6.7 14.48,-6.58 14.57,-6.47 14.65,-6.35 14.74,-6.24 14.82,-6.12 14.91,-6.01 14.99,-5.89 15.08,-5.78 15.16,-5.66 15.24,-5.54 15.33,-5.43 15.41,-5.31 15.5,-5.19 15.58,-5.08 15.67,-4.96 15.75,-4.84 15.84,-4.72 15.92,-4.6 16.01,-4.48 16.09,-4.36 16.17,-4.24 16.26,-4.12 16.34,-4 16.43,-3.88 16.51,-3.76 16.6,-3.64 16.68,-3.52 16.77,-3.4 16.85,-3.28 16.93,-3.16 17.02,-3.04 17.1,-2.92 17.19,-2.79 17.27,-2.67 17.36,-2.55 17.44,-2.43 17.53,-2.3 17.61,-2.18 17.69,-2.06 17.78,-1.93 17.86,-1.81 17.95,-1.69 18.03,-1.56 18.12,-1.44 18.2,-1.31 18.29,-1.19 18.37,-1.07 18.45,-0.94 18.54,-0.82 18.62,-0.69 18.71,-0.57 18.79,-0.44 18.88,-0.32 18.96,-0.19 19.05,-0.07 19.13,0.06 19.21,0.18 19.3,0.31 19.38,0.43 19.47,0.56 19.55,0.68 19.64,0.81 19.72,0.93 19.81,1.06 19.89,1.18 19.97,1.31 20.06,1.43 20.14,1.56 20.23,1.68 20.31,1.81 20.4,1.93 20.48,2.06 20.57,2.18 20.65,2.31 20.73,2.43 20.82,2.55 20.9,2.68 20.99,2.8 21.07,2.93 21.16,3.05 21.24,3.18 21.33,3.3 21.41,3.42 21.49,3.55 21.58,3.67 21.66,3.79 21.75,3.92 21.83,4.04 21.92,4.16 22,4.28 22.09,4.41 22.17,4.53 22.26,4.65 22.34,4.77 22.42,4.89 22.51,5.01 22.59,5.13 22.68,5.25 22.76,5.37 22.85,5.49 22.93,5.61 23.02,5.73 23.1,5.85 23.18,5.97 23.27,6.09 23.35,6.21 23.44,6.32 23.52,6.44 23.61,6.56 23.69,6.67 23.78,6.79 23.86,6.9 23.94,7.02 24.03,7.13 24.11,7.25 24.2,7.36 24.28,7.48 24.37,7.59 24.45,7.7 24.54,7.82 24.62,7.93 24.7,8.04 24.79,8.15 24.87,8.26 24.96,8.37 25.04,8.48 25.13,8.59 25.21,8.7 25.3,8.81 25.38,8.91 25.46,9.02 25.55,9.13 25.63,9.23 25.72,9.34 25.8,9.44 25.89,9.55 25.97,9.65 26.06,9.76 26.14,9.86 26.22,9.96 26.31,10.06 26.39,10.16 26.48,10.26 26.56,10.36 26.65,10.46 26.73,10.56 26.82,10.66 26.9,10.76 26.98,10.86 27.07,10.95 27.15,11.05 27.24,11.14 27.32,11.24 27.41,11.33 27.49,11.43 27.58,11.52 27.66,11.61 27.74,11.7 27.83,11.79 27.91,11.88 28,11.97 28.08,12.06 28.17,12.15 28.25,12.24 28.34,12.33 28.42,12.41 28.51,12.5 28.59,12.59 28.67,12.67 28.76,12.75 28.84,12.84 28.93,12.92 29.01,13 29.1,13.08 29.18,13.17 29.27,13.25 29.35,13.33 29.43,13.4 29.52,13.48 29.6,13.56 29.69,13.64 29.77,13.71 29.86,13.79 29.94,13.87 30.03,13.94 30.11,14.01 30.19,14.09 30.28,14.16 30.36,14.23 30.45,14.3 30.53,14.37 30.62,14.44 30.7,14.51 30.79,14.58 30.87,14.65 30.95,14.72 31.04,14.79 31.12,14.85 31.21,14.92 31.29,14.98 31.38,15.05 31.46,15.11 31.55,15.18 31.63,15.24 31.71,15.3 31.8,15.36 31.88,15.43 31.97,15.49 32.05,15.55 32.14,15.61 32.22,15.67 32.31,15.72 32.39,15.78 32.47,15.84 32.56,15.9 32.64,15.95 32.73,16.01 32.81,16.06 32.9,16.12 32.98,16.17 33.07,16.23 33.15,16.28 33.23,16.33 33.32,16.39 33.4,16.44 33.49,16.49 33.57,16.54 33.66,16.59 33.74,16.64 33.83,16.69 33.91,16.74 33.99,16.79 34.08,16.84 34.16,16.88 34.25,16.93 34.33,16.98 34.42,17.03 34.5,17.07 34.59,17.12 34.67,17.16 34.76,17.21 34.84,17.25 34.92,17.3 35.01,17.34 35.09,17.38 35.18,17.43 35.26,17.47 35.35,17.51 35.43,17.55 35.52,17.6 35.6,17.64 35.68,17.68 35.77,17.72 35.85,17.76 35.94,17.8 36.02,17.84 36.11,17.88 36.19,17.92 36.28,17.96 36.36,18 36.44,18.04 36.53,18.07 36.61,18.11 36.7,18.15 36.78,18.19 36.87,18.23 36.95,18.26 37.04,18.3 37.12,18.34 37.2,18.37 37.29,18.41 37.37,18.45 37.46,18.48 37.54,18.52 37.63,18.55 37.71,18.59 37.8,18.62 37.88,18.66 37.96,18.69 38.05,18.73 38.13,18.76 38.22,18.8 38.3,18.83 38.39,18.86 38.47,18.9 38.56,18.93 38.64,18.97 38.72,19 38.81,19.03 38.89,19.07 38.98,19.1 39.06,19.13 39.15,19.17 39.23,19.2 39.32,19.23 39.4,19.27 39.48,19.3 39.57,19.33 39.65,19.36 39.74,19.4 39.82,19.43 39.91,19.46 39.99,19.49 40.08,19.53 40.16,19.56 40.24,19.59 40.33,19.62 40.41,19.66 40.5,19.69 40.58,19.72 40.67,19.75 40.75,19.79 40.84,19.82 40.92,19.85 41.01,19.88 41.09,19.91 41.17,19.95 41.26,19.98 41.34,20.01 41.43,20.04 41.51,20.07 41.6,20.11 41.68,20.14 41.77,20.17 41.85,20.2 41.93,20.23 42.02,20.27 42.1,20.3 42.19,20.33 " class="primitive"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="guide ylabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-89b295c5-200">
+    <g transform="translate(12.35,60.41)" id="img-89b295c5-201">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.00</text>
+      </g>
+    </g>
+    <g transform="translate(12.35,49.73)" id="img-89b295c5-202">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.05</text>
+      </g>
+    </g>
+    <g transform="translate(12.35,39.05)" id="img-89b295c5-203">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.10</text>
+      </g>
+    </g>
+    <g transform="translate(12.35,28.37)" id="img-89b295c5-204">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.15</text>
+      </g>
+    </g>
+    <g transform="translate(12.35,17.68)" id="img-89b295c5-205">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.20</text>
+      </g>
+    </g>
+    <g transform="translate(12.35,7)" id="img-89b295c5-206">
+      <g class="primitive">
+        <text text-anchor="end" dy="0.35em">0.25</text>
+      </g>
+    </g>
+  </g>
+</g>
+<defs>
+  <clipPath id="img-89b295c5-21">
+    <path d="M13.35,5 L101.72,5 101.72,62.41 13.35,62.41 " />
+  </clipPath>
+</defs>
+</svg>
