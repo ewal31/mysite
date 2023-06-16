@@ -96,6 +96,7 @@ div.csl-entry {
     position: relative;
 	background: #eee;
 	padding: 0.4rem;
+    transform: translate(0, -50%)
 }
 
 input.margin-toggle {
@@ -116,6 +117,7 @@ input.margin-toggle {
         margin: 1rem 2.5%;
         vertical-align: baseline;
         position: relative;
+        transform: translate(0, 0)
     }
 	
 }

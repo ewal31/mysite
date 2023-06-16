@@ -316,9 +316,10 @@ We can now implement this approximation in Julia, equating $\sigma^2$ with an un
 $$
 \begin{aligned}
 \bar{x} &= \frac{\sum_i^n x_i}{n} \\
-s^2 &= \frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}
+s^2 &= \frac{n^{-1} \sum_i^n (x_i - \bar{x})^2}{1 - n^{-1}}
 \end{aligned}
 $$
+where $1 - n^{-1}$ is the bias correction term
 
 ```julia
 function h_est_gaussian(samples)
@@ -490,12 +491,12 @@ $$
 n_{\text{eff}} = \frac{\left ( \sum_i^n \frac{1}{n} \right ) ^2}{\sum_i^n \frac{1}{n^2}} = \frac{1^2}{\frac{n}{n^2}} = n
 $$
 
-If we have integer-type weights or choose to use Kish's *Rule of Thumb*, we end up with an analogous term to the Bessel correction for individual equally weighted samples. The $n$ in the $1 - \left( 1 / n \right)$ correction term is effectively replaced by $n_{\text{eff}}$ giving us the following form for an unbiased weighted variance.  The [Wikipedia page](https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_variance) has a full derivation.
+If we have integer-type weights or choose to use Kish's *Rule of Thumb*, we end up with an analogous term to the Bessel correction for individual equally weighted samples. The $n$ in the $1 - n^{-1}$ correction term is effectively replaced by $n_{\text{eff}}$ giving us the following form for an unbiased weighted variance.  The [Wikipedia page](https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_variance) has a full derivation.
 
 $$
 \begin{aligned}
 \bar{x}_{\text{weighted}} &= \frac{\sum_i^n w_i \times x_i}{\sum_i^n w_i} \\
-s_{\text{weighted}} &= \frac{ \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right ) }{ \left ( \left ( \sum_i^n w_i \right ) - \left( \left ( \sum_i^n w_i \right ) / n_{\text{eff}} \right ) \right ) } \\
+s_{\text{weighted}} &= \frac{ \left ( \sum_i^n w_i \right )^{-1} \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right ) }{ 1 - n_{\text{eff}}^{-1} } \\
 \end{aligned}
 $$
 
@@ -512,7 +513,7 @@ function h_est_silverman(samples, ws)
     μ = sum(ws .* samples) / sum(ws)
 	
     neff = sum(ws)^2 / sum(ws .^ 2)
-    unbiased_variance = sum(ws .* (samples .- μ) .^ 2) / ( sum(ws) - sum(ws) / neff )
+    unbiased_variance = 1 / sum(ws) * sum(ws .* (samples .- μ) .^ 2) / ( 1 - 1 / neff )
 	
     # We also calculate a weighted IQR
     (q1, q3) = quantile(samples, Weights(ws), [0.25, 0.75])
@@ -521,7 +522,6 @@ function h_est_silverman(samples, ws)
     0.9 * min( √(unbiased_variance) , IQR / 1.34) * length(samples) ^ (-1 / 5)
 end
 ```
-
 [^WeightedIQR]
 
 [^WeightedIQR]: The weighted IQR can also make use of Kish's *Rule of Thumb*. A wonderful outline can be found [here](https://aakinshin.net/posts/weighted-quantiles/).
@@ -537,6 +537,8 @@ In Julia we can write this as
 ```julia
 f(x, σ, xs, ws) = sum(ws .* K.(x, xs, σ)) / sum(ws)
 ```
+
+[@WangBandwidthWeightedKDE]
 
 ---
 

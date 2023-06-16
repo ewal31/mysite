@@ -243,9 +243,10 @@ h_{gaussian} &amp;= (2 \sqrt{\pi})^{-1/5} \left ( \frac{3}{8 \sigma^{5} \sqrt{\p
 <span class="math display">\[
 \begin{aligned}
 \bar{x} &amp;= \frac{\sum_i^n x_i}{n} \\
-s^2 &amp;= \frac{\sum_i^n (x_i - \bar{x})^2}{n - 1}
+s^2 &amp;= \frac{n^{-1} \sum_i^n (x_i - \bar{x})^2}{1 - n^{-1}}
 \end{aligned}
-\]</span><br />
+\]</span>
+where <span class="math inline">\(1 - n^{-1}\)</span> is the bias correction term<br />
 <br />
 </span></span>.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">h_est_gaussian</span>(samples)</span>
@@ -384,11 +385,11 @@ n_{\text{eff}} = \frac{\left ( \sum_i^n \frac{1}{n} \right ) ^2}{\sum_i^n \frac{
 \]</span><br />
 <br />
 </span></span></p>
-<p>If we have integer-type weights or choose to use Kish's <em>Rule of Thumb</em>, we end up with an analogous term to the Bessel correction for individual equally weighted samples. The <span class="math inline">\(n\)</span> in the <span class="math inline">\(1 - \left( 1 / n \right)\)</span> correction term is effectively replaced by <span class="math inline">\(n_{\text{eff}}\)</span> giving us the following form for an unbiased weighted variance. The <a href="https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_variance">Wikipedia page</a> has a full derivation.</p>
+<p>If we have integer-type weights or choose to use Kish's <em>Rule of Thumb</em>, we end up with an analogous term to the Bessel correction for individual equally weighted samples. The <span class="math inline">\(n\)</span> in the <span class="math inline">\(1 - n^{-1}\)</span> correction term is effectively replaced by <span class="math inline">\(n_{\text{eff}}\)</span> giving us the following form for an unbiased weighted variance. The <a href="https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#Weighted_sample_variance">Wikipedia page</a> has a full derivation.</p>
 <p><span class="math display">\[
 \begin{aligned}
 \bar{x}_{\text{weighted}} &amp;= \frac{\sum_i^n w_i \times x_i}{\sum_i^n w_i} \\
-s_{\text{weighted}} &amp;= \frac{ \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right ) }{ \left ( \left ( \sum_i^n w_i \right ) - \left( \left ( \sum_i^n w_i \right ) / n_{\text{eff}} \right ) \right ) } \\
+s_{\text{weighted}} &amp;= \frac{ \left ( \sum_i^n w_i \right )^{-1} \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right ) }{ 1 - n_{\text{eff}}^{-1} } \\
 \end{aligned}
 \]</span></p>
 <p><span class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle" /><span class="sidenote">If all of the samples have a weight of one, we recover the traditional equation for non-biased variance, as both <span class="math inline">\(\sum_i^n w_i\)</span> and <span class="math inline">\(n_{\text{eff}}\)</span> will equal <span class="math inline">\(n\)</span>.<br />
@@ -401,7 +402,7 @@ s_{\text{weighted}} &amp;= \frac{ \left( \sum_i^n w_i (x_i - \bar{x_i})^2 \right
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    μ <span class="op">=</span> <span class="fu">sum</span>(ws <span class="op">.*</span> samples) <span class="op">/</span> <span class="fu">sum</span>(ws)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>	</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    neff <span class="op">=</span> <span class="fu">sum</span>(ws)<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fu">sum</span>(ws <span class="op">.^</span> <span class="fl">2</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fu">sum</span>(ws <span class="op">.*</span> (samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fu">sum</span>(ws) <span class="op">-</span> <span class="fu">sum</span>(ws) <span class="op">/</span> neff )</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    unbiased_variance <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fu">sum</span>(ws) <span class="op">*</span> <span class="fu">sum</span>(ws <span class="op">.*</span> (samples <span class="op">.-</span> μ) <span class="op">.^</span> <span class="fl">2</span>) <span class="op">/</span> ( <span class="fl">1</span> <span class="op">-</span> <span class="fl">1</span> <span class="op">/</span> neff )</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>	</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># We also calculate a weighted IQR</span></span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    (q1, q3) <span class="op">=</span> <span class="fu">quantile</span>(samples, <span class="fu">Weights</span>(ws), [<span class="fl">0.25</span>, <span class="fl">0.75</span>])</span>
