@@ -31,21 +31,21 @@ Several Kernels fitting this mould can be seen [here](https://en.wikipedia.org/w
 Given a Kernel, we can create a continuous function that connects a set of points, i.e. *smooths* the data. In order to do this, we construct a local weighted average across a dataset. The form this average takes is a generalisation of the traditional weighted arithmetic mean,
 
 $$
-\bar{x} = \frac{\sum_{i = 1}^N w_i x_i}{\sum_{i = 1}^N w_i}
+\bar{x} = \frac{\sum_{i = 1}^n w_i x_i}{\sum_{i = 1}^n w_i}
 $$
 
-which, given $N$ observations $x_i$ and corresponding weights $w_i$, constructs a global average of a given set of points. 
+which, given $n$ observations $x_i$ and corresponding weights $w_i$, constructs a global average of a given set of points. 
 
 The generalisation, named after Èlizbar Nadaraya and Geoffrey Watson, replaces the weights $w_i$ with the result of the Kernel function producing the following form:
 
 $$
-\hat{Y} (x^*) = \frac{ \sum_{i=1}^N K_{h}(x^*, \bm{x}_i) Y(\bm{x}_i) }{ \sum_{i=1}^N K_{h}(x^*, \bm{x}_i) }
+\hat{Y} (x^*) = \frac{ \sum_{i=1}^n K_{h}(x^*, \bm{x}_i) Y(\bm{x}_i) }{ \sum_{i=1}^n K_{h}(x^*, \bm{x}_i) }
 $$
 
 Here,
 
 * $Y(\bm{x}_i)$ returns the magnitude of the sample at $\bm{x}_i$
-* and $N$ is the number of samples available to build an estimate from
+* and $n$ is the number of samples available to build an estimate from
 
 ![KernelSmoothingIllustration.png](/img/2023/KernelSmoothingIllustration.png){#img#imgexpandtoborder .img}
 
@@ -53,7 +53,7 @@ For example, given a Kernel function that weights an estimate via the Euclidean 
 
 ### Gaussian Kernel Smoothing
 
-We create the Gaussian Kernel from the above more general form by setting $D(u)$ to $\text{exp}( -1/2 u^2)$ and $h(x^*)$ to $\sigma$. In this case, the correct norm is the $L_2$ or Euclidean norm.
+We create the Gaussian Kernel from the above more general form by setting $D(u)$ to $\text{exp}( -1/2 u^2)$ and $h(x^*)$ to $\sigma$. In this case, the correct norm is the $\text{L}_2$ or Euclidean norm.
 
 $$
 K_{\text{smoother}}(x^*, x) = \text{exp} \left ( - \frac{1}{2} \left ( \frac{ x - x^* }{\sigma} \right )^2 \right )
@@ -100,10 +100,10 @@ or in Julia
 K(x_star, x, σ) = 1/(σ * √(2*π)) * ℯ^( - 1/2 * (x_star - x)^2 / σ^2)
 ```
 
-Instead of the mean $\mu$ typical of the definition, we have one of the samples, $x$. In fact, to construct an estimate of our density, we build a mixture from $N$ Gaussian distributions, with the mean of each being one of the samples $x_i$. Observing this fact then leads to the equation for our probability density estimate.
+Instead of the mean $\mu$ typical of the definition, we have one of the samples, $x$. In fact, to construct an estimate of our density, we build a mixture from $n$ Gaussian distributions, with the mean of each being one of the samples $x_i$. Observing this fact then leads to the equation for our probability density estimate.
 
 $$
-\hat{f}(x | \sigma, \bm{x}) = \frac{1}{N} \sum_i^N K_\sigma(x, \bm{x}_i)
+\hat{f}(x | \sigma, \bm{x}) = \frac{1}{n} \sum_i^n K_\sigma(x, \bm{x}_i)
 $$
 
 In Julia we can write this as
@@ -121,7 +121,7 @@ $$
 As in the case of the probability density function, our estimate is created by averaging each of the cumulative density functions.
 
 $$
-\hat{\text{cdf}} (x| \sigma, \bm{x}) = \frac{1}{N} \sum_i^N \Phi(x | \bm{x}_i, \sigma)
+\hat{\text{cdf}} (x| \sigma, \bm{x}) = \frac{1}{n} \sum_i^n \Phi(x | \bm{x}_i, \sigma)
 $$
 
 By making use of the `SpecialFunctions` package, we implement these two equations in Julia.
@@ -167,7 +167,7 @@ Many of the *rule-of-thumb* approaches start by attempting to minimise the Mean 
 
 $$\begin{aligned}
 \text{MISE}(\hat{f}) &= \int \text{E} \left[ \left( \hat{f}(x) - f(x) \right)^2 \right ] \text{d}x \\
-							   &= \int \left( \text{E} \left [ \hat{f}(x) \right ] - f(x) \right )^2 \text{d}x + \int \text{var} \hat{f}(x) \text{d}x
+                     &= \int \left( \text{E} \left [ \hat{f}(x) \right ] - f(x) \right )^2 \text{d}x + \int \text{var} \hat{f}(x) \text{d}x
 \end{aligned}
 $$
 
@@ -529,7 +529,7 @@ end
 To account for the weights, we must also modify our estimator definition. We have the following form: analogous to the difference between a mean and a weighted mean.
 
 $$
-\hat{f}(x | \sigma, \bm{x}, \bm{w}) = \frac{ \sum_i^N \bm{w}_i K_\sigma(x, \bm{x}_i) }{\sum_i^N \bm{w}_i}
+\hat{f}(x | \sigma, \bm{x}, \bm{w}) = \frac{ \sum_i^n \bm{w}_i K_\sigma(x, \bm{x}_i) }{\sum_i^n \bm{w}_i}
 $$
 
 In Julia we can write this as
