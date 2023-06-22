@@ -201,9 +201,9 @@ to get
 $$\begin{aligned}
 \text{bias} &= \text{E} \left [ \hat{f}(x) \right ] - f(x) \\
                  &= \int \frac{K \left( (x-y) / h \right )}{h} f(y) \text{d}y - f(x) \\
-				 &= \int K(u) f(x - hu) \text{d}u - f(x) \\
-				 &= \int K(u) \left ( f(x - hu) - f(x) \right ) \text{d}u \\
-				 &= -h f'(x) \int u K(u) du + \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
+                 &= \int K(u) f(x - hu) \text{d}u - f(x) \\
+                 &= \int K(u) \left ( f(x - hu) - f(x) \right ) \text{d}u \\
+                 &= -h f'(x) \int u K(u) du + \frac{1}{2} h^2 f''(x) \int u^2 K(u)du + ...
 \end{aligned}
 $$
 
@@ -238,7 +238,7 @@ we can use the same process on the variance term to simplify the remaining MISE 
 $$\begin{aligned}
 \text{variance} &=\frac{1}{n} \int \frac{K \left ( \left ( x - y \right ) / h \right )^2}{h^2} f(y) \text{d}y - \frac{\left ( f(x)  + \text{bias} \right )^2}{n} \\
                         &= \frac{1}{n h} \int f(x - h u) K (u)^2 \text{d}u - \frac{1}{n} \left ( f(x)  + \text{bias} \right )^2 \\
-						&= \frac{1}{n h} \int \left( f(x) - htf'(x) + ... \right ) K (u)^2 \text{d}u - \frac{1}{n} \left ( f(x)  + \text{bias} \right )^2
+                        &= \frac{1}{n h} \int \left( f(x) - htf'(x) + ... \right ) K (u)^2 \text{d}u - \frac{1}{n} \left ( f(x)  + \text{bias} \right )^2
 \end{aligned}
 $$
 
@@ -285,12 +285,12 @@ Starting with the $R(K)$ term, we integrate over the square of our Gaussian Kern
 $$\begin{aligned}
 R(K) &= \int \left ( \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
         &= \frac{1}{2 \pi} \int \left ( \text{exp} \left ( - \frac{1}{2} x^2 \right ) \right)^2 \text{d}x \\
-		&= \frac{\sqrt{\pi}}{2 \pi} \\
+        &= \frac{\sqrt{\pi}}{2 \pi} \\
         &= \frac{1}{2\sqrt{\pi}}
 \end{aligned}
 $$
 
-Next, using our assumption that the true distribution is Gaussian, i.e. that $f = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right )$, we can solve for the $R(f'')$ term. 
+Next, using our assumption that the true distribution is Gaussian, i.e. that $f = \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right )$, we can solve for the $R(f'')$ term.
 
 $$\begin{aligned}
 R(f'') &= \int \left( \frac{\text{d}^2}{\text{d}x} \frac{1}{\sigma \sqrt{2 \pi}} \text{exp} \left( - \frac{1}{2} \frac{x^2}{\sigma^2} \right ) \right )^2 \text{d} x \\
@@ -374,7 +374,7 @@ $$
 In Julia, we can write this as follows, again employing an unbiased estimate of our data's variance
 
 ```julia
-using Statistics
+using StatsBase: quantile, Weights
 
 function h_est_silverman(samples)
     μ = sum(samples) / length(samples)
@@ -431,7 +431,7 @@ function h_est_sheatherjones(samples)
 
     (q1, q3) = quantile(samples, [0.25, 0.75])
     IQR = q3 - q1
-	
+
     a = 0.92 * IQR * n ^ (-1 / 7)
     b = 0.912 * IQR * n ^ (-1 / 9)
 
@@ -451,7 +451,7 @@ function h_est_sheatherjones(samples)
 
     function absolute_error(h)
         h = h[1]
-		
+
         α2h = 1.357 * ( SDα / TDb ) ^ (1/7) * h ^ (5/7)
         SDα2 = 2 / (n * (n-1) * α2h^5) * sum( ϕIV.(samplediffs ./ α2h) )
 
@@ -504,21 +504,21 @@ $$
 
 [^UnbiasedWeightedRecover]: If all of the samples have a weight of one, we recover the traditional equation for non-biased variance, as both $\sum_i^n w_i$ and $n_{\text{eff}}$ will equal $n$.
 
-Using this definition we can modify Silverman's *Rule of Thumb* for weighted samples
+Using this definition we modify Silverman's *Rule of Thumb* for weighted samples so that bandwidth estimates are still possible.
 
 ```julia
 using StatsBase: quantile, Weights
 
 function h_est_silverman(samples, ws)
     μ = sum(ws .* samples) / sum(ws)
-	
+
     neff = sum(ws)^2 / sum(ws .^ 2)
     unbiased_variance = 1 / sum(ws) * sum(ws .* (samples .- μ) .^ 2) / ( 1 - 1 / neff )
-	
+
     # We also calculate a weighted IQR
     (q1, q3) = quantile(samples, Weights(ws), [0.25, 0.75])
     IQR = q3 - q1
-	
+
     0.9 * min( √(unbiased_variance) , IQR / 1.34) * length(samples) ^ (-1 / 5)
 end
 ```
@@ -526,7 +526,9 @@ end
 
 [^WeightedIQR]: The weighted IQR can also make use of Kish's *Rule of Thumb*. A wonderful outline can be found [here](https://aakinshin.net/posts/weighted-quantiles/).
 
-To account for the weights, we must also modify our estimator definition. We have the following form: analogous to the difference between a mean and a weighted mean.
+A more in depth exploration of this modification to Silverman's *Rule of Thumb* can be found in [@WangBandwidthWeightedKDE]. Unfortunately, the Sheather-Jones method can't be modified as easily for weighted samples.
+
+To account for the weights in our density estimate, we must similarly modify our estimator definition. We have the following form: analogous to the difference between a mean and a weighted mean.
 
 $$
 \hat{f}(x | \sigma, \bm{x}, \bm{w}) = \frac{ \sum_i^n \bm{w}_i K_\sigma(x, \bm{x}_i) }{\sum_i^n \bm{w}_i}
@@ -537,8 +539,6 @@ In Julia we can write this as
 ```julia
 f(x, σ, xs, ws) = sum(ws .* K.(x, xs, σ)) / sum(ws)
 ```
-
-[@WangBandwidthWeightedKDE]
 
 ---
 
