@@ -4,20 +4,21 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>The Monge Problem</title>
-		<link rel="stylesheet" href="../../css/syntax.css" />
+        <link rel="stylesheet" href="../../css/syntax.css" />
         <link rel="stylesheet" type="text/css" href="../../css/default.css" />
     </head>
     <body>
         <div id="header">
             <div id="logo">
-                <a href="../../">Blog</a>
+                <a href="../../">Ed's Blog</a>
             </div>
             <div id="navigation">
                 <a href="../../">Home</a>
                 <!-- <a href="/about.html">About</a> -->
                 <!-- <a href="/contact.html">Contact</a> -->
                 <a href="../../archive.html">Archive</a>
-				<a href="http://github.com/ewal31/mysite">Source</a>
+                <a href="../../notes.html">Notes</a>
+                <a href="http://github.com/ewal31/mysite">Source</a>
             </div>
         </div>
 
@@ -25,7 +26,37 @@
             <h1>The Monge Problem</h1>
 
             
-
+<h2>Analogy</h2>
+<p>We would like to move a pile of dirt from its current position into a hole in the ground.
+Each sub-portion of this total pile has a weight. To minimise our required 'effort', we
+try to move heavier sub-portions smaller distances. The <strong>Monge Problem</strong> asks we find
+the smallest amount of 'effort' required to move the entire pile.</p>
+<p><img src="../../img/notes/OT-pile-of-dirt.png" id="imgexpandtoborder" class="img" alt="OT-pile-of-dirt.png" /></p>
+<p>Mathematically this can be expressed as the following integral:</p>
+<p><span class="math display">\[
+\text{min}_T \int \left | x - T(x) \right | f(x) \text{d}x
+\]</span></p>
+<p>Here, we try to find a minimising map <span class="math inline">\(T\)</span>, which associates each point with a new location
+(i.e. from pile to hole). The cost we are minimising, tries to maintain a small distance
+between the original and new location <span class="math inline">\(\left | x - T(x) \right |\)</span> while also taking into
+account the 'effort' required for each move <span class="math inline">\(f(x)\)</span>.</p>
+<p>A more typical formulation, however, generalises this integral further, considering
+not just distances, but arbitrary costs <span class="math inline">\(c(x, y)\)</span> over the mapping.</p>
+<p><span class="math display">\[
+\text{min}_T \int c(x, T(x)) f(x) \text{d}x
+\]</span></p>
+<p>Further generalising, this minimisation problem is typically defined over <em>measures</em> allowing
+for the inclusion of infinite point masses. In such a case, we define a source measure <span class="math inline">\(\mu\)</span>
+and a target measure <span class="math inline">\(\nu\)</span>, where each applied to a set indicates the mass of said set (i.e
+<span class="math inline">\(\mu(E)\)</span> returns the mass of <span class="math inline">\(E\)</span>). Our minimisation then requires we seek a <em>mass balanced</em>
+mapping</p>
+<p><span class="math display">\[
+T(x): X \rightarrow Y
+\]</span></p>
+<p>implying that <span class="math inline">\(\mu(X) = \nu(Y)\)</span>.</p>
+<hr />
+<p>Source Lecture:</p>
+<p><a href="https://youtu.be/kjOBJP7gglw">Math 707 Optimal Transport - Introduction to Optimal Transport</a></p>
 
         </div>
         <div id="footer">

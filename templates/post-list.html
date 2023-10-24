@@ -1,7 +1,12 @@
-<ul>
+<ul id="post-summary-list">
     $for(posts)$
         <li>
-            <a href="$url$">$title$</a> - $date$
+            <h3 id="post-summary-name"><a href="$url$">$title$</a></h3>
+            <div id="post-summary-date">$date$</div>
+			$if(library)$
+			<div id="post-library-link">Implementation: <a href="https://$library$">$library$</a></div>
+			$endif$
+            <section id="post-summary">$summary$</section>
         </li>
     $endfor$
 </ul>

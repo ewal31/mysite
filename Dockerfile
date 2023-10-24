@@ -2,7 +2,7 @@ from haskell:9.2.7-buster
 
 # Update Image
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade -y
 RUN stack upgrade
 
 # Install NPM and used packages
