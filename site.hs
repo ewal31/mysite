@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 import Data.Function (on)
 import Data.Functor ((<&>))
+import Hakyll.Process
 import Data.List (groupBy)
 import System.FilePath (joinPath, splitPath, takeDirectory)
 import Text.Pandoc.Highlighting (Style, kate, styleToCss)
@@ -16,7 +17,7 @@ import Text.Pandoc.Options (
                                , Ext_latex_macros
                                , Ext_link_attributes
                                --, Ext_markdown_in_html_blocks
-                               --, Ext_raw_attribute
+                               , Ext_raw_attribute
                                , Ext_tex_math_dollars
                                , Ext_tex_math_double_backslash
                                , Ext_tex_math_single_backslash
@@ -32,9 +33,17 @@ import Hakyll
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith config $ do
-    match "static/**" $ do
+    match ((fromGlob "static/**") .&&. (complement . fromGlob $ "static/**/.js")) $ do
         route   rootRoute
         compile copyFileCompiler
+
+    -- match "static/**.js" $ do
+    match "static/**/*[!*.min].js" $ do
+        route $ rootRoute `composeRoutes` setExtension "min.js"
+        compile $ execCompilerWith (execName "terser") [HakFilePath, ProcArg "--compress"] CStdOut
+    --    route   rootRoute
+    --    compile copyFileCompiler
+    --    terser --compress -- static/js/GeneralisedIsotonicRegressionPlots.js
 
     match "css/*" $ do
         route   idRoute
@@ -62,17 +71,17 @@ main = hakyllWith config $ do
             >>= loadAndApplyTemplate "templates/default.html" postCtx
             >>= relativizeUrls
 
-    create ["archive.html"] $ do
+    create ["blog.html"] $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll "posts/*"
             let archiveCtx =
                     listField "posts" postCtx (return posts) `mappend`
-                    constField "title" "Archive"            `mappend`
+                    constField "title" "Blog"                `mappend`
                     defaultContext
 
             makeItem ""
-                >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/blog.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
                 >>= relativizeUrls
 
@@ -108,9 +117,7 @@ main = hakyllWith config $ do
     match "index.html" $ do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
             let indexCtx =
-                    listField "posts" postCtx (return posts) `mappend`
                     constField "title" "Home"                `mappend`
                     defaultContext
             getResourceBody
@@ -155,7 +162,7 @@ postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
                 , Ext_latex_macros               -- Parse LaTeX macro definitions (for math only)
                 , Ext_inline_code_attributes     -- Allow attributes on inline code
                 , Ext_link_attributes            -- link and image attributes
-                --, Ext_raw_attribute
+                , Ext_raw_attribute
                 --, Ext_markdown_in_html_blocks
                 ]
         }

@@ -22,3 +22,4 @@ The resulting website that is then provided by Github Pages is located within th
 
 - [ ] make use of the above compression tools
 - [ ] make site usable on different screen sizes
+- [ ] clean up presentation of references
