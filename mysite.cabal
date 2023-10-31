@@ -21,7 +21,7 @@ executable mysite
                        hakyll
                      , pandoc
                      , pandoc-sidenote
-					 , hakyll-process
+                     , hakyll-process
                      , filepath
   ghc-options:         -Wall
                        -Wcompat

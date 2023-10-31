@@ -30,20 +30,18 @@ import Text.Pandoc.Options (
 import Text.Pandoc.SideNote (usingSideNotes)
 import Hakyll
 
---------------------------------------------------------------------------------
+jsToCompress :: Pattern
+jsToCompress = fromGlob "static/**.js" .&&. (complement . fromGlob $ "static/**.min.js")
+
 main :: IO ()
 main = hakyllWith config $ do
-    match ((fromGlob "static/**") .&&. (complement . fromGlob $ "static/**/.js")) $ do
+    match (fromGlob "static/**" .&&. complement jsToCompress) $ do
         route   rootRoute
         compile copyFileCompiler
 
-    -- match "static/**.js" $ do
-    match "static/**/*[!*.min].js" $ do
+    match jsToCompress $ do
         route $ rootRoute `composeRoutes` setExtension "min.js"
         compile $ execCompilerWith (execName "terser") [HakFilePath, ProcArg "--compress"] CStdOut
-    --    route   rootRoute
-    --    compile copyFileCompiler
-    --    terser --compress -- static/js/GeneralisedIsotonicRegressionPlots.js
 
     match "css/*" $ do
         route   idRoute

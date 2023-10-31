@@ -2,7 +2,7 @@
 title: Generalised Isotonic Regression - In Depth
 summary: Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations, while maintaining monotonicity.
 library: github.com/ewal31/GeneralisedIsotonicRegression
-plotly_js_file: /js/GeneralisedIsotonicRegressionPlots.js
+plotly_js_file: /js/GeneralisedIsotonicRegressionPlots.min.js
 ---
 
 Summary
@@ -28,7 +28,7 @@ $$\begin{aligned}
 $$
 
 ```{=html}
-<div id="UniIsoPlot">
+<div id="UniIsoPlot" class="plotlycontainer" csvsrc="/plotdata/uni-iso-regression.csv">
 </div>
 ```
 
@@ -107,6 +107,11 @@ $$
 out KKT conditions
 
 [@BoydVandenbergheConvexOptimization{}, pages 244]
+
+```{=html}
+<div id="3dPlot" class="plotlycontainer" csvsrc="https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv">
+</div>
+```
 
 ## How does this paper differ?
 
