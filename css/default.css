@@ -1,8 +1,23 @@
-body {
+.backgroundpattern {
+    /* More options can be found here https://www.magicpattern.design/tools/css-backgrounds */
+    z-index: -999;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: #b2b2bb;
+    opacity: 0.1;
+    background-image:  linear-gradient(30deg, #ffffff 12%, transparent 12.5%, transparent 87%, #ffffff 87.5%, #ffffff), linear-gradient(150deg, #ffffff 12%, transparent 12.5%, transparent 87%, #ffffff 87.5%, #ffffff), linear-gradient(30deg, #ffffff 12%, transparent 12.5%, transparent 87%, #ffffff 87.5%, #ffffff), linear-gradient(150deg, #ffffff 12%, transparent 12.5%, transparent 87%, #ffffff 87.5%, #ffffff), linear-gradient(60deg, #ffffff77 25%, transparent 25.5%, transparent 75%, #ffffff77 75%, #ffffff77), linear-gradient(60deg, #ffffff77 25%, transparent 25.5%, transparent 75%, #ffffff77 75%, #ffffff77);
+    background-size: 18px 32px;
+    background-position: 0 0, 0 0, 9px 16px, 9px 16px, 0 0, 9px 16px;
+}
+
+div#body {
+    background-color: #ffffff;
     color: black;
     font-size: 16px;
-    margin: 0px auto 0px auto;
-	padding-right: 12.5%;
+    margin: 0px 30% 0px auto;
+    padding-left: 2%;
+    padding-right: 2%;
     width: clamp(200px, 87.5%, 800px); /* min width, preferred, max width */
 }
 
@@ -64,7 +79,7 @@ img#imgexpandtoborder {
 
 ul#post-summary-list {
     list-style-type: none;
-	padding: 0;
+    padding: 0;
 }
 
 h3#post-summary-name {
@@ -82,9 +97,9 @@ section#post-summary {
 }
 
 div.sourceCode {
-	padding: 12px;
-	background-color: rgb(248, 248, 248);
-	font-size: clamp(10px, 1vw + 2px, 16px);
+    padding: 12px;
+    background-color: rgb(248, 248, 248);
+    font-size: clamp(10px, 1vw + 2px, 16px);
 }
 
 blockquote {
@@ -98,7 +113,7 @@ blockquote p {
 }
 
 div.csl-entry {
-	margin-top: 20px;	
+    margin-top: 20px;
 }
 
 /* Sidenotes */
@@ -113,8 +128,8 @@ div.csl-entry {
     line-height: 1.3;
     vertical-align: baseline;
     position: relative;
-	background: #eee;
-	padding: 0.4rem;
+    background: #eee;
+    padding: 0.4rem;
     transform: translate(0, -50%)
 }
 
@@ -124,9 +139,9 @@ input.margin-toggle {
 
 @media (max-width: 760px) {
     body {
-	    padding-right: 0%;
+        padding-right: 0%;
     }
-	
+
     .sidenote {
         display: block;
         float: left;
@@ -138,5 +153,5 @@ input.margin-toggle {
         position: relative;
         transform: translate(0, 0)
     }
-	
+
 }

@@ -28,7 +28,7 @@ $$\begin{aligned}
 $$
 
 ```{=html}
-<div id="UniIsoPlot" class="plotlycontainer" csvsrc="/plotdata/uni-iso-regression.csv">
+<div id="UniIsoPlot" csvsrc="/plotdata/uni-iso-regression.csv">
 </div>
 ```
 
@@ -107,6 +107,11 @@ $$
 out KKT conditions
 
 [@BoydVandenbergheConvexOptimization{}, pages 244]
+
+```{=html}
+<div id="MultiIsoPlot" csvsrc="/plotdata/multi-iso-regression.csv">
+</div>
+```
 
 ```{=html}
 <div id="3dPlot" class="plotlycontainer" csvsrc="https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv">

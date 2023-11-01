@@ -1,132 +1,145 @@
-function new_plot_height(plot_id) {
-    // Half viewport height
-    var vh = 0.5 * Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    return Math.min(Math.max(300, vh), 1200);
-}
+(function() {
 
-function new_plot_width(plot_id) {
-    // Width of parent
-    var parentNode = document.getElementById(plot_id).parentNode
-    var vw = Math.max(parentNode.clientWidth || 0, parentNode.innerWidth || 0);
-    return vw;
-}
+    function new_plot_height(plot_id, mult=0.5) {
+        // Relative to viewport
+        var vh = mult * Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        return Math.min(Math.max(300, vh), 1200);
+    }
 
-function create_2d_plot(plot_id) {
-    d3.csv(document.getElementById(plot_id).getAttribute("csvsrc"), function(err, rows){
-        var data = [
-            {
-                x: rows.map(function(row) { return row["X_1"]; }),
-                y: rows.map(function(row) { return row["y"]; }),
-                mode: 'markers',
-                type: 'scatter',
-            },
-            {
-                x: rows.map(function(row) { return row["X_1"]; }),
-                y: rows.map(function(row) { return row["iso"]; }),
-                line: {shape: 'hvh'},
-                type: 'scatter',
-            }
-        ];
+    function new_plot_width(plot_id) {
+        // Width of parent
+        var parentNode = document.getElementById(plot_id).parentNode
+        var vw = Math.max(parentNode.clientWidth || 0, parentNode.innerWidth || 0);
+        return vw;
+    }
 
-        var layout = {
-            width: new_plot_width(plot_id),
-            height: new_plot_height(plot_id),
-            margin: {
-                l: 20,
-                r: 20,
-                b: 20,
-                t: 20,
-                pad: 0,
-            },
-            showlegend: false,
-        };
-
-        var config = {
-            scrollZoom: true,
-            displayModeBar: false,
-        };
-
-        Plotly.newPlot(plot_id, data, layout, config);
-
+    function register_relayout_on_window_resize(
+        plot_id,
+        new_height = new_plot_height,
+        new_width = new_plot_width
+    ) {
         window.addEventListener('resize', function(){
             Plotly.relayout(plot_id, {
-                width: new_plot_width(plot_id),
-                height: new_plot_height(plot_id)
+                width: new_width(plot_id),
+                height: new_height(plot_id)
             });
         })
-    })
-};
+    }
 
-create_2d_plot("UniIsoPlot");
+    function get_column(rows, key) {
+        return rows.map(function(row) { return row[key]; });
+    }
 
-function create_3d_plot(plot_id) {
-    d3.csv(document.getElementById(plot_id).getAttribute("csvsrc"), function(err, rows){
-
-        function unpack(rows, key) {
-            return rows.map(function(row) { return row[key]; });
-        }
-
-        var z_data=[ ]
-        for(i=0;i<24;i++) {
-            z_data.push(unpack(rows,i));
-        }
-
-        var data = [
-            {
-                z: z_data,
-                type: 'surface',
-                showscale: false,
-            }
-        ];
-
-        var layout = {
-            title: 'Mt Bruno Elevation',
-            width: new_plot_width(plot_id),
-            height: new_plot_height(plot_id),
-            scene: {
-                camera: {
-                    eye: {
-                        x: 1.2,
-                        y: 1.2,
-                        z: 0.1
-                    },
-                    center: {
-                        x: 0,
-                        y: 0,
-                        z: -0.2
-                    }
+    uni_iso_plot = "UniIsoPlot";
+    d3.csv(document.getElementById(uni_iso_plot).getAttribute("csvsrc"), function(err, rows){
+        Plotly.newPlot(
+            uni_iso_plot,
+            [
+                {
+                    x: get_column(rows, "X_1"),
+                    y: get_column(rows, "y"),
+                    mode: 'markers',
+                    type: 'scatter',
+                },
+                {
+                    x: get_column(rows, "X_1"),
+                    y: get_column(rows, "iso"),
+                    line: {shape: 'hvh'},
+                    type: 'scatter',
                 }
+            ],
+            {
+                width: new_plot_width(uni_iso_plot),
+                height: new_plot_height(uni_iso_plot, 0.3),
+                margin: {
+                    l: 20,
+                    r: 20,
+                    b: 20,
+                    t: 20,
+                    pad: 0,
+                },
+                showlegend: false,
             },
-            margin: {
-                l: 20,
-                r: 20,
-                b: 20,
-                t: 40,
-                pad: 0,
+            {
+                scrollZoom: false,
+                displayModeBar: false,
             }
-        };
+        );
+        register_relayout_on_window_resize(
+            uni_iso_plot,
+            new_height = (plot_id) => new_plot_height(plot_id, 0.3)
+        );
+    });
 
-        var config = {
-            scrollZoom: true,
-            displayModeBar: false,
-        };
+    multi_iso_plot = "MultiIsoPlot";
+    d3.csv(document.getElementById(multi_iso_plot).getAttribute("csvsrc"), function(err, rows){
+        var x = Array.from(new Set(rows.map(function(row) { return row["X_1"]; })));
+        var y = Array.from(new Set(rows.map(function(row) { return row["X_2"]; })));
 
-        Plotly.newPlot(plot_id, data, layout, config);
+        var z_iso = [];
+        for (i = 0; i < x.length; i++) {
+            var z_row = [];
+            for (j = 0; j < y.length; j++) {
+                z_row.push(rows[i * y.length + j]["iso"])
+            }
+            z_iso.push(z_row);
+        }
 
-        window.addEventListener('resize', function(){
-            Plotly.relayout(plot_id, {
-                width: new_plot_width(plot_id),
-                height: new_plot_height(plot_id)
-            });
-        })
-    })
-};
+        Plotly.newPlot(
+            multi_iso_plot,
+            [
+                {
+                    x: x,
+                    y: y,
+                    z: z_iso,
+                    type: 'surface',
+                    showscale: false,
+                    opacity: 0.7,
+                },
+                {
+                    x: get_column(rows, 'X_1'),
+                    y: get_column(rows, 'X_2'),
+                    z: get_column(rows, 'y'),
+                    mode: 'markers',
+                    marker: {
+                        size: 1,
+                        color: 'rgb(0, 0, 0)',
+                        opacity: 0.8
+                    },
+                    type: 'scatter3d'
+                },
+            ],
+            {
+                width: new_plot_width(multi_iso_plot),
+                height: new_plot_height(multi_iso_plot),
+                margin: {
+                    l: 20,
+                    r: 20,
+                    b: 20,
+                    t: 20,
+                    pad: 0,
+                },
+                scene: {
+                    camera: {
+                        eye: {
+                            x: -0.3,
+                            y: -1.5,
+                            z: 0.6
+                        },
+                        center: {
+                            x: 0,
+                            y: 0,
+                            z: -0.2
+                        }
+                    }
+                },
+                showlegend: false,
+            },
+            {
+                displayModeBar: false,
+            }
+        );
+        register_relayout_on_window_resize(multi_iso_plot);
+    });
 
-create_3d_plot("3dPlot");
-
-// for (plotcontainer of document.getElementsByClassName("plotlycontainer")) {
-//     create_plot(
-//         plotcontainer.id,
-//         plotcontainer.getAttribute("csvsrc")
-//     );
-// }
+})()
