@@ -28,7 +28,7 @@ $$\begin{aligned}
 $$
 
 ```{=html}
-<div id="UniIsoPlot" csvsrc="/plotdata/uni-iso-regression.csv">
+<div id="UniIsoPlot">
 </div>
 ```
 
@@ -109,12 +109,7 @@ out KKT conditions
 [@BoydVandenbergheConvexOptimization{}, pages 244]
 
 ```{=html}
-<div id="MultiIsoPlot" csvsrc="/plotdata/multi-iso-regression.csv">
-</div>
-```
-
-```{=html}
-<div id="3dPlot" class="plotlycontainer" csvsrc="https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv">
+<div id="MultiIsoPlot">
 </div>
 ```
 
@@ -125,11 +120,15 @@ The approach in the paper
 
 The linear program that we want to solve is defined
 
-$$
-\text{min} \left\{ z^{T} x \colon x_i \leq x_j \forall (i, j) \in \mathfrak{I}, -1 \leq x_i \leq 1 \forall i \in V \right\}
+$$\begin{aligned}
+&\text{minimize}   &\quad z^T x \\
+&\text{subject to} &\quad x_i \leq x_j, \forall (i, j) \in \mathfrak{I} \\
+&                  &\quad -1 \leq x_i \leq 1, \forall i \in \mathfrak{V}
+\end{aligned}
 $$
 
-where
+where $x_i$ is a relaxed variable that selects which cluster a given sample belongs to,
+$\mathfrak{V}$ is the currently considered subset and
 
 $$
 z_i = \left. \frac{\partial f_i (\hat{y}_i)}{\partial \hat{y}_i} \right\vert_{w_V}

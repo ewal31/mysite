@@ -21,5 +21,10 @@ The resulting website that is then provided by Github Pages is located within th
 ## TODO
 
 - [ ] make use of the above compression tools
+    - [x] javascript
+    - [ ] css
+    - [ ] svg
 - [ ] make site usable on different screen sizes
 - [ ] clean up presentation of references
+- [ ] nix in place of docker for building
+- [ ] purescript instead of javascript
