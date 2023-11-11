@@ -19,6 +19,10 @@ Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observ
 * fits a piecewise-constant non-decreasing (or -increasing) function to data
 * maintains monotonicity
 
+```{=html}
+<div id="AdjacencyMatrix"></div>
+```
+
 In the classical formulation (with $L_2$ loss) where $\mathfrak{I}$ is a partial order defined on our dataset, we want to solve
 
 $$\begin{aligned}
@@ -28,9 +32,17 @@ $$\begin{aligned}
 $$
 
 ```{=html}
-<div id="UniIsoPlot">
-</div>
+<div id="UniIsoPlot"></div>
 ```
+
+so this zTc loss value that weights what to do next
+is somehow a measure of how well separated the points are either side of the most recent split
+loss could be really large, but there might be little potentially gained
+but this derivative measure says more something like
+the points on the right of split are on mostly larger than the estimator
+and the points on the left are mostly smaller.
+it might be worth normalising this by the number of points though
+which isn't done in the post or code
 
 ## How is it done historically?
 
@@ -109,8 +121,7 @@ out KKT conditions
 [@BoydVandenbergheConvexOptimization{}, pages 244]
 
 ```{=html}
-<div id="MultiIsoPlot">
-</div>
+<div id="MultiIsoPlot"></div>
 ```
 
 ## How does this paper differ?

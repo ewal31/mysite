@@ -41,29 +41,57 @@
     uni_iso_plot = "UniIsoPlot";
     d3.csv("/plotdata/uni-iso-regression.csv", function(err, rows){
         d3.csv("/plotdata/uni-iso-regression-iterations.csv", function(err, rows_anim){
-            var iterations = { }
+
+            var active_iteration = 3;
+            var iterations = { };
+            var slider_steps = [];
+            var frames = [];
+
+            function get_label(iter) {
+                return 'Loss: ' + round(iterations[iter].loss);
+            }
+
+            // Parse data into a usable format
             for (var i = 0; i < rows_anim.length; i++) {
-                var trace;
                 var row = rows_anim[i];
-                var iter = row.iter;
-                if (!(trace = iterations[iter])) {
-                    trace = iterations[iter] = {
+
+                var trace;
+                if (!(trace = iterations[row.iter])) {
+                    trace = iterations[row.iter] = {
                         x: [],
                         y: [],
-                        loss: [],
+                        groups: {},
                     };
                 }
                 trace.x.push(row.X_1)
                 trace.y.push(row.y_fit)
-                trace.loss.push(row.L2)
+                if (row.L2) {
+                    trace.loss = row.L2
+                }
+
+                if (row.group_loss) {
+                    var group = trace.groups[row.group] = {};
+                    group.loss = round(row.group_loss, 3)
+                    group.x    = Number.parseFloat(row.X_1)
+                    group.y    = -0.4
+                } else {
+                    var group = trace.groups[row.group];
+                    group.x = (
+                        Number.parseFloat(row.X_1) + group.x) / 2
+                }
             }
 
-            function get_label(iter) {
-                return 'Loss: ' + round(iterations[iter].loss[0]);
+            // console.log(iterations)
+
+            function get_values(obj, subkey) {
+                var result = [];
+                for (key of Object.keys(obj)) {
+                    result.push(obj[key][subkey]);
+                }
+                return result;
             }
 
-            var active_iteration = 3;
-            var slider_steps = [];
+            // Set up slider effect and values
             for (iter of Object.keys(iterations)) {
                 slider_steps.push({
                     method: 'animate',
@@ -79,12 +107,40 @@
                 });
             }
 
-            var frames = [];
+            // Build animation frames
             for (iter of Object.keys(iterations)) {
                 var data = [];
                 data[1] = {
                     x: iterations[iter].x.slice(),
                     y: iterations[iter].y.slice(),
+                }
+                data[3] = {
+                    x: get_values(iterations[iter].groups, "x"),
+                    y: get_values(iterations[iter].groups, "y"),
+                    text: Object.keys(iterations[iter].groups),
+                }
+
+                var prev_x = false;
+                var down = false;
+                var idx = 0;
+                var loss_text_x = get_values(iterations[iter].groups, "x");
+                var loss_text_y = loss_text_x.
+                    map(x => [x, idx++]).
+                    sort((a, b) => a[0] - b[0]).
+                    map(function (row){
+                        if (down || (prev_x && Math.abs(row[0] - prev_x) < 2)) {
+                            down = !down;
+                        }
+                        prev_x = row[0]
+                        return [row[1], down ? -1.3 : -.9];
+                    }).
+                    sort((a, b) => a[0] - b[0]).
+                    map(row => row[1]);
+
+                data[4] = {
+                    x: loss_text_x,
+                    y: loss_text_y,
+                    text: get_values(iterations[iter].groups, "loss"),
                 }
 
                 frames.push({
@@ -104,8 +160,8 @@
                         {
                             x: get_column(rows, "X_1"),
                             y: get_column(rows, "y"),
-                            mode: 'markers',
                             type: 'scatter',
+                            mode: 'markers',
                             name: "Observations",
                         },
                         {
@@ -123,6 +179,30 @@
                             mode: "lines",
                             name: "Linear Regression (L2)",
                             visible: 'legendonly',
+                        },
+                        {
+                            x: get_values(iterations[active_iteration].groups, "x"),
+                            y: get_values(iterations[active_iteration].groups, "y"),
+                            text: Object.keys(iterations[active_iteration].groups),
+                            type: 'scatter',
+                            mode: 'text',
+                            name: 'Group',
+                            textfont: {
+                                color: '#803a36'
+                            },
+                        },
+                        {
+                            x: get_values(iterations[active_iteration].groups, "x"),
+                            y: get_values(
+                                   iterations[active_iteration].groups, "y"
+                               ).map(function (val) {return -.9}),
+                            text: get_values(iterations[active_iteration].groups, "loss"),
+                            type: 'scatter',
+                            mode: 'text',
+                            name: 'Group Loss',
+                            textfont: {
+                                color: '#807d7d'
+                            },
                         }
                     ],
                     layout: {
@@ -142,14 +222,6 @@
                         yaxis: {
                             range: [-1.5, 9.5]
                         },
-                        sliders: [{
-                            pad: {l: 130, t: 55},
-                            currentvalue: {
-                                visible: false,
-                            },
-                            steps: slider_steps,
-                            active: active_iteration,
-                        }],
                         annotations: [{
                             xref: 'paper',
                             yref: 'paper',
@@ -157,9 +229,17 @@
                             xanchor: 'left',
                             y: 0.9,
                             yanchor: 'bottom',
-                            text: get_label(iter),
+                            text: get_label(active_iteration),
                             font: {size: 19},
                             showarrow: false
+                        }],
+                        sliders: [{
+                            pad: {l: 130, t: 55},
+                            currentvalue: {
+                                visible: false,
+                            },
+                            steps: slider_steps,
+                            active: active_iteration,
                         }],
                         updatemenus: [{
                             x: 0,
@@ -207,9 +287,23 @@
     multi_iso_plot = "MultiIsoPlot";
     d3.csv("/plotdata/multi-iso-regression.csv", function(err, rows){
         d3.csv("/plotdata/multi-iso-regression-iterations.csv", function(err, rows_anim){
+
+            var active_iteration = 7;
+            var iterations = { };
+            var slider_steps = [];
+            var frames = [];
+
+            function get_label(iter) {
+                return 'Iteration: ' + iter + '<br>Loss: ' + round(iterations[iter].loss);
+            }
+
+
+            // The uniqe x and y values.
             var x = Array.from(new Set(get_column(rows, 'X_1')));
             var y = Array.from(new Set(get_column(rows, 'X_2')));
 
+            // Put Linear regression result in correct form (row-wise)
+            // for surface plot
             var z_reg = [];
             for (j = 0; j < y.length; j++) {
                 z_reg.push([])
@@ -220,10 +314,10 @@
                 }
             }
 
-            var iterations = { }
+            // Put each Isotonic step in the correct form (row-wise)
+            // for surface plot
             var rows_anim_idx = 0;
             var iter = 0;
-
             while (true) {
 
                 if (rows_anim_idx >= rows_anim.length) {
@@ -252,12 +346,7 @@
 
             }
 
-            function get_label(iter) {
-                return 'Iteration: ' + iter + '<br>Loss: ' + round(iterations[iter].loss);
-            }
-
-            var active_iteration = 7;
-            var slider_steps = [];
+            // Set up slider effect and values
             for (iter of Object.keys(iterations)) {
                 slider_steps.push({
                     method: 'animate',
@@ -273,7 +362,7 @@
                 });
             }
 
-            var frames = [];
+            // Build animation frames
             for (iter of Object.keys(iterations)) {
                 var data = [];
                 data[1] = {
@@ -342,6 +431,7 @@
                             pad: 0,
                         },
                         scene: {
+                            // Starting rotation and position of 3d scene
                             camera: {
                                 eye: {
                                     x: -0.4,
@@ -365,14 +455,6 @@
                             },
                         },
                         showlegend: true,
-                        sliders: [{
-                            pad: {l: 130, t: 55},
-                            currentvalue: {
-                                visible: false,
-                            },
-                            steps: slider_steps,
-                            active: active_iteration,
-                        }],
                         annotations: [{
                             xref: 'paper',
                             yref: 'paper',
@@ -381,9 +463,17 @@
                             y: 0.5,
                             yanchor: 'bottom',
                             align: "left",
-                            text: get_label(iter),
+                            text: get_label(active_iteration),
                             font: {size: 19},
                             showarrow: false
+                        }],
+                        sliders: [{
+                            pad: {l: 130, t: 55},
+                            currentvalue: {
+                                visible: false,
+                            },
+                            steps: slider_steps,
+                            active: active_iteration,
                         }],
                         updatemenus: [{
                             x: 0,
@@ -424,5 +514,284 @@
             register_relayout_on_window_resize(multi_iso_plot);
         })
     });
+
+    var animation_state = 0;
+    const width = new_plot_width("AdjacencyMatrix")
+    const height = width * 0.6
+    const svg = d3.select("#AdjacencyMatrix")
+        .append("svg")
+        .attr("width", width + 'px')
+        .attr("height", height + 'px');
+
+    // 1,1------
+    //   |      |
+    //   ------1,1-------------
+    //                  |      |
+    //                 3,1     |
+    //                  |      |
+    //                  |     1,3--------
+    //                  |                |
+    //                  |               2,3 -----
+    //                  |                        |
+    //                  -------------------------3,3
+    const points = [
+        { x: width * 2 / 9, y: height * 2 / 9, text: "(1, 1)"},
+        { x: width * 3 / 9, y: height * 3 / 9, text: "(1, 1)"},
+        { x: width * 4 / 9, y: height * 4 / 9, text: "(3, 1)"},
+        { x: width * 5 / 9, y: height * 5 / 9, text: "(1, 3)"},
+        { x: width * 6 / 9, y: height * 6 / 9, text: "(2, 3)"},
+        { x: width * 7 / 9, y: height * 7 / 9, text: "(3, 3)"},
+    ]
+
+    const links = [
+        { source: 0, dest: 1, dir: true },
+        { source: 1, dest: 0, dir: true, rev: true },
+        { source: 1, dest: 2, dir: true },
+        { source: 1, dest: 3, dir: true },
+        { source: 2, dest: 5, dir: false },
+        { source: 3, dest: 4, dir: true },
+        { source: 4, dest: 5, dir: true },
+    ]
+
+    svg
+        .append("svg:defs")
+        .append("svg:marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 0)
+        .attr("refY", 5)
+        .attr("markerUnits", "strokeWidth")
+        .attr("markerWidth", 8)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .attr("d", "M 0 0 L 10 5 L 0 10 z")
+
+    for (c of ['pointHoriz', 'pointVert']) {
+        svg
+            .selectAll(c)
+            .data(points)
+            .enter().append('text')
+            .attr('class', c)
+            .attr('x', d => d.x)
+            .attr('y', d => d.y)
+            .attr('dy', 6) // account for text height
+            .attr("text-anchor", "middle")
+            .text(d => d.text)
+    }
+
+    const textwidth = 35;
+    const textheight = 25;
+
+    svg
+        .selectAll('links')
+        .data(links)
+        .enter().append('path')
+        .attr('class', 'link')
+        .attr('d', function(d) {
+            op = d.rev ? (a, b) => a - b : (a, b) => a + b
+            if (d.dir) {
+                return d3.svg.line()([
+                    [op(points[d.source].x, textwidth), points[d.source].y],
+                    [points[d.dest].x, points[d.source].y],
+                    [points[d.dest].x, op(points[d.dest].y, -textheight)],
+                ])
+            } else {
+                return d3.svg.line()([
+                    [points[d.source].x, op(points[d.source].y, textheight - 10)],
+                    [points[d.source].x, points[d.dest].y],
+                    [op(points[d.dest].x, -textwidth), points[d.dest].y],
+                ])
+            }
+        })
+        .attr('stroke', 'black')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none')
+        .attr('marker-end', "url(\#arrow)")
+
+    svg
+        .selectAll('matrixborder')
+        .data([
+            [
+                [1.7/9 * width, 1.5/9 * height],
+                [1.5/9 * width, 1.5/9 * height],
+                [1.5/9 * width, 7.5/9 * height],
+                [1.7/9 * width, 7.5/9 * height],
+            ],
+            [
+                [7.3/9 * width, 1.5/9 * height],
+                [7.5/9 * width, 1.5/9 * height],
+                [7.5/9 * width, 7.5/9 * height],
+                [7.3/9 * width, 7.5/9 * height],
+            ],
+        ]).enter().append('path')
+        .attr('class', 'matrixborder')
+        .attr('d', d => d3.svg.line()(d))
+        .attr('stroke', 'black')
+        .attr('stroke-width', 0)
+        .attr('fill', 'none')
+
+    var matrixcontents = []
+    for (i = 0; i < points.length; i++) {
+        for (j = 0; j < points.length; j++) {
+            matrixcontents.push({
+                x: (i+2) / 9 * width,
+                y: (j+2) / 9 * height,
+                text: '0'
+            })
+        }
+    }
+
+    for (link of links) {
+        var {source, dest} = link;
+        matrixcontents[source + points.length * dest].text = "1";
+    }
+
+    svg
+        .selectAll('matrixcontents')
+        .data(matrixcontents)
+        .enter().append('text')
+        .attr('class', 'matrixcontents')
+        .attr('x', d => d.x)
+        .attr('y', d => d.y)
+        .attr('dy', 6) // account for text height
+        .attr('text-anchor', 'middle')
+        .attr('visibility', 'hidden')
+        .text(d => d.text)
+
+    var button_data = [
+        [{x: -1 * (230 / 2 - 70 / 2) - 1, width: 70, height: 33, text: "Graph", state: 0, selected: true}],
+        [{x:  (230/2 - 160 / 2) + 1, width: 160, height: 33, text: "Adjacency Matrix", state: 1, selected: false}]
+    ]
+
+    function update_adjacency_matrix_state(button) {
+        var chosen_state = button.state;
+
+        if (chosen_state == animation_state) {
+            return;
+        }
+
+        animation_state = chosen_state
+
+        button_group
+            .selectAll('.button')
+            .transition()
+            .attr('fill', d => d.state == chosen_state ? '#f4faff' : '#ffffff')
+
+        if (chosen_state == 0) {
+            d3
+                .selectAll('.pointHoriz')
+                .transition()
+                .attr('x', d => d.x)
+                .duration(2000)
+                .delay(500)
+
+            d3
+                .selectAll('.pointVert')
+                .transition()
+                .attr('y', d => d.y)
+                .duration(2000)
+                .delay(500)
+
+            d3
+                .selectAll('.link')
+                .transition()
+                .attr('stroke-width', 2)
+                .duration(2500)
+                .delay(2000)
+
+            d3
+                .selectAll('.matrixborder')
+                .transition()
+                .attr('stroke-width', 0)
+                .duration(500)
+
+            d3
+                .selectAll('.matrixcontents')
+                .transition()
+                .attr('visibility', 'hidden')
+                .duration(500)
+
+        } else if (chosen_state == 1) {
+            d3
+                .selectAll('.pointHoriz')
+                .transition()
+                .attr('x', 1/9 * width)
+                .duration(2000)
+                .delay(500)
+
+            d3
+                .selectAll('.pointVert')
+                .transition()
+                .attr('y', 1/9 * height)
+                .duration(2000)
+                .delay(500)
+
+            d3
+                .selectAll('.link')
+                .transition()
+                .attr('stroke-width', 0)
+                .duration(700)
+
+            d3
+                .selectAll('.matrixborder')
+                .transition()
+                .attr('stroke-width', 6)
+                .duration(2500)
+                .delay(2000)
+
+            d3
+                .selectAll('.matrixcontents')
+                .transition()
+                .attr('visibility', 'visible')
+                .delay(2500)
+        }
+
+    }
+
+    var button_group = svg
+        .selectAll('button-group')
+        .data(button_data)
+        .enter().append('g')
+        .attr('class', 'button-group')
+        .attr('transform', d => 'translate(' + (width / 2 - d[0].width / 2 + d[0].x) + ',' + (height - 33 - 2) + ')')
+        .on('click', d => update_adjacency_matrix_state(d[0]))
+        .on({
+            "mouseover": function(d) {
+                d3.select(this).style("cursor", "pointer");
+            },
+            "mouseout": function(d) {
+                d3.select(this).style("cursor", "default");
+            }
+        });
+
+    button_group
+        .selectAll('button')
+        .data(d => d)
+        .enter().append('rect')
+        .attr('class', 'button')
+        .attr('fill', d => d.selected ? '#f4faff' : '#ffffff')
+        .attr('width', d => d.width)
+        .attr('height', d => d.height)
+        .attr({
+            rx: 2,
+            ry: 2,
+            stroke: '#bec8d9',
+            'stroke-opacity': 1,
+            'fill-opacity': 1,
+            'stroke-width': '1px',
+            'shape-rendering': 'crispEdges',
+        })
+
+    button_group
+        .selectAll('buttontext')
+        .data(d => d)
+        .enter().append('text')
+        .attr('class', 'buttontext')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('dx', d => d.width / 2)
+        .attr('dy', d => d.height / 2)
+        .text(d => d.text)
 
 })()

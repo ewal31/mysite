@@ -1,19 +1,19 @@
 .homepagetext {
-	color: black;
+    color: black;
     font-size: 20px;
-    width: 65%;	
+    width: 65%;
 }
 
 .padding {
     padding: clamp(10px, 1vw, 30px);
-	clear: both;
+    clear: both;
 }
 
 .cubeslider {
     width: clamp(80px, 12vw, 200px); /* pictures size */
     height: clamp(80px, 12vw, 200px); /* picture size */
     /* margin-left: auto; */
-	float: right;
+    float: right;
     perspective: 30vw;
 }
 
