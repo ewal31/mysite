@@ -28,3 +28,4 @@ The resulting website that is then provided by Github Pages is located within th
 - [ ] clean up presentation of references
 - [ ] nix in place of docker for building
 - [ ] purescript instead of javascript
+- [ ] perhaps change sidenotes, to fix to html markers in the text

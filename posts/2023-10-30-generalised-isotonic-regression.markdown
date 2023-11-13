@@ -2,59 +2,128 @@
 title: Generalised Isotonic Regression - In Depth
 summary: Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations, while maintaining monotonicity.
 library: github.com/ewal31/GeneralisedIsotonicRegression
-plotly_js_file: /js/GeneralisedIsotonicRegressionPlots.min.js
+include_plotly: true
+include_d3: true
+js_file: /js/GeneralisedIsotonicRegressionPlots.min.js
 ---
 
-Summary
-
-* what is isotonic regression
-* implement the multivariate isotonic regression algorithm from paper
-* how does it work (linear programming with slack surplus)
-* look at ways to improve the input by reducing constraints
-
-Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations, while maintaining monotonicity.
+```{=html}
+<div id="MultiIsoPlot"></div>
+```
 
 ## What is Isotonic Regression?
 
-* fits a piecewise-constant non-decreasing (or -increasing) function to data
-* maintains monotonicity
+Isotonic Regression, similar to other regression models, tries to find a
+predictive relationship between a set of features and their corresponding
+observations. A method such as Linear Regression, constrains the space
+of possible relationships, such that the predictions vary linearly
+with changes in the feature space. Isotonic Regression, conversely,
+has no restrictions on its shape apart from requiring a strict
+non-decreasing (alt. non-increasing) relationship;
+typically a monotonic piecewise-constant function. It can, therefore,
+be a useful alternative, when it is known that a monotonic relationship
+between variables exists.
 
-```{=html}
-<div id="AdjacencyMatrix"></div>
-```
-
-In the classical formulation (with $L_2$ loss) where $\mathfrak{I}$ is a partial order defined on our dataset, we want to solve
+In the classical formulation (with $L_2$ loss) where $\mathfrak{I}$ is
+a partial order defined over our independent variables, Isotonic
+Regression can be defined as the following Linear Program.
 
 $$\begin{aligned}
-&\text{minimize}   &\quad \sum_i (\hat{y}_i - y_i)^2 \\
-&\text{subject to} &\quad \hat{y}_i \leq \hat{y}_j, \forall \left ( i, j \right ) \in \mathfrak{I}
+&\text{minimize}   &\quad \sum_i (\hat{\bm{y}}_i - \bm{y}_i)^2 \\
+&\text{subject to} &\quad \hat{\bm{y}}_i \leq \hat{\bm{y}}_j, \forall \left ( i, j \right ) \in \mathfrak{I}
 \end{aligned}
 $$
 
-```{=html}
-<div id="UniIsoPlot"></div>
-```
-
-so this zTc loss value that weights what to do next
-is somehow a measure of how well separated the points are either side of the most recent split
-loss could be really large, but there might be little potentially gained
-but this derivative measure says more something like
-the points on the right of split are on mostly larger than the estimator
-and the points on the left are mostly smaller.
-it might be worth normalising this by the number of points though
-which isn't done in the post or code
-
-## How is it done historically?
-
-- Pooled adjacent violators algorithm (PAVA)
-- these implementations can be more general (i.e. not necessarily differentiable), but restricted to 1-d
-
-https://www.stat.umn.edu/geyer/8054/notes/isotonic.pdf
+Throughout this post, we will discuss what a Linear Program is, and how it leads
+to the algorithm discussed in [@LussRossetGeneralizedIsotonicRegression] for
+solving the Isotonic Regression problem in an arbitrary number of dimensions
+while supporting any convex differentiable loss function.
 
 ## Linear Programming
 
-* basic form with and without constraints?
-* solving
+Linear Programming is a generic approach to solving constraint problems with a
+linear objective function. The standard form of such a problem asks us to find
+a vector $\bm{x} \in \mathbb{R}^p$ that takes the form
+
+$$\begin{aligned}
+&\text{minimize}   &\quad f_0(\bm{x}) \\
+&\text{subject to} &\quad f_i(\bm{x}) \leq 0, \quad \forall i \\
+&                  &\quad h_j(\bm{x}) = 0,    \quad \forall j
+\end{aligned}
+$$
+
+Where our inequalities $f_i$ and equalities $h_i$ express a linear
+relationship.
+
+The advantage of prescribing such a form, is that generic sotware can be
+written to solve any number of problems that can be expressed in such a
+manner. [^GeneralKernelForm]
+With $f_i$ being any linear function, we aren't even restricted
+to minimisation problems and inequalities of the form $\leq 0$. Multiplying
+by negative one in $f_0$ lets us morph a maximisation problem into the above
+form. Similarly, a greater than inequality can be change to a less than and
+add an offset can be added to allow for equalities and inequalities with values
+other than zero. For example, the linear relation $x \geq 5$ could be changed to
+$5 - x \leq 0$ giving us a function $f_i(x) = 5 - x$ in order to fit the above
+form.
+
+[^GeneralKernelForm]: For example, the commercial software, [MOSEK](https://www.mosek.com/),
+or the the open source [HiGHS](https://highs.dev/#top), which I have used
+in this implementation.
+
+Consider, for example, a hobby photographer, that also enjoys making sourdough
+bread. He might want to maximise the amount of time he spends his two favourite
+activies. Unfortunately, he needs a job in order to finance his hobbies -
+photography equipment can in particular be quite expensive. This leads us
+to a constrained optimisation problem. As we can be either working or
+enjoying one of our hobbies and we need to work some minimum amount of time
+in order to have sufficient funds for our hobbies and to survive and save $s$ a bit
+so we have geq value larger than 0.
+
+Photography $p$ is 5 times more expensive, but want to do it 2 times more
+than baking $b$. Will allow for 10 units of money a month. Can't spend negative
+time doing something. Can only eat so much bread each weak. So maybe
+limit total bread making to 5 times a week.
+
+[^OnlineSolver]
+
+[^OnlineSolver]: Can play around with setting up and solving some of these problems using an
+online solver such as [this online optimizer](https://online-optimizer.appspot.com/?model=builtin:default.mod)
+
+$$\begin{aligned}
+&\text{maximize}   &\quad 2 p + b \\
+&\text{subject to} &\quad 5 p + b \leq s \\
+&                  &\quad b \leq 5 \\
+&                  &\quad p \geq 0 \\
+&                  &\quad b \geq 0
+\end{aligned}
+$$
+
+or in standard form
+
+$$\begin{aligned}
+&\text{minimize}   &\quad - 2p - b \\
+&\text{subject to} &\quad 5 p + b - s \leq 0 \\
+&                  &\quad b - 5 \leq 0 \\
+&                  &\quad -p \leq 0 \\
+&                  &\quad -b \leq 0
+\end{aligned}
+$$
+
+With such a small number of constraints and dimensions it is easy to solve this
+Linear Program. We just need to plot the constraints and choose the largest
+value possible.
+
+```{=html}
+<div id="LinearProgram"></div>
+```
+
+This leads to the result, that our hobby photographer should spend an hour
+a week taking pictures, and 5 hours baking bread.
+
+[^TutorialVideo]
+
+[^TutorialVideo]: For a more in-depth introduction see this video [The Art of Linear Programming](https://www.youtube.com/watch?v=E72DWgKP_1Y)
 
 ## Karush-Kuhn-Tucker (KKT) Conditions
 
@@ -120,9 +189,6 @@ out KKT conditions
 
 [@BoydVandenbergheConvexOptimization{}, pages 244]
 
-```{=html}
-<div id="MultiIsoPlot"></div>
-```
 
 ## How does this paper differ?
 
@@ -147,9 +213,26 @@ $$
 
 [@LussRossetGeneralizedIsotonicRegression]
 
+```{=html}
+<div id="UniIsoPlot"></div>
+```
+
+so this zTc loss value that weights what to do next
+is somehow a measure of how well separated the points are either side of the most recent split
+loss could be really large, but there might be little potentially gained
+but this derivative measure says more something like
+the points on the right of split are on mostly larger than the estimator
+and the points on the left are mostly smaller.
+it might be worth normalising this by the number of points though
+which isn't done in the post or code
+
 ## Implementing the Algorithm
 
 First build matrix in the correct form for the linear program solver.
+
+```{=html}
+<div id="AdjacencyMatrix"></div>
+```
 
 ```cpp
 Eigen::SparseMatrix<int>
@@ -288,6 +371,26 @@ $$
 ## Regularisation
 
 ## More generalisation?
+
+
+# TOOD
+
+* what is isotonic regression
+* implement the multivariate isotonic regression algorithm from paper
+* how does it work (linear programming with slack surplus)
+* look at ways to improve the input by reducing constraints
+
+Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations, while maintaining monotonicity.
+
+Should probably mention some concrete applications
+https://dl.acm.org/doi/abs/10.1145/1102351.1102430
+
+Do I want to discuss other solutions at all?
+
+- Pooled adjacent violators algorithm (PAVA)
+- these implementations can be more general (i.e. not necessarily differentiable), but restricted to 1-d
+
+https://www.stat.umn.edu/geyer/8054/notes/isotonic.pdf
 
 ---
 
