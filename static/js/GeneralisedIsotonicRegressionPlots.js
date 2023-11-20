@@ -75,9 +75,17 @@
                     mode: "lines",
                     name: "b >= 0",
                 },
+                {
+                    x: [-1, 0, 2, 2.5],
+                    y: [9, 7, 3, 2],
+                    type: 'scatter',
+                    mode: "lines",
+                    name: "2p + b = 7<br>Dual Solution",
+                    visible: 'legendonly',
+                },
             ],
             {
-                width: new_plot_width(lp_plot, 0.8),
+                width: new_plot_width(lp_plot),
                 height: new_plot_height(lp_plot, 0.4),
                 margin: {
                     l: 40,
@@ -100,19 +108,34 @@
                         type: 'path',
                         path: 'M0,0 L0,5 L1,5 L2,0 Z',
                         fillcolor: 'rgba(255, 140, 184, 0.5)',
+                        line: {
+                            width: 0
+                        }
                     }
                 ],
                 annotations: [
                     {
                         x: 1,
                         y: 5,
-                        // xref: 'x',
-                        // yref: 'y',
-                        text: 'Maximum',
+                        text: '2 x 1 + 5 = 7',
                         showarrow: true,
-                        // arrowhead: 7,
-                        ax: 20,
-                        // ay: -40
+                        ax: 30,
+                    },
+                    {
+                        x: 0,
+                        y: 5,
+                        text: '2 x 0 + 5 = 5',
+                        showarrow: true,
+                        ax: -40,
+                        ay: -45,
+                    },
+                    {
+                        x: 2,
+                        y: 0,
+                        text: '2 x 2 + 0 = 4',
+                        showarrow: true,
+                        ax: 40,
+                        ay: -25,
                     }
                 ]
             },
@@ -124,7 +147,6 @@
         register_relayout_on_window_resize(
             lp_plot,
             id => new_plot_height(id, 0.4),
-            id => new_plot_width(id, 0.8)
         );
 
     })()
