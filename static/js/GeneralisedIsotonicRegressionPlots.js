@@ -117,7 +117,7 @@
                     {
                         x: 1,
                         y: 5,
-                        text: '2 x 1 + 5 = 7',
+                        text: '<b>2 x 1 + 5 = 7</b>',
                         showarrow: true,
                         ax: 30,
                     },

@@ -1,6 +1,6 @@
 ---
 title: Generalised Isotonic Regression - In Depth
-summary: Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations, while maintaining monotonicity.
+summary: Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations while maintaining monotonicity. This post takes an in-depth look at how the paper Generalized Isotonic Regression solves this problem in an arbitrary number of dimensions while supporting any convex differentiable loss function. First, Linear Programming is introduced, and then it is shown how the partitioning-based algorithm follows from the KKT conditions.
 library: github.com/ewal31/GeneralisedIsotonicRegression
 include_plotly: true
 include_d3: true
@@ -44,138 +44,145 @@ while supporting any convex differentiable loss function.
 
 Linear Programming is a generic approach to solving constrained problems with a
 linear objective function and linear constraints. The standard form of such a
-problem asks us to find a vector $\bm{x} \in \mathbb{R}^p$ that takes the form:
+problem asks us to find a vector $\bm{x} \in \mathbb{R}^p$ minimising our
+objective $o(\bm{x})$ and takes the form:
 
 $$\begin{aligned}
-&\text{minimise}   &\quad f_0(\bm{x}) \\
-&\text{subject to} &\quad f_i(\bm{x}) \leq 0, \quad \forall i \\
-&                  &\quad h_j(\bm{x}) = 0,    \quad \forall j
+&\text{minimise}         &o(\bm{x}) \\
+&\text{subject to} \quad &b_i(\bm{x}) &\leq 0, &\quad \forall i \\
+&                        &c_j(\bm{x}) &=    0, &\quad \forall j
 \end{aligned}
 $$
 
-where our inequalities $f_i$ and equalities $h_i$ express linear
-relationships.
+where our inequalities $b_i$ and equalities $c_j$ express linear relationships.
 
-The advantage of prescribing such a form, is that generic sotware can be
-written to solve any number of problems that can be expressed in such a manner.
-[^GeneralKernelForm] With $f_i$ being any linear function, we aren't even
-restricted to minimisation problems and inequalities of the form $\leq 0$.
-Multiplying by negative one in $f_0$ lets us morph a maximisation problem into
-the above form. Similarly, a greater than inequality can be change to a less
-than and add an offset can be added to allow for equalities and inequalities
-with values other than zero. For example, the linear relation $x \geq 5$ could
-be changed to $5 - x \leq 0$ giving us a function $f_i(x) = 5 - x$ in order to
-fit the above form. We can then use generic, interior point of simplex solvers.
+The advantage of prescribing such a form is that generic software can be
+written to solve any problem that fits the template. [^AvailableSoftware] With
+$o$ being any linear function, we are not even restricted to minimisation
+problems and inequalities of the form $\leq 0$. Multiplying our objective by negative
+one lets us morph a maximisation problem into the above form. In the same
+way, a greater than inequality can be changed to a less than. Furthermore, an
+offset can be included to support equalities and inequalities with values other
+than zero. For example, the linear relation $x \geq 5$ changed to $5 - x \leq
+0$ produces the function $b_i(x) = 5 - x$, which also fits the above form. We
+can then use generic interior point or simplex solvers to minimise the objective.
 
-[^GeneralKernelForm]: For example, the commercial software, [MOSEK](https://www.mosek.com/),
-or the the open source [HiGHS](https://highs.dev/#top), which I have used
-in this implementation.
+[^AvailableSoftware]: For example, the commercial software,
+    [MOSEK](https://www.mosek.com/), or the the open source
+    [HiGHS](https://highs.dev/#top), which I have used in this implementation.
 
-Consider, for example, a hobby photographer, that also enjoys making sourdough
-bread. He might want to maximise the amount of time he spends his two favourite
-activies. Unfortunately, he needs a job in order to finance his hobbies -
-photography equipment can in particular be quite expensive. This leads us
-to a constrained optimisation problem. As we can be either working or
-enjoying one of our hobbies and we need to work some minimum amount of time
-in order to have sufficient funds for our hobbies and to survive and save $s$ a bit
-so we have geq value larger than 0.
+### Example Linear Program
+
+Consider, for example, a hobbyist photographer and amateur baker. He wants to
+maximise the time he spends on his two favourite activities but, unfortunately,
+cannot finance them without limits. From these wishes, we can create a
+constrained optimisation problem.
 
 [^OnlineSolver]
 
-[^OnlineSolver]: Can play around with setting up and solving some of these problems using an
-online solver such as [this online optimizer](https://online-optimizer.appspot.com/?model=builtin:default.mod)
+[^OnlineSolver]: You may choose to play around with setting up and solving some
+    of these problems using an
+    [online solver](https://online-optimizer.appspot.com/?model=builtin:default.mod).
 
-Photography $p$ is 5 times more expensive, but want to do it 2 times more
-than baking $b$. Will allow for 10 units of money a month. Can't spend negative
-time doing something. Can only eat so much bread each weak. So maybe
-limit total bread making to 5 times a week.
+Our hobbyist wants to *maximise* his time doing his favourite activities;
+perhaps he prefers photography, $p$ over baking, $b$ ($2p +b$). Unfortunately,
+photography is considerably more expensive at 5€ per hour than baking at 1€,
+and he has a limited budget of 10€ constraining the activities ($5p + b \leq 10$).
+Finally, he does not want to make more baked goods than he can eat, so he
+limits himself to 5 hours of baking ($b \leq 5$). Along with the natural
+assumption that a negative amount of time can not be spent on an activity, this
+produces the Linear Program:
 
 $$\begin{aligned}
-&\text{maximize}   &\quad 2 p + b \\
-&\text{subject to} &\quad 5 p + b \leq s \\
-&                  &\quad b \leq 5 \\
-&                  &\quad p \geq 0 \\
-&                  &\quad b \geq 0
+&\text{maximize}         & 2 p + b \\
+&\text{subject to} \quad & 5 p + b &\leq 10 \\
+&                        & b       &\leq 5 \\
+&                        & p       &\geq 0 \\
+&                        & b       &\geq 0
 \end{aligned}
 $$
 
-With such a small number of constraints and dimensions it is easy to solve this
-Linear Program. We just need to plot the constraints and choose the largest
-value possible; one of the vertices. [^Technically] However, once we have more
-than three dimensions, it is no longer so easy to visualise the problem. We
-can, however, imagine solving such a problem, by checking each vertices in
-what would be a multidimensional polytope.
+With such few constraints and dimensions, this Linear Program is easily solved.
+We plot the constraints and choose the largest value possible; one of the
+vertices. [^Technically] However, once we have more than three dimensions, it
+is more challenging to visualise such a problem. Regardless, a similar approach
+can be taken, checking each vertex of the feasible region of the corresponding
+multidimensional polytope.
 
-[^Technically]: Technically, one of the vertices if there is a single solution,
-or any point along a line between two vertices, if there are multiple solutions.
+[^Technically]: Technically, it will be one of the vertices if there is only a
+    single solution and otherwise, any point along a line between vertices if
+    there are multiple solutions.
 
 ```{=html}
 <div id="LinearProgram"></div>
 ```
 
-This leads to the result, that our hobby photographer should spend an hour
-a week taking pictures, and 5 hours baking bread.
+Plotting all of the constraints, we see our maximal vertex in the top right
+corner, which suggests that our hobbyist spend an hour a week taking pictures
+and five hours baking bread.
 
 [^TutorialVideo]
 
-[^TutorialVideo]: For a more in-depth introduction see this video [The Art of Linear Programming](https://www.youtube.com/watch?v=E72DWgKP_1Y)
+[^TutorialVideo]: For a more in-depth introduction, see this video
+    [The Art of Linear Programming](https://www.youtube.com/watch?v=E72DWgKP_1Y)
 
-We can also write this in the standard form we mentioned above.
+We can also write this problem in the standard form we mentioned above.
 
 $$\begin{aligned}
-&\text{minimise}   &\quad - 2p - b \\
-&\text{subject to} &\quad 5 p + b - s \leq 0 \\
-&                  &\quad b - 5 \leq 0 \\
-&                  &\quad -p \leq 0 \\
-&                  &\quad -b \leq 0
+&\text{minimise}         & - 2p - b \\
+&\text{subject to} \quad & 5 p + b - s &\leq 0 \\
+&                        & b - 5       &\leq 0 \\
+&                        & -p          &\leq 0 \\
+&                        & -b          &\leq 0
 \end{aligned}
 $$
 
 
-## Karush-Kuhn-Tucker (KKT) Conditions
+### Lagrangian Dual Function
 
-Given standard form
+Given the standard form:
 
 $$\begin{aligned}
-&\text{minimise}   &\quad f_0(\bm{x}) \\
-&\text{subject to} &\quad f_i(\bm{x}) \leq 0, \quad \forall i \\
-&                  &\quad h_j(\bm{x}) = 0,    \quad \forall j
+&\text{minimise}         &o(\bm{x}) \\
+&\text{subject to} \quad &b_i(\bm{x}) &\leq 0, &\quad \forall i \\
+&                        &c_j(\bm{x}) &=    0, &\quad \forall j
 \end{aligned}
 $$
 
-can define the Lagrangian dual function which lower bounds our LP
-* weighted sum over constraint functions incorporated into objective function
-* instead of hard constraints, we include $\lambda_i \in \mathbb{R}$ and
-  $v_i \in \mathbb{R}$ terms, which are continuously variable. this should mitigate
-  discontinuities in the search space. $\lambda_i$ corresponds to inequalities
-  and $v_i$ to equalities.
+we also have the option to define a Lagrangian dual function. Essentially, this
+new definition relaxes the constraints by multiplying them with a
+$\lambda_i \in \mathbb{R}_0^+$ or $v_i \in \mathbb{R}_0^+$ term, for
+inequalities and equalities respectively, removing discontinuities in the
+search space. When violating constraints, we no longer move from a finite to an
+undefined objective value. Furthermore, by directly including the weighted sum
+of these constraints in the objective, the Lagrangian acts as a lower bound on
+the original problem.
 
 $$
-L(\bm{x}, \bm{\lambda}, \bm{v}) = f_0(\bm{x}) + \sum_i \lambda_i f_i(\bm{x}) + \sum_j v_i h_i(\bm{x})
+L(\bm{x}, \bm{\lambda}, \bm{v}) = o(\bm{x}) + \sum_i \lambda_i b_i(\bm{x}) + \sum_j v_j c_j(\bm{x})
 $$
 
-our optimal value for a given $(\bm{\lambda}, \bm{v})$ is then the infinium of the above objective
+It is natural to ask what the optimal lower bound is for a given $\bm{\lambda}$
+and $\bm{v}$. This is the infimum of the above objective.
 
 $$
 g(\bm{\lambda}, \bm{v}) = \text{inf}_{\bm{x}} L(\bm{x}, \bm{\lambda}, \bm{v})
 $$
 
-[@BoydVandenbergheConvexOptimization{}, pages 215-216]
-
-The best lower bound (our dual problem for the above stated LP) is then the optimisation
-problem
+Taking this objective, we then define the dual problem of our standard form
+above; the following convex maximisation problem:
 
 $$\begin{aligned}
-&\text{maximize}   &\quad g(\bm{\lambda}, \bm{v}) \\
-&\text{subject to} &\quad \bm{\lambda} \succeq 0
+&\text{maximize}         & g(\bm{\lambda}, \bm{v}) \\
+&\text{subject to} \quad & \bm{\lambda} \succeq 0
 \end{aligned}
 $$
 
-This dual problem is convex.
+[@BoydVandenbergheConvexOptimization{}, pages 215-223]
 
-[@BoydVandenbergheConvexOptimization{}, page 223]
+### Karush-Kuhn-Tucker (KKT) Conditions
 
-Can make some conclusions about the point $(\bm{x}^*, \bm{\lambda}^*, \bm{v}^*)
+Can make some conclusions about the point $(\bm{x}^*, \bm{\lambda}^*, \bm{v}^*)$
 assuming no duality gap
 To see why this is the case (although it might seem a little arbitrary at first
 these conditions are important in optimsation and the paper we are discussing)
@@ -238,7 +245,7 @@ here we use conditions 2 and 4 from above leading to equality in the last line.
 
 [@BoydVandenbergheConvexOptimization{}, pages 244-245]
 
----
+### Example Lagrangian Dual Problem
 
 Lagrangian for the example above is as follows
 
@@ -864,6 +871,15 @@ The approach in the paper
 supports multidimension
 
 https://www.stat.umn.edu/geyer/8054/notes/isotonic.pdf
+
+TO DELETE
+$$\begin{aligned}
+&\text{minimise}   &\quad f_0(\bm{x}) \\
+&\text{subject to} &\quad f_i(\bm{x}) \leq 0, \quad \forall i \\
+&                  &\quad h_j(\bm{x}) = 0,    \quad \forall j
+\end{aligned}
+$$
+TO DELETE
 
 ---
 
