@@ -180,147 +180,167 @@ $$
 
 [@BoydVandenbergheConvexOptimization{}, pages 215-223]
 
-### Karush-Kuhn-Tucker (KKT) Conditions
-
-Can make some conclusions about the point $(\bm{x}^*, \bm{\lambda}^*, \bm{v}^*)$
-assuming no duality gap
-To see why this is the case (although it might seem a little arbitrary at first
-these conditions are important in optimsation and the paper we are discussing)
-lets assume we have an optimal $\bm{x}^*$ satisfying the LP
-and optimal $(\bm{\lambda}^*, \bm{v}^*)$
-the lagragian must be minimised at this point and therefore the gradient vanishes
-
-$$
-\Delta f_0(\bm{x}^*) + \sum_i \lambda_i^* \Delta f_i (\bm{x}^*) + \sum_j v_j \Delta h_j(\bm{x}^*) = 0
-$$
-
-We can make a number of conclusions about this optimal point (the KKT condidtions)
-
-$$\begin{aligned}
-f_i(\bm{x}^*)             &\leq 0, &\quad \forall i \\
-h_j(\bm{x}^*)             &= 0   , &\quad \forall j \\
-\lambda_i^*               &\geq 0, &\quad \forall i \\
-\lambda_i^* f_i(\bm{x}^*) &= 0,    &\quad \forall i
-\end{aligned}
-$$
-
-The first two must be true, as an optimal $\bm{x}^*$ must satisfy the conditions of
-the LP, i.e. the inequalities on $f_i$ and the equalities of $h_j$. The third
-must be true, as the optimal pair $(\bm{\lambda}^*, \bm{v}^*)$ must satisfy
-the conditions of our dual problem, that $\bm{lambda}$ is non-negative. and we arrive at
-the final condition through the following (i think)
-at our optimal $\bm{x}^*$ it is the case that $f_i(\bm{x}^*) \leq 0$ via our LP
-then if $(\bm{\lambda}^*, \bm{v}^*)$ maximises our dual, $\sum_i \lambda_i f_i(\bm{x}) \rightarrow 0$
-as a positive $\bm{\lambda}$ will make this summation more negative reducing the maximum
-therefore it should be 0 at our optimal points (there is also a proof on page 242)
-
-[^Feasible]
-
-[^Feasible]: This all assumes there is a feasible solution and strong duality, i.e. that
-the optimal solution to both the dual and primal problem is identical.
-
-Now, the paper we are wanting to discuss in this post, considers only
-convex differentiable loss functions. Luckily, in the case where
-convex $f$ and affine $h$, both the original formulation and
-the dual problem using the lagrangian produce the same optimal solution (page 244)
-or in other words, the point where KKT hold, is the optimal solution
-both to the LP and the dual lagrangian
-This conclusions follows from the KKT conditions. given an optimal $\bm{x}^*$
-and optimal $(\bm{\lambda}^*, \bm{v}^*)$ points that satisfy the conditions
-of the primal and the dual, and consequently the conditions above
-
-first we note that at $\bm{x} = \bm{x}^*$ the gradient of $L(\bm{x}, \bm{\lambda}^*, \bm{v}^*)$ is zero
-and consequently minimises $L(\bm{x}, \bm{\lambda}^*, \bm{v}^*)$ over $x$
-
-therefore our dual problem is equivalent to L at this point
-
-$$\begin{aligned}
-g(\bm{\lambda}^*, \bm{v}^*) &= L(\bm{x}^*, \bm{\lambda}^*, \bm{v}^*) \\
-                            &= f_0(\bm{x}^*) + \sum_i \lambda^*_i f_i(\bm{x}^*) + \sum_j v^*_i h_i(\bm{x}^*) \\
-                            &= f_0(x^*)
-\end{aligned}
-$$
-
-here we use conditions 2 and 4 from above leading to equality in the last line.
-
-[@BoydVandenbergheConvexOptimization{}, pages 244-245]
-
 ### Example Lagrangian Dual Problem
 
-Lagrangian for the example above is as follows
+Using the form of this new dual Lagrangian problem, we can lower-bound our
+example from above. Our Lagrangian is:
 
 $$\begin{aligned}
-L(p, b, \bm{\lambda}) &= -2p - b + \lambda_1 \left ( 5p + b - s \right ) + \lambda_2 \left ( b - 5 \right ) - \lambda_3 p - \lambda_4 b \\
-                      &= p \left ( 5 \lambda_1 - \lambda_3 - 2 \right ) + b \left ( \lambda_1 + \lambda_2 - \lambda_4 - 1 \right ) + \left ( - s \lambda_1 - 5 \lambda_2 \right ) \\
+L(p, b, \bm{\lambda}) &= -2p - b + \lambda_1 \left ( 5p + b - 10 \right ) + \lambda_2 \left ( b - 5 \right ) - \lambda_3 p - \lambda_4 b \\
+                      &= p \left ( 5 \lambda_1 - \lambda_3 - 2 \right ) + b \left ( \lambda_1 + \lambda_2 - \lambda_4 - 1 \right ) + \left ( - 10 \lambda_1 - 5 \lambda_2 \right ) \\
 \end{aligned}
 $$
 
-considering the dual problem. this is unbounded and equal to negative infinity for every value of $\bm{\lambda}$
-except for those, where $(5 \lambda_1 - \lambda_3 - 2) = 0$ and $(\lambda_1 + \lambda_2 - \lambda_4 - 1) = 0$
-and we want to maximise this result where these two equal 0
+We have no $\bm{v}$ term in this case due to a lack of equality constraints,
+and we have $(p, b)$ in place of $\bm{x}$. Our dual problem is then formulated
+as follows:
+
+$$\begin{aligned}
+&\text{maximize}         &\text{inf}_{p, b} \text{ } & p \left ( 5 \lambda_1 - \lambda_3 - 2 \right ) + b \left ( \lambda_1 + \lambda_2 - \lambda_4 - 1 \right ) + \left ( - 10 \lambda_1 - 5 \lambda_2 \right ) \\
+&\text{subject to} \quad &\bm{\lambda} & \succeq 0
+\end{aligned}
+$$
+
+What we notice is that this program is unbounded for all values of
+$\bm{\lambda}$ except for those where $(5 \lambda_1 - \lambda_3 - 2) = 0$ and
+$(\lambda_1 + \lambda_2 - \lambda_4 - 1) = 0$. If either of these terms is not
+zero, the corresponding $p$ or $b$ term can be arbitrarily small, and the
+infimum returns negative infinity. [^PropertyLinearProg] Using this, we can derive an analytic
+solution by first rearranging our two equalities
+
+[^PropertyLinearProg]: Linear programs are always unbounded like this, but this
+    is not generally true of optimisation problems.
 
 $$\begin{aligned}
 \lambda_1 &= 1/5 \lambda_3 + 2/5 \\
 \lambda_2 &= \lambda_4 + 1 - \lambda_1 \\
           &= \lambda_4 + 3/5 - 1/5 \lambda_3 \\
-\text{maximise}& -\left ( s \lambda_1 + 5 \lambda_2 \right ) \\
-\text{maximise}& -\left ( s/5 \lambda_3 + 2s/5 + 5 \lambda_4 + 3 - \lambda_3 \right ) \\
-\text{maximise}& -\left ( (s-1)/5 \lambda_3 + 2s/5 + 5 \lambda_4 + 3 \right ) \\
-\text{if the } \lambda_i \text{ terms are } > 0 \text{ then we get a small maximum.} \\
-\lambda_3 = 0, \lambda_4 = 0: &\quad -\left ( 2s/5 + 3 \right )
 \end{aligned}
 $$
 
-So, our solution to the dual problem is $-( 2 * 10 / 5 + 3) = -7$ and is accomplished
-where $2p + b = 7$ intersects the feasible region. See the picture above.
-
-[^LPExamples]
-
-[^LPExamples]: For many many more examples see this wonderful and free textbook [Convex Optimisation](https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf)
-
-## Paper
-
-with the background introduced we can look at the paper
-
-where $f$ is our convex differentiable function we are using to guide optimisation
-where $f(\bm{x}) = \sum_i f_i(x_i)$ Need to fix notation here
-i.e. for $L_2$ loss we have $f_i^{L_2}(x) = (x - x_i)^2$
-we have no equalities and so no $h$ part and end up with the following
-in our LP standard form
+and then substituting these into our objective function $L(p, b, \bm{\lambda})$ and simplifying
 
 $$\begin{aligned}
-&\text{minimise}     &\quad \sum_i f_i(x_i) & \\
-&\text{subject to}_i &\quad \hat{y}_k  - \hat{y}_i \leq 0, &\quad \forall \left ( k, i \right ) \in \mathfrak{I} \\
-&                    &\quad \hat{y}_i  - \hat{y}_j \leq 0, &\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+L(p, b, \bm{\lambda}) &= -\left ( 10 \lambda_1 + 5 \lambda_2 \right ) \\
+                      &= -\left ( 2 \lambda_3 + 4 + 5 \lambda_4 + 3 - \lambda_3 \right ) \\
+                      &= -\left ( \lambda_3 + 5 \lambda_4 + 7 \right )
 \end{aligned}
 $$
 
-above only kinda, this would have duplicated... the way I have written it
+and realising that if any $\lambda_i > 0$ we move away from our maximum, we reach a maximum of
 
 $$
-\hat{y}_i \preceq \hat{y}_j \rightarrow \hat{y}_i  - \hat{y}_j \leq 0 \text{and other side}
+\lambda_3 = 0, \lambda_4 = 0: \quad -7
 $$
 
-where there is both subject tos for each $i$ two for each
-has to allow for slackness in both directions.
+Finally, recalling that we negated the objective in the formulation of our original
+problem to fit the standard form, we get $7$. In other words, our lower bound is
+**identical** to the optimal value from our original problem! [^LPExamples] Activating the curve
+$2p +b = 7$ in our feasible region graph above also shows that this new
+constraint resulting from the Lagrangian dual program intersects the feasible
+at precisely one point, our optimal vertex from before.
 
-then our Lagrange for a specific point is
-each of our subject twos get their own $\lambda_i$
+[^LPExamples]: For many, many more examples, see this excellent and free textbook
+    [Convex Optimisation](https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf)
+
+### Karush-Kuhn-Tucker (KKT) Conditions
+
+If we assume, for a moment, that we know the optimal value $\bm{x}^*$ and
+optimal dual values $\bm{\lambda}^*$ and $\bm{v}^*$ of our Lagrangian and that
+our lower bound is equal to the standard form solution, as in the preceding
+example, we can conclude that the Lagrangian,
+$L(\bm{x}, \bm{\lambda}^*, \bm{v}^*)$ has attained its minimum at $\bm{x}^*$
+and consequently has a gradient of zero.
 
 $$
-L(y_i, \bm{\lambda}, \bm{v})_i = f^{loss}_i(y_i)  + \sum_j \lambda_j \left ( \hat{y}_i  - \hat{y}_j \right ) + \sum_k \lambda_k \left ( \hat{y}_k  - \hat{y}_i \right )
+\Delta o(\bm{x}^*) + \sum_i \lambda_i^* \Delta b_i (\bm{x}^*) + \sum_j v_j^* \Delta c_j(\bm{x}^*) = 0
 $$
 
-and our KKT for each $i$ (for the first derive by $y_i$)
+We can conclude several additional conditions that must hold at this optimal
+set of values. Together, these are the Karush-Kuhn-Tucker (KKT) Conditions:
 
 $$\begin{aligned}
-\delta f_0(y_i^*) + \sum_j \lambda_j^* - \sum_k \lambda_k^* &= 0 \\
-y_i^* - y_j^*                              &\leq 0, &\quad \forall (i, j) \in \mathfrak{I} \\
-\text{there is no equality constraint} \\
-\lambda_i^*                                &\geq 0, &\quad \forall i \\
-\lambda_i^* \left ( y_i^* - y_j^* \right ) &= 0,    &\quad \forall (i, j) \in \mathfrak{I}
+b_i(\bm{x}^*)             &\leq 0, &\quad \forall i \\
+c_j(\bm{x}^*)             &= 0   , &\quad \forall j \\
+\lambda_i^*               &\geq 0, &\quad \forall i \\
+\lambda_i^* b_i(\bm{x}^*) &= 0,    &\quad \forall i
 \end{aligned}
 $$
+
+The first two must hold as an optimal $\bm{x}^*$ must satisfy the constraints
+of our linear program's standard form. The third is true as the optimal
+$\bm{\lambda}^*$ and $\bm{v}^*$ must satisfy the constraint of the Lagrangian
+dual program. To reach the final condition, we build on the others. From the
+first, we know that $b_i(\bm{x}^*) \leq 0$. This means that any $\lambda_i > 0$
+will push our Lagrangian dual problem away from its maximum as one of its
+summations multiplies the positive $\lambda_i$ with a negative $b_i(\bm{x})$.
+Consequently, attaining the optimal solution requires that either $\lambda_i$
+or $b_i(\bm{x})$ equal zero producing the last condition.
+
+[^Feasible]
+
+[^Feasible]: This all assumes there is a feasible solution and strong duality,
+    i.e. that the optimal solution to both the dual and primal problem is
+    identical.
+
+It is not always the case that the primal and dual programs produce the same
+solution. If, however, our problem is convex, as in our example above, then we
+always have a zero duality gap when together values $\hat{\bm{x}}$,
+$\hat{\bm{\lambda}}$ and $\hat{\bm{v}}$ satisfy the KKT conditions.
+[^PapersConvexity] Without this convexity guarantee, the gradient of the
+Lagrangian equating to zero does not imply it has been minimised. When
+convexity does hold, though, we can use the KKT conditions to show that the
+following equality holds:
+
+[^PapersConvexity]: Luckily, the constraints in the linear program from the
+    paper we are looking at here are convex and the objective is restricted to
+    convex differentiable functions.
+
+$$\begin{aligned}
+g(\hat{\bm{\lambda}}, \hat{\bm{v}}) &= L(\hat{\bm{x}}, \hat{\bm{\lambda}}, \hat{\bm{v}}) \\
+                                    &= o(\hat{\bm{x}}) + \sum_i \hat{\lambda}_i b_i(\hat{\bm{x}}) + \sum_j \hat{v}_i c_i(\hat{\bm{x}}) \\
+                                    &= o(\hat{\bm{x}})
+\end{aligned}
+$$
+
+[@BoydVandenbergheConvexOptimization{}, pages 244-245]
+
+## Generalised Isotonic Regression
+
+Having covered the necessary background material, we can move to the paper. We
+aim to solve the following general version of the isotonic regression problem:
+
+$$\begin{aligned}
+&\text{minimise}           &\sum_i f_i(\hat{y}_i) & \\
+&\text{subject to}_i \quad &\hat{y}_i  - \hat{y}_j \leq 0, &\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+\end{aligned}
+$$
+
+where each $f_i : \mathbb{R} \rightarrow \mathbb{R}$ is a differentiable convex
+function. Should we wish to use an $L_2$ loss function, we would substitute
+$(\hat{y}_i - y_i)^2$ in place of $f_i(\hat{y})$.
+
+As a starting point, we consider the corresponding dual Lagrangian objective
+function and the KKT conditions. For a single point, $i$, the Lagrangian is:
+
+$$
+L_i(\hat{y}, \bm{\lambda})_i = f_i(\hat{y}_i)  + \sum_j \lambda_{ij} \left ( \hat{y}_i  - \hat{y}_j \right ) + \sum_k \lambda_{ki} \left ( \hat{y}_k  - \hat{y}_i \right )
+$$
+
+In the first summation, we include the constraints for all points larger than
+$i$ and in the second for all points smaller. The KKT for a single point $i$
+are:
+
+$$\begin{aligned}
+\frac{\partial f_i(\hat{y}_i^*)}{\partial \hat{y}_i^*} + \sum_j \lambda_{ij}^* - \sum_k \lambda_{ki}^* &= 0 \\
+\hat{y}_i^* - \hat{y}_j^*                                 &\leq 0, &\quad \forall (i, j) \in \mathfrak{I} \\
+\text{no equality constraints} \\
+\lambda_{ij}^*                                            &\geq 0, &\quad \forall (i, j) \in \mathfrak{I} \\
+\lambda_{ij}^* \left ( \hat{y}_i^* - \hat{y}_j^* \right ) &= 0,    &\quad \forall (i, j) \in \mathfrak{I}
+\end{aligned}
+$$
+
+---
 
 so our optimal solution, satisfies the constraints and
 the last condition implies that all $y_i^*$ are the same
@@ -861,26 +881,7 @@ value for each point, our partitioning.
 
 ### Algorithm Overview
 
-## How does this paper differ?
-
-Regularisation
-
-The approach in the paper
-- support convex differentiable functions
-
-supports multidimension
-
-https://www.stat.umn.edu/geyer/8054/notes/isotonic.pdf
-
-TO DELETE
-$$\begin{aligned}
-&\text{minimise}   &\quad f_0(\bm{x}) \\
-&\text{subject to} &\quad f_i(\bm{x}) \leq 0, \quad \forall i \\
-&                  &\quad h_j(\bm{x}) = 0,    \quad \forall j
-\end{aligned}
-$$
-TO DELETE
-
 ---
+
 
 ### References
