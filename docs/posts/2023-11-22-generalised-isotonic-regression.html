@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Generalised Isotonic Regression - In Depth</title>
+        <link rel="stylesheet" href="../css/syntax.css" />
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div class="backgroundpattern"></div>
+        <div id="body">
+            <div id="header">
+                <div id="logo">
+                    <a href="../">Ed's Site</a>
+                </div>
+                <div id="navigation">
+                    <a href="../">Home</a>
+                    <!-- <a href="/about.html">About</a> -->
+                    <!-- <a href="/contact.html">Contact</a> -->
+                    <a href="../blog.html">Blog</a>
+                    <a href="../notes.html">Notes</a>
+                    <a href="http://github.com/ewal31/mysite">Source</a>
+                </div>
+            </div>
+
+            <div id="content">
+                <h1>Generalised Isotonic Regression - In Depth</h1>
+                <div class="info">
+    Posted on November 22, 2023
+    
+</div>
+
+<div id="MultiIsoPlot"></div>
+<h2>What is Isotonic Regression?</h2>
+<p>Like other regression models, Isotonic Regression tries to find a predictive
+relationship between a set of features and corresponding observations. A method
+such as Linear Regression constrains the space of possible relationships such
+that the predictions vary linearly with changes in the feature space; in other
+words, it has a constant rate of change. Isotonic Regression, conversely, has
+no restrictions on its shape apart from requiring a strict non-decreasing (alt.
+non-increasing) relationship - typically a monotonic piecewise-constant
+function - meaning there can be large jumps between subsequent feature values.
+It can, therefore, be a helpful alternative when a monotonic relationship
+between variables exists, especially when this relationship does not follow an
+obvious Linear or Polynomial form typical in regression.</p>
+<p>In the classical formulation (with <span class="math inline">\(L_2\)</span> loss) where <span class="math inline">\(\mathfrak{I}\)</span> is a
+partial order defined over our independent variables, <em>Isotonic Regression</em> can
+be defined as the following optimisation problem.</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}   &amp;\quad \sum_i (\hat{y}_i - y_i)^2 &amp; \\
+&amp;\text{subject to} &amp;\quad \hat{y}_i \preceq \hat{y}_j, &amp;\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+\end{aligned}
+\]</span></p>
+<p>Throughout this post, we will discuss what a Linear Program is and how it leads
+to the algorithm discussed in <span class="citation" data-cites="LussRossetGeneralizedIsotonicRegression">(Ronny Luss and Rosset 2014)</span> for
+solving the Isotonic Regression problem in an arbitrary number of dimensions
+while supporting any convex differentiable loss function.</p>
+<h2>Linear Programming</h2>
+<p>Linear Programming is a generic approach to solving constrained problems with a
+linear objective function and linear constraints. The standard form of such a
+problem asks us to find a vector <span class="math inline">\(\bm{x} \in \mathbb{R}^p\)</span> minimising our
+objective <span class="math inline">\(o(\bm{x})\)</span> and takes the form:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}         &amp;o(\bm{x}) \\
+&amp;\text{subject to} \quad &amp;b_i(\bm{x}) &amp;\leq 0, &amp;\quad \forall i \\
+&amp;                        &amp;c_j(\bm{x}) &amp;=    0, &amp;\quad \forall j
+\end{aligned}
+\]</span></p>
+<p>where our inequalities <span class="math inline">\(b_i\)</span> and equalities <span class="math inline">\(c_j\)</span> express linear relationships.</p>
+<p>The advantage of prescribing such a form is that generic software can be
+written to solve any problem that fits the template. <span class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle" /><span class="sidenote">For example, the commercial software,
+<a href="https://www.mosek.com/">MOSEK</a>, or the the open source
+<a href="https://highs.dev/#top">HiGHS</a>, which I have used in this implementation.<br />
+<br />
+</span></span> With
+<span class="math inline">\(o\)</span> being any linear function, we are not even restricted to minimisation
+problems and inequalities of the form <span class="math inline">\(\leq 0\)</span>. Multiplying our objective by negative
+one lets us morph a maximisation problem into the above form. In the same
+way, a greater than inequality can be changed to a less than. Furthermore, an
+offset can be included to support equalities and inequalities with values other
+than zero. For example, the linear relation <span class="math inline">\(x \geq 5\)</span> changed to <span class="math inline">\(5 - x \leq 0\)</span> produces the function <span class="math inline">\(b_i(x) = 5 - x\)</span>, which also fits the above form. We
+can then use generic interior point or simplex solvers to minimise the objective.</p>
+<h3>Example Linear Program</h3>
+<p>Consider, for example, a hobbyist photographer and amateur baker. He wants to
+maximise the time he spends on his two favourite activities but, unfortunately,
+cannot finance them without limits. From these wishes, we can create a
+constrained optimisation problem.</p>
+<p><span class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle" /><span class="sidenote">You may choose to play around with setting up and solving some
+of these problems using an
+<a href="https://online-optimizer.appspot.com/?model=builtin:default.mod">online solver</a>.<br />
+<br />
+</span></span></p>
+<p>Our hobbyist wants to <em>maximise</em> his time doing his favourite activities;
+perhaps he prefers photography, <span class="math inline">\(p\)</span> over baking, <span class="math inline">\(b\)</span> (<span class="math inline">\(2p +b\)</span>). Unfortunately,
+photography is considerably more expensive at 5€ per hour than baking at 1€,
+and he has a limited budget of 10€ constraining the activities (<span class="math inline">\(5p + b \leq 10\)</span>).
+Finally, he does not want to make more baked goods than he can eat, so he
+limits himself to 5 hours of baking (<span class="math inline">\(b \leq 5\)</span>). Along with the natural
+assumption that a negative amount of time can not be spent on an activity, this
+produces the Linear Program:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{maximize}         &amp; 2 p + b \\
+&amp;\text{subject to} \quad &amp; 5 p + b &amp;\leq 10 \\
+&amp;                        &amp; b       &amp;\leq 5 \\
+&amp;                        &amp; p       &amp;\geq 0 \\
+&amp;                        &amp; b       &amp;\geq 0
+\end{aligned}
+\]</span></p>
+<p>With such few constraints and dimensions, this Linear Program is easily solved.
+We plot the constraints and choose the largest value possible; one of the
+vertices. <span class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle" /><span class="sidenote">Technically, it will be one of the vertices if there is only a
+single solution and otherwise, any point along a line between vertices if
+there are multiple solutions.<br />
+<br />
+</span></span> However, once we have more than three dimensions, it
+is more challenging to visualise such a problem. Regardless, a similar approach
+can be taken, checking each vertex of the feasible region of the corresponding
+multidimensional polytope.</p>
+<div id="LinearProgram"></div>
+<p>Plotting all of the constraints, we see our maximal vertex in the top right
+corner, which suggests that our hobbyist spend an hour a week taking pictures
+and five hours baking bread.</p>
+<p><span class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle" /><span class="sidenote">For a more in-depth introduction, see this video
+<a href="https://www.youtube.com/watch?v=E72DWgKP_1Y">The Art of Linear Programming</a><br />
+<br />
+</span></span></p>
+<p>We can also write this problem in the standard form we mentioned above.</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}         &amp; - 2p - b \\
+&amp;\text{subject to} \quad &amp; 5 p + b - s &amp;\leq 0 \\
+&amp;                        &amp; b - 5       &amp;\leq 0 \\
+&amp;                        &amp; -p          &amp;\leq 0 \\
+&amp;                        &amp; -b          &amp;\leq 0
+\end{aligned}
+\]</span></p>
+<h3>Lagrangian Dual Function</h3>
+<p>Given the standard form:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}         &amp;o(\bm{x}) \\
+&amp;\text{subject to} \quad &amp;b_i(\bm{x}) &amp;\leq 0, &amp;\quad \forall i \\
+&amp;                        &amp;c_j(\bm{x}) &amp;=    0, &amp;\quad \forall j
+\end{aligned}
+\]</span></p>
+<p>we also have the option to define a Lagrangian dual function. Essentially, this
+new definition relaxes the constraints by multiplying them with a
+<span class="math inline">\(\lambda_i \in \mathbb{R}_0^+\)</span> or <span class="math inline">\(v_i \in \mathbb{R}_0^+\)</span> term, for
+inequalities and equalities respectively, removing discontinuities in the
+search space. When violating constraints, we no longer move from a finite to an
+undefined objective value. Furthermore, by directly including the weighted sum
+of these constraints in the objective, the Lagrangian acts as a lower bound on
+the original problem.</p>
+<p><span class="math display">\[
+L(\bm{x}, \bm{\lambda}, \bm{v}) = o(\bm{x}) + \sum_i \lambda_i b_i(\bm{x}) + \sum_j v_j c_j(\bm{x})
+\]</span></p>
+<p>It is natural to ask what the optimal lower bound is for a given <span class="math inline">\(\bm{\lambda}\)</span>
+and <span class="math inline">\(\bm{v}\)</span>. This is the infimum of the above objective.</p>
+<p><span class="math display">\[
+g(\bm{\lambda}, \bm{v}) = \text{inf}_{\bm{x}} L(\bm{x}, \bm{\lambda}, \bm{v})
+\]</span></p>
+<p>Taking this objective, we then define the dual problem of our standard form
+above; the following convex maximisation problem:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{maximize}         &amp; g(\bm{\lambda}, \bm{v}) \\
+&amp;\text{subject to} \quad &amp; \bm{\lambda} \succeq 0
+\end{aligned}
+\]</span></p>
+<p><span class="citation" data-cites="BoydVandenbergheConvexOptimization">(Boyd and Vandenberghe 2004, pages 215-223)</span></p>
+<h3>Example Lagrangian Dual Problem</h3>
+<p>Using the form of this new dual Lagrangian problem, we can lower-bound our
+example from above. Our Lagrangian is:</p>
+<p><span class="math display">\[\begin{aligned}
+L(p, b, \bm{\lambda}) &amp;= -2p - b + \lambda_1 \left ( 5p + b - 10 \right ) + \lambda_2 \left ( b - 5 \right ) - \lambda_3 p - \lambda_4 b \\
+                      &amp;= p \left ( 5 \lambda_1 - \lambda_3 - 2 \right ) + b \left ( \lambda_1 + \lambda_2 - \lambda_4 - 1 \right ) + \left ( - 10 \lambda_1 - 5 \lambda_2 \right ) \\
+\end{aligned}
+\]</span></p>
+<p>We have no <span class="math inline">\(\bm{v}\)</span> term in this case due to a lack of equality constraints,
+and we have <span class="math inline">\((p, b)\)</span> in place of <span class="math inline">\(\bm{x}\)</span>. Our dual problem is then formulated
+as follows:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{maximize}         &amp;\text{inf}_{p, b} \text{ } &amp; p \left ( 5 \lambda_1 - \lambda_3 - 2 \right ) + b \left ( \lambda_1 + \lambda_2 - \lambda_4 - 1 \right ) + \left ( - 10 \lambda_1 - 5 \lambda_2 \right ) \\
+&amp;\text{subject to} \quad &amp;\bm{\lambda} &amp; \succeq 0
+\end{aligned}
+\]</span></p>
+<p>What we notice is that this program is unbounded for all values of
+<span class="math inline">\(\bm{\lambda}\)</span> except for those where <span class="math inline">\((5 \lambda_1 - \lambda_3 - 2) = 0\)</span> and
+<span class="math inline">\((\lambda_1 + \lambda_2 - \lambda_4 - 1) = 0\)</span>. If either of these terms is not
+zero, the corresponding <span class="math inline">\(p\)</span> or <span class="math inline">\(b\)</span> term can be arbitrarily small, and the
+infimum returns negative infinity. <span class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle" /><span class="sidenote">Linear programs are always unbounded like this, but this
+is not generally true of optimisation problems.<br />
+<br />
+</span></span> Using this, we can derive an analytic
+solution by first rearranging our two equalities</p>
+<p><span class="math display">\[\begin{aligned}
+\lambda_1 &amp;= 1/5 \lambda_3 + 2/5 \\
+\lambda_2 &amp;= \lambda_4 + 1 - \lambda_1 \\
+          &amp;= \lambda_4 + 3/5 - 1/5 \lambda_3 \\
+\end{aligned}
+\]</span></p>
+<p>and then substituting these into our objective function <span class="math inline">\(L(p, b, \bm{\lambda})\)</span> and simplifying</p>
+<p><span class="math display">\[\begin{aligned}
+L(p, b, \bm{\lambda}) &amp;= -\left ( 10 \lambda_1 + 5 \lambda_2 \right ) \\
+                      &amp;= -\left ( 2 \lambda_3 + 4 + 5 \lambda_4 + 3 - \lambda_3 \right ) \\
+                      &amp;= -\left ( \lambda_3 + 5 \lambda_4 + 7 \right )
+\end{aligned}
+\]</span></p>
+<p>and realising that if any <span class="math inline">\(\lambda_i &gt; 0\)</span> we move away from our maximum, we reach a maximum of</p>
+<p><span class="math display">\[
+\lambda_3 = 0, \lambda_4 = 0: \quad -7
+\]</span></p>
+<p>Finally, recalling that we negated the objective in the formulation of our original
+problem to fit the standard form, we get <span class="math inline">\(7\)</span>. In other words, our lower bound is
+<strong>identical</strong> to the optimal value from our original problem! <span class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle" /><span class="sidenote">For many, many more examples, see this excellent and free textbook
+<a href="https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf">Convex Optimisation</a><br />
+<br />
+</span></span> Activating the curve
+<span class="math inline">\(2p +b = 7\)</span> in our feasible region graph above also shows that this new
+constraint resulting from the Lagrangian dual program intersects the feasible
+at precisely one point, our optimal vertex from before.</p>
+<h3>Karush-Kuhn-Tucker (KKT) Conditions</h3>
+<p>If we assume, for a moment, that we know the optimal value <span class="math inline">\(\bm{x}^*\)</span> and
+optimal dual values <span class="math inline">\(\bm{\lambda}^*\)</span> and <span class="math inline">\(\bm{v}^*\)</span> of our Lagrangian and that
+our lower bound is equal to the standard form solution, as in the preceding
+example, we can conclude that the Lagrangian,
+<span class="math inline">\(L(\bm{x}, \bm{\lambda}^*, \bm{v}^*)\)</span> has attained its minimum at <span class="math inline">\(\bm{x}^*\)</span>
+and consequently has a gradient of zero.</p>
+<p><span class="math display">\[
+\Delta o(\bm{x}^*) + \sum_i \lambda_i^* \Delta b_i (\bm{x}^*) + \sum_j v_j^* \Delta c_j(\bm{x}^*) = 0
+\]</span></p>
+<p>We can conclude several additional conditions that must hold at this optimal
+set of values. Together, these are the Karush-Kuhn-Tucker (KKT) Conditions:</p>
+<p><span class="math display">\[\begin{aligned}
+b_i(\bm{x}^*)             &amp;\leq 0, &amp;\quad \forall i \\
+c_j(\bm{x}^*)             &amp;= 0   , &amp;\quad \forall j \\
+\lambda_i^*               &amp;\geq 0, &amp;\quad \forall i \\
+\lambda_i^* b_i(\bm{x}^*) &amp;= 0,    &amp;\quad \forall i
+\end{aligned}
+\]</span></p>
+<p>The first two must hold as an optimal <span class="math inline">\(\bm{x}^*\)</span> must satisfy the constraints
+of our linear program's standard form. The third is true as the optimal
+<span class="math inline">\(\bm{\lambda}^*\)</span> and <span class="math inline">\(\bm{v}^*\)</span> must satisfy the constraint of the Lagrangian
+dual program. To reach the final condition, we build on the others. From the
+first, we know that <span class="math inline">\(b_i(\bm{x}^*) \leq 0\)</span>. This means that any <span class="math inline">\(\lambda_i &gt; 0\)</span>
+will push our Lagrangian dual problem away from its maximum as one of its
+summations multiplies the positive <span class="math inline">\(\lambda_i\)</span> with a negative <span class="math inline">\(b_i(\bm{x})\)</span>.
+Consequently, attaining the optimal solution requires that either <span class="math inline">\(\lambda_i\)</span>
+or <span class="math inline">\(b_i(\bm{x})\)</span> equal zero producing the last condition.</p>
+<p><span class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle" /><span class="sidenote">This all assumes there is a feasible solution and strong duality,
+i.e. that the optimal solution to both the dual and primal problem is
+identical.<br />
+<br />
+</span></span></p>
+<p>It is not always the case that the primal and dual programs produce the same
+solution. If, however, our problem is convex, as in our example above, then we
+always have a zero duality gap when together values <span class="math inline">\(\hat{\bm{x}}\)</span>,
+<span class="math inline">\(\hat{\bm{\lambda}}\)</span> and <span class="math inline">\(\hat{\bm{v}}\)</span> satisfy the KKT conditions.
+<span class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle" /><span class="sidenote">Luckily, the constraints in the linear program from the
+paper we are looking at here are convex and the objective is restricted to
+convex differentiable functions.<br />
+<br />
+</span></span> Without this convexity guarantee, the gradient of the
+Lagrangian equating to zero does not imply it has been minimised. When
+convexity does hold, though, we can use the KKT conditions to show that the
+following equality holds:</p>
+<p><span class="math display">\[\begin{aligned}
+g(\hat{\bm{\lambda}}, \hat{\bm{v}}) &amp;= L(\hat{\bm{x}}, \hat{\bm{\lambda}}, \hat{\bm{v}}) \\
+                                    &amp;= o(\hat{\bm{x}}) + \sum_i \hat{\lambda}_i b_i(\hat{\bm{x}}) + \sum_j \hat{v}_i c_i(\hat{\bm{x}}) \\
+                                    &amp;= o(\hat{\bm{x}})
+\end{aligned}
+\]</span></p>
+<p><span class="citation" data-cites="BoydVandenbergheConvexOptimization">(Boyd and Vandenberghe 2004, pages 244-245)</span></p>
+<h2>Generalised Isotonic Regression</h2>
+<p>Having covered the necessary background material, we can move to the paper. We
+aim to solve the following general version of the isotonic regression problem:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}           &amp;\sum_i f_i(\hat{y}_i) &amp; \\
+&amp;\text{subject to}_i \quad &amp;\hat{y}_i  - \hat{y}_j \leq 0, &amp;\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+\end{aligned}
+\]</span></p>
+<p>where each <span class="math inline">\(f_i : \mathbb{R} \rightarrow \mathbb{R}\)</span> is a differentiable convex
+function. Should we wish to use an <span class="math inline">\(L_2\)</span> loss function, we would substitute
+<span class="math inline">\((\hat{y}_i - y_i)^2\)</span> in place of <span class="math inline">\(f_i(\hat{y})\)</span>.</p>
+<p>As a starting point, we consider the corresponding dual Lagrangian objective
+function and the KKT conditions. For a single point, <span class="math inline">\(i\)</span>, the Lagrangian is:</p>
+<p><span class="math display">\[
+L_i(\hat{\bm{y}}, \bm{\lambda}) = f_i(\hat{y}_i)  + \sum_j \lambda_{ij} \left ( \hat{y}_i  - \hat{y}_j \right ) + \sum_k \lambda_{ki} \left ( \hat{y}_k  - \hat{y}_i \right )
+\]</span></p>
+<p>In the first summation, we include the constraints for all points larger than
+<span class="math inline">\(i\)</span> and in the second for all points smaller. The KKT for a single point <span class="math inline">\(i\)</span>
+are:</p>
+<p><span class="math display">\[\begin{aligned}
+\frac{\partial f_i(\hat{y}_i^*)}{\partial \hat{y}_i^*} + \sum_j \lambda_{ij}^* - \sum_k \lambda_{ki}^* &amp;= 0 \\
+\hat{y}_i^* - \hat{y}_j^*                                 &amp;\leq 0, &amp;\quad \forall (i, j) \in \mathfrak{I} \\
+\text{no equality constraints} \\
+\lambda_{ij}^*                                            &amp;\geq 0, &amp;\quad \forall (i, j) \in \mathfrak{I} \\
+\lambda_{ij}^* \left ( \hat{y}_i^* - \hat{y}_j^* \right ) &amp;= 0,    &amp;\quad \forall (i, j) \in \mathfrak{I}
+\end{aligned}
+\]</span></p>
+<p>These conditions reveal several properties of the optimal solution:</p>
+<ol>
+<li>From conditions two and four, we conclude that optimal estimates
+<span class="math inline">\(\hat{y}_i^*\)</span> and <span class="math inline">\(\hat{y}_j^*\)</span> for isotonically constrained points <span class="math inline">\(i \preceq j\)</span> are either identical, as would be the case when the unconstrained
+estimate otherwise produces <span class="math inline">\(\hat{y}_i &gt; \hat{y}_j\)</span>, or the two estimates
+trivially satisfy the constraint and <span class="math inline">\(\lambda_{ij} = 0\)</span>.</li>
+<li>Consequently, the optimal solution partitions the space into blocks <span class="math inline">\(V\)</span>,
+where every point within a block has the identical estimate <span class="math inline">\(\hat{y}_V^*\)</span></li>
+<li>The second condition, furthermore, implies isotonicity at the optimum.</li>
+</ol>
+<p>Therefore, the paper's authors suggest an algorithm which iteratively selects
+the block <span class="math inline">\(V\)</span> with the largest between-group variance and seeks to partition
+this group or conclude that it is already optimal and move on to the next. An
+example can be seen in the plot below. As with many statistical and machine
+learning algorithms, with too many iterations, it appears to overfit the
+solution.</p>
+<div id="UniIsoPlot"></div>
+<h3>Optimal Cut</h3>
+<p>From the first KKT condition above, we know that a block <span class="math inline">\(V\)</span> that is already
+optimally partitioned will satisfy:</p>
+<p><span class="math display">\[
+\sum_{i \in V} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} = 0
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle" /><span class="sidenote">Our first KKT condition is a telescopic series that
+sums to zero. Consider three points <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span> and <span class="math inline">\(c\)</span>; all terms cancel out
+when summed.
+<span class="math display">\[
+\begin{aligned}
+a&amp;: 0 - \lambda_{ab} - \lambda_{ac} \\
+b&amp;: \lambda_{ab} - \lambda_{bc} \\
+c&amp;: \lambda_{ac} + \lambda_{bc} \\
+\end{aligned}
+\]</span><br />
+<br />
+</span></span></p>
+<p>If, however, this is not the case, we can find a more optimal solution by
+partitioning our block into two subblocks <span class="math inline">\(V_-\)</span> and <span class="math inline">\(V_+\)</span>, where all points
+<span class="math inline">\(i\in V_-\)</span> are smaller than those <span class="math inline">\(j \in V_+\)</span> according to our isotonicity
+constraints.</p>
+<p><span class="math display">\[
+\sum_{j \in V_+} \frac{\partial f_j(\hat{y}_V)}{\partial \hat{y}_V} - \sum_{i \in V_-} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} &lt; 0
+\]</span></p>
+<p>However, this only happens if the first summand has a net negative gradient and
+the second a net positive. In other words, a better partitioning implies that
+our estimates <span class="math inline">\(\hat{y}_j\)</span> want to increase in magnitude, while <span class="math inline">\(\hat{y}_i\)</span>
+wants to decrease, maintaining isotonicity. After partitioning a block, this
+difference also measures how well separated the two new blocks are and is used
+to guide the iterative splitting. At each iteration, therefore, we select the
+block with the maximal difference and search for a new optimal cut or to verify
+that the block is already optimal.</p>
+<p><span class="math display">\[
+\text{minimise}_{\left ( V^-, V^+ \right ) \in V} \left ( \sum_{j \in V^+} \frac{\partial f_j(\hat{y}_V)}{\partial \hat{y}_V} - \sum_{i \in V^-} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \right )
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-9" class="margin-toggle" /><span class="sidenote">This is equivalent to maximising the between-group
+variance at each step. For details see
+<span class="citation" data-cites="LussRossetEfficientRegularizedIsotonicRegression">(Rosset Luss Ronny and Shahar 2012)</span><br />
+<br />
+</span></span></p>
+<p>Introducing a new variable <span class="math inline">\(x_i\)</span>, which can be either <span class="math inline">\(1\)</span> or <span class="math inline">\(-1\)</span>, this
+minimisation problem is equivalent to the following binary program:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}   &amp;\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \\
+&amp;\text{subject to} &amp;\quad x_i \leq x_j                      &amp;\quad \forall (i,j) \in \mathfrak{I}_V \\
+&amp;                  &amp;\quad x_i \in \left \{ -1, +1 \right \} &amp;\quad \forall i \in V
+\end{aligned}
+\]</span></p>
+<p>Finally, relaxing the integer constraint, allowing <span class="math inline">\(x_i\)</span> to vary continuously
+between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span>, and converting it to our standard form, we reach the
+linear program from the paper:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}    &amp;\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \\
+&amp;\text{subject to}  &amp;\quad  x_i - x_j \leq 0 &amp;\quad \forall (i,j) \in \mathfrak{I}_V \\
+&amp;                   &amp;\quad -x_i - 1   \leq 0 &amp;\quad \forall i \in V \\
+&amp;                   &amp;\quad  x_i - 1   \leq 0 &amp;\quad \forall i \in V
+\end{aligned}
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-10" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-10" class="margin-toggle" /><span class="sidenote">Previous work from the author of the discussed
+paper typically considers a maximisation problem instead of the
+minimisation problem we discuss here. See for example,
+<span class="citation" data-cites="LussRossetDecomposingIsotonicRegression">(Ronny Luss, Rosset, and Shahar 2010, equation 3)</span> and
+<span class="citation" data-cites="LussRossetEfficientRegularizedIsotonicRegression">(Rosset Luss Ronny and Shahar 2012, equation 3)</span>. These
+two variants are equivalent, but the order of comparison is reversed. Here
+we take the derivative of the <span class="math inline">\(L_2\)</span> loss to be <span class="math inline">\(2 (\hat{y}_V - y_i)\)</span>,
+whereas the previous works take this to be <span class="math inline">\(2 (y_i - \hat{y}_V)\)</span>. Switching
+from a minimisation to a maximisation requires few changes. In the case of
+the final matrix form below, we would swap the maximisation for
+minimisation and swap the domain of our variables <span class="math inline">\(y_i\)</span> from <span class="math inline">\(y_i \leq 0\)</span>
+to <span class="math inline">\(y_i \geq 0\)</span>. In my full implementation, I have actually implemented
+this opposite variant following the implementation from the author.<br />
+<br />
+</span></span></p>
+<h2>Implementation</h2>
+<p>Having discussed the core of the paper, we now implement the algorithm for
+solving the generalised isotonic regression problem. To start, we need a method
+to discover and store the monotonicity constraints between a set of points
+<code>points_to_adjacency</code>. Then, we need to be able to encode these constraints
+into a matrix, <code>adjacency_to_LP_standard_form</code>. Finally, we set up our linear
+program and solve it, <code>minimum_cut</code>.</p>
+<h3>Isotonic Constraints</h3>
+<p>Points can be ordered unambiguously in a single dimension according to the
+traditional <span class="math inline">\(\leq\)</span> operator, whereby <span class="math inline">\(0 \leq 1 \leq 2 \leq ...\)</span>. With at least
+<span class="math inline">\(2\)</span>-dimensions, however, things are more complex. Which of the two points <span class="math inline">\((1, 3)\)</span> and <span class="math inline">\((3, 1)\)</span> are larger? One option would be to order the pairs
+lexicographically, in which case the second is larger. Here, however, we
+consider a domination-based ordering, whereby a point <span class="math inline">\((x_1, x_2)\)</span> is
+considered smaller than or equal to another point <span class="math inline">\((y_1, y_2)\)</span> if both <span class="math inline">\(x_1 \leq y_1\)</span> and <span class="math inline">\(x_2 \leq y_2\)</span>. Following this relation, the two points <span class="math inline">\((1, 3)\)</span>
+and <span class="math inline">\((3, 1)\)</span> have no relation to each another. They are both, however, larger
+than the point <span class="math inline">\((1, 1)\)</span> and smaller than the point <span class="math inline">\((3, 3)\)</span>. Following this
+relation, we graphically show the ordering for several points in
+<span class="math inline">\(2\)</span>-dimensional space below.</p>
+<div id="AdjacencyMatrix"></div>
+<p>We save this ordering as a sparse adjacency matrix to reduce memory
+consumption. Clicking on the "Adjacency Matrix" button, we see, as is typical
+of an adjacency matrix, that where there is a <span class="math inline">\(1\)</span>, the column corresponding
+point is less than or equal to the row corresponding point. However, we have
+not added a <span class="math inline">\(1\)</span> for every point smaller than another. We could have included
+all of these, and the implementation would still have worked. The additional
+<span class="math inline">\(1\)</span>'s are redundant; removing them is an optimisation to reduce the number of
+constraints passed into the linear program solver to improve performance.</p>
+<p><span class="sidenote-wrapper"><label for="sn-11" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-11" class="margin-toggle" /><span class="sidenote">A potential alternative to the brute force approach
+I have coded here might be to make use of the approach of
+<span class="citation" data-cites="BentleyMultidimensionalDivideAndConquer">(Bentley 1980)</span> determining a ranking based on
+the number of points dominated by each point. This can be done in
+<span class="math inline">\(T(N, k) = O \left ( N \text{log}^{k-1} N \right )\)</span> time, with <span class="math inline">\(k\)</span>
+dimensions and <span class="math inline">\(N\)</span> points. We would then only need to compare points with
+those of the previous rank.<br />
+<br />
+</span></span></p>
+<p>We now introduce a function for creating this reduced adjacency matrix.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">typename</span> V<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>points_to_adjacency<span class="op">(</span><span class="at">const</span> Eigen<span class="op">::</span>MatrixXd<span class="op">&amp;</span> points<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">uint64_t</span> total_points <span class="op">=</span> points<span class="op">.</span>rows<span class="op">();</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> adjacency<span class="op">(</span>total_points<span class="op">,</span> total_points<span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  VectorXu degree <span class="op">=</span> VectorXu<span class="op">::</span>Zero<span class="op">(</span>total_points<span class="op">);</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>VectorX<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> is_predecessor <span class="op">=</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      Eigen<span class="op">::</span>VectorX<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;::</span>Zero<span class="op">(</span>total_points<span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>VectorX<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> is_equal <span class="op">=</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      Eigen<span class="op">::</span>VectorX<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;::</span>Zero<span class="op">(</span>total_points<span class="op">);</span></span></code></pre></div>
+<p>First, we sort the points lexicographically in <span class="math inline">\(O(N \text{log} N)\)</span> time in
+order to reduce the total comparisons.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span><span class="op">&amp;</span> sorted_idxs <span class="op">=</span> argsort<span class="op">(</span>points<span class="op">);</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> Eigen<span class="op">::</span>MatrixXd sorted_points <span class="op">=</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>      points<span class="op">(</span>sorted_idxs<span class="op">,</span> Eigen<span class="op">::</span>all<span class="op">).</span>transpose<span class="op">();</span></span></code></pre></div>
+<p>Next, we iterate through the points and compare each with all previous points.
+We add any points smaller than the current point without a successor also
+smaller than the current point. This we complete with roughly <span class="math inline">\(O(N^2/2)\)</span>
+comparisons.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">uint64_t</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> total_points<span class="op">;</span> <span class="op">++</span>i<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">auto</span><span class="op">&amp;</span> previous_points <span class="op">=</span> sorted_points<span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        Eigen<span class="op">::</span>all<span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        VectorXu<span class="op">::</span>LinSpaced<span class="op">(</span>i<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> i<span class="op">-</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">).</span>array<span class="op">();</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="kw">auto</span><span class="op">&amp;</span> current_point <span class="op">=</span> sorted_points<span class="op">(</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        Eigen<span class="op">::</span>all<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        VectorXu<span class="op">::</span>LinSpaced<span class="op">(</span>i<span class="op">,</span> i<span class="op">,</span> i<span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">).</span>array<span class="op">();</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    is_predecessor<span class="op">(</span>Eigen<span class="op">::</span>seq<span class="op">(</span><span class="dv">0</span><span class="op">,</span> i<span class="op">-</span><span class="dv">1</span><span class="op">))</span> <span class="op">=</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">(</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            previous_points <span class="op">&lt;=</span> current_point</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">).</span>colwise<span class="op">().</span>all<span class="op">();</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    degree<span class="op">(</span>i<span class="op">)</span> <span class="op">=</span> is_predecessor<span class="op">.</span>count<span class="op">();</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">/* If there is a chain of points that are all predecessors,</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">     * we take only the largest. So, we check if the outgoing</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">     * edge of a predecessor connects to another predecessor</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">     * (which would be included instead).</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">     */</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>Index j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> adjacency<span class="op">.</span>outerSize<span class="op">();</span> <span class="op">++</span>j<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>is_predecessor<span class="op">(</span>j<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>          Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;::</span>InnerIterator it<span class="op">(</span>adjacency<span class="op">,</span> j<span class="op">);</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>          it<span class="op">;</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>          <span class="op">++</span>it</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>          <span class="cf">if</span> <span class="op">(</span>it<span class="op">.</span>value<span class="op">()</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>is_equal<span class="op">(</span>it<span class="op">.</span>row<span class="op">()))</span> <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>            is_predecessor<span class="op">(</span>it<span class="op">.</span>row<span class="op">())</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    adjacency<span class="op">.</span>col<span class="op">(</span>i<span class="op">)</span> <span class="op">=</span> is_predecessor<span class="op">.</span>sparseView<span class="op">();</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> adjacency<span class="op">;</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3>Minimum Cut / Maximum Flow</h3>
+<p>To solve the optimal cut, we use the open-source linear solver
+<a href="https://highs.dev/">HiGHS</a>. This requires us to convert our linear program
+into matrix form.</p>
+<p><span class="math display">\[\begin{aligned}
+\text{minimise}    &amp;\quad \bm{b}^T \bm{x} \\
+\text {subject to} &amp;\quad \bm{A} \bm{x} \leq \bm{c} \\
+\end{aligned}
+\]</span></p>
+<p>Our example adjacency matrix from above in this matrix form is as follows:</p>
+<p><span class="math display">\[\begin{aligned}
+&amp;\bm{A} &amp;\bm{x} &amp;\leq &amp;\bm{c} \\
+&amp;\begin{bmatrix}
+ 1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  1 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  1 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  0 &amp;  1 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  0 &amp;  0 &amp;  1 \\
+-1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp; -1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp; -1 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp; -1 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  0 &amp; -1 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  0 &amp;  0 &amp; -1 \\
+ 1 &amp; -1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+-1 &amp;  1 &amp;  0 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  1 &amp; -1 &amp;  0 &amp;  0 &amp;  0 \\
+ 0 &amp;  1 &amp;  0 &amp; -1 &amp;  0 &amp;  0 \\
+ 0 &amp;  0 &amp;  1 &amp;  0 &amp;  0 &amp; -1 \\
+ 0 &amp;  0 &amp;  0 &amp;  1 &amp; -1 &amp;  0 \\
+ 0 &amp;  0 &amp;  0 &amp;  0 &amp;  1 &amp; -1
+\end{bmatrix}
+&amp;\begin{bmatrix}
+x_1 \\
+x_2 \\
+x_3 \\
+x_4 \\
+x_5 \\
+x_6
+\end{bmatrix}
+&amp;\leq
+&amp;\begin{bmatrix}
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+1 \\
+0 \\
+0 \\
+0 \\
+0 \\
+0 \\
+0 \\
+0
+\end{bmatrix}
+\end{aligned}
+\]</span></p>
+<p>The first six rows represent the <span class="math inline">\(x_i \leq 1\)</span> constraints. We multiply each
+side of the <span class="math inline">\(-1 \leq x_1\)</span> constraints by <span class="math inline">\(-1\)</span> to get <span class="math inline">\(-x_i \leq 1\)</span> filling the
+next six rows. The last seven correspond to the isotonicity constraints
+<span class="math inline">\(x_i - x_j \leq 0\)</span> from the adjacency matrix. We encode the objective with the
+matrix <span class="math inline">\(b\)</span>.</p>
+<p><span class="math display">\[
+\bm{b} = \begin{bmatrix}
+\frac{\partial f_1(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_2(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_3(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_4(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_5(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_6(\hat{y})}{\partial \hat{y}}
+\end{bmatrix}
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-12" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-12" class="margin-toggle" /><span class="sidenote">Another example of converting a Linear Program to
+matrix form can be seen on the first few slides
+<a href="https://vanderbei.princeton.edu/542/lectures/lec6.pdf">here</a>.<br />
+<br />
+</span></span></p>
+<p>The function <code>adjacency_to_LP_standard_form</code> builds the constraint matrix <span class="math inline">\(A^T\)</span>
+for a selected subset of points <code>considered_idxs</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>adjacency_to_LP_standard_form<span class="op">(</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;&amp;</span> adjacency_matrix<span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> VectorXu<span class="op">&amp;</span> considered_idxs</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">uint64_t</span> total_constraints <span class="op">=</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      constraints_count<span class="op">(</span>adjacency_matrix<span class="op">,</span> considered_idxs<span class="op">);</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">uint64_t</span> total_observations <span class="op">=</span> considered_idxs<span class="op">.</span>rows<span class="op">();</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="dt">uint64_t</span> columns <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> total_observations <span class="op">+</span> total_constraints<span class="op">;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">int</span><span class="op">,</span> Eigen<span class="op">::</span>ColMajor<span class="op">&gt;</span> standard_form<span class="op">(</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      total_observations<span class="op">,</span> columns<span class="op">);</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> idx <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>Index j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> total_observations<span class="op">;</span> <span class="op">++</span>j<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> it <span class="op">=</span> Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;::</span>InnerIterator it<span class="op">(</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        adjacency_matrix<span class="op">,</span> considered_idxs<span class="op">(</span>j<span class="op">));</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      it<span class="op">;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      it<span class="op">;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">++</span>it</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="kw">auto</span> row_idx <span class="op">=</span> <span class="bu">std::</span>find<span class="op">(</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>          considered_idxs<span class="op">.</span>begin<span class="op">(),</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>          considered_idxs<span class="op">.</span>end<span class="op">(),</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>          it<span class="op">.</span>row<span class="op">());</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      <span class="co">// add isotonicity constraint if both points in</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>      <span class="co">// considered subset</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>row_idx <span class="op">!=</span> considered_idxs<span class="op">.</span>end<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// smaller point</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        standard_form<span class="op">.</span>insert<span class="op">(</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            <span class="bu">std::</span>distance<span class="op">(</span>considered_idxs<span class="op">.</span>begin<span class="op">(),</span> row_idx<span class="op">),</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>            <span class="dv">2</span> <span class="op">*</span> total_observations <span class="op">+</span> idx<span class="op">)</span> <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">// larger point</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        standard_form<span class="op">.</span>insert<span class="op">(</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>            j<span class="op">,</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>            <span class="dv">2</span> <span class="op">*</span> total_observations <span class="op">+</span> idx<span class="op">)</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">++</span>idx<span class="op">;</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// bound x by -1 and 1 (source and sink)</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    standard_form<span class="op">.</span>insert<span class="op">(</span>j<span class="op">,</span> j<span class="op">)</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    standard_form<span class="op">.</span>insert<span class="op">(</span>j<span class="op">,</span> j <span class="op">+</span> total_observations<span class="op">)</span> <span class="op">=</span> <span class="op">-</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  standard_form<span class="op">.</span>makeCompressed<span class="op">();</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> standard_form<span class="op">;</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We could put this into the solver as formulated. Instead, following the
+suggestion of the paper's author, we implement the dual linear program,
+switching from the minimum cut to the maximum flow variant, a relatively
+mechanical process, now that we have put it into the matrix form. The
+conversion rules are detailed under <em>Constructing the dual LP</em>
+<a href="https://en.wikipedia.org/wiki/Dual_linear_program#Constructing_the_dual_LP">here</a>.</p>
+<p><span class="math display">\[\begin{aligned}
+\text{minimise}    &amp;\quad \bm{b}^T \bm{x}                             &amp;\quad \text{maximise}    &amp;\quad \bm{c}^T \bm{y} \\
+\text {subject to} &amp;\quad \bm{A} \bm{x} \leq \bm{c} \quad \rightarrow &amp;\quad \text {subject to} &amp;\quad \bm{A}^T \bm{y} = \bm{b} \\
+                   &amp;\quad \bm{x} \in \mathbb{R}^N                     &amp;\quad                    &amp;\quad \bm{y} \leq 0
+\end{aligned}
+\]</span></p>
+<p><span class="sidenote-wrapper"><label for="sn-13" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-13" class="margin-toggle" /><span class="sidenote">Realising that this Min-Cut problem can be reformulated
+as a Max-Flow problem permits using many other algorithms. Just recently,
+this was even discussed on
+<a href="https://www.quantamagazine.org/researchers-achieve-absurdly-fast-algorithm-for-network-flow-20220608/">Quanta</a>
+or the more technical presentation
+<a href="https://www.youtube.com/watch?v=KsMtVthpkzI">here</a>. Other algorithms, such
+as <a href="https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm">Ford Fulkerson</a>,
+operate directly on the maximum flow graph. For more information about the
+correspondence between the
+<a href="https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem#Linear_program_formulation">Max-Flow and Min-Cut problems</a>.<br />
+<br />
+</span></span></p>
+<p>The first step to setting up HiGHS for solving our linear program is to declare
+the optimisation direction.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Eigen<span class="op">::</span>VectorX<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>minimum_cut<span class="op">(</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;&amp;</span> adjacency_matrix<span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> Eigen<span class="op">::</span>VectorXd loss_gradient<span class="op">,</span> <span class="co">// z in the paper</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> VectorXu considered_idxs</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  HighsModel model<span class="op">;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">sense_</span> <span class="op">=</span> ObjSense<span class="op">::</span>kMaximize<span class="op">;</span></span></code></pre></div>
+<p>Next, we create the matrix <span class="math inline">\(A^T\)</span>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="at">const</span> <span class="kw">auto</span> A <span class="op">=</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>      adjacency_to_LP_standard_form<span class="op">(</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>          adjacency_matrix<span class="op">,</span> considered_idxs<span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">num_col_</span> <span class="op">=</span> A<span class="op">.</span>cols<span class="op">();</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">num_row_</span> <span class="op">=</span> A<span class="op">.</span>rows<span class="op">();</span></span></code></pre></div>
+<p>HiGHS requires that we flatten the matrix <span class="math inline">\(A^T\)</span> into three vectors
+corresponding to the compressed column scheme. The first contains the contents
+- in this case, column-wise - the second, the corresponding row for each value
+and the third, the index where each new column starts. This is actually the
+same format the Eigen uses for its compressed sparse matrices by default.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;</span> column_start_positions<span class="op">(</span>A<span class="op">.</span>cols<span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">int64_t</span><span class="op">&gt;</span> nonzero_row_index<span class="op">(</span>A<span class="op">.</span>nonZeros<span class="op">());</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> nonzero_values<span class="op">(</span>A<span class="op">.</span>nonZeros<span class="op">());</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">uint64_t</span> idx <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>Index j <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> A<span class="op">.</span>outerSize<span class="op">();</span> <span class="op">++</span>j<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    column_start_positions<span class="op">[</span>j<span class="op">]</span> <span class="op">=</span> idx<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span>Eigen<span class="op">::</span>SparseMatrix<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;::</span>InnerIterator it<span class="op">(</span>A<span class="op">,</span> j<span class="op">);</span> it<span class="op">;</span> <span class="op">++</span>it<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      nonzero_row_index<span class="op">[</span>idx<span class="op">]</span> <span class="op">=</span> it<span class="op">.</span>row<span class="op">();</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      nonzero_values<span class="op">[</span>idx<span class="op">]</span> <span class="op">=</span> it<span class="op">.</span>value<span class="op">();</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">++</span>idx<span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  column_start_positions<span class="op">[</span>column_start_positions<span class="op">.</span>size<span class="op">()-</span><span class="dv">1</span><span class="op">]</span> <span class="op">=</span> idx<span class="op">;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">a_matrix_</span><span class="op">.</span><span class="va">format_</span> <span class="op">=</span> MatrixFormat<span class="op">::</span>kColwise<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">a_matrix_</span><span class="op">.</span><span class="va">start_</span> <span class="op">=</span> column_start_positions<span class="op">;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">a_matrix_</span><span class="op">.</span><span class="va">index_</span> <span class="op">=</span> nonzero_row_index<span class="op">;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">a_matrix_</span><span class="op">.</span><span class="va">value_</span> <span class="op">=</span> nonzero_values<span class="op">;</span></span></code></pre></div>
+<p>Next, we add the equality constraint <span class="math inline">\(= \bm{b}\)</span></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> b<span class="op">(</span>loss_gradient<span class="op">.</span>begin<span class="op">(),</span> loss_gradient<span class="op">.</span>end<span class="op">());</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">row_lower_</span> <span class="op">=</span> b<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">row_upper_</span> <span class="op">=</span> b<span class="op">;</span></span></code></pre></div>
+<p>and the upper bound <span class="math inline">\(\bm{y} \leq 0\)</span>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">col_lower_</span> <span class="op">=</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>      <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;(</span>A<span class="op">.</span>cols<span class="op">(),</span> <span class="op">-</span>infinity<span class="op">);</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">col_upper_</span> <span class="op">=</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;(</span>A<span class="op">.</span>cols<span class="op">(),</span> <span class="dv">0</span><span class="op">);</span></span></code></pre></div>
+<p>Finally, we determine how the objective is calculated via the vector <span class="math inline">\(\bm{c}\)</span>.
+In this case, <span class="math inline">\(1\)</span> for each bounding constraint <span class="math inline">\(-1 \leq x_i \leq 1\)</span> and <span class="math inline">\(0\)</span> for
+each isotonicity constraint.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;</span> c<span class="op">(</span>A<span class="op">.</span>cols<span class="op">());</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">size_t</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> total_observations <span class="op">*</span> <span class="dv">2</span><span class="op">;</span> <span class="op">++</span>i<span class="op">)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    c<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="dt">size_t</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> total_constraints<span class="op">;</span> <span class="op">++</span>i<span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    c<span class="op">[</span><span class="dv">2</span> <span class="op">*</span> total_observations <span class="op">+</span> i<span class="op">]</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  model<span class="op">.</span><span class="va">lp_</span><span class="op">.</span><span class="va">col_cost_</span> <span class="op">=</span> <span class="bu">std::</span>move<span class="op">(</span>c<span class="op">);</span></span></code></pre></div>
+<p>Running the solver, we retrieve the values of interest - the vector <span class="math inline">\(\bm{x}\)</span> -
+the solution to the optimal cut or original matrix form of the linear program.
+These are contained in the <code>row_dual</code> variable, as it is the solution to the
+program dual to which we tasked HiGHS with solving.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>  Highs highs<span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  highs<span class="op">.</span>setOptionValue<span class="op">(</span><span class="st">&quot;solver&quot;</span><span class="op">,</span> <span class="st">&quot;simplex&quot;</span><span class="op">);</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  highs<span class="op">.</span>passModel<span class="op">(</span>model<span class="op">);</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  highs<span class="op">.</span>run<span class="op">();</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> solution <span class="op">=</span> Eigen<span class="op">::</span>VectorXd<span class="op">::</span>Map<span class="op">(</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">&amp;</span>highs<span class="op">.</span>getSolution<span class="op">().</span>row_dual<span class="op">[</span><span class="dv">0</span><span class="op">],</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      highs<span class="op">.</span>getSolution<span class="op">().</span>row_dual<span class="op">.</span>size<span class="op">()).</span>array<span class="op">()</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> solution<span class="op">.</span>array<span class="op">()</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// -1 := V- and 1 := V+</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>All that remains is continuously iterating, selecting the block with the
+largest between-group variation and attempting to partition it further until
+all blocks are optimal.</p>
+<p>The full, non-simplified version of the implementation is available at
+<a href="https://github.com/ewal31/GeneralisedIsotonicRegression">GeneralisedIsotonicRegression</a>,
+where I will continue to add features and attempt to improve the code's
+performance.</p>
+<hr />
+<h3 class="unnumbered">References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-BentleyMultidimensionalDivideAndConquer" class="csl-entry" role="doc-biblioentry">
+Bentley, Jon Louis. 1980. <span>“Multidimensional divide-and-conquer.”</span> <em>Commun. ACM</em> 23 (4) (April): 214–229. doi:<a href="https://doi.org/10.1145/358841.358850">10.1145/358841.358850</a>. <a href="https://doi.org/10.1145/358841.358850">https://doi.org/10.1145/358841.358850</a>.
+</div>
+<div id="ref-BoydVandenbergheConvexOptimization" class="csl-entry" role="doc-biblioentry">
+Boyd, Stephen, and Lieven Vandenberghe. 2004. <em>Convex optimization</em>. USA: Cambridge University Press.
+</div>
+<div id="ref-LussRossetGeneralizedIsotonicRegression" class="csl-entry" role="doc-biblioentry">
+Luss, Ronny, and Saharon Rosset. 2014. <span>“Generalized isotonic regression.”</span> <em>Journal of Computational and Graphical Statistics</em> 23 (1): 192–210. doi:<a href="https://doi.org/10.1080/10618600.2012.741550">10.1080/10618600.2012.741550</a>. <a href="https://doi.org/10.1080/10618600.2012.741550">https://doi.org/10.1080/10618600.2012.741550</a>.
+</div>
+<div id="ref-LussRossetDecomposingIsotonicRegression" class="csl-entry" role="doc-biblioentry">
+Luss, Ronny, Saharon Rosset, and Moni Shahar. 2010. <span>“Decomposing isotonic regression for efficiently solving large problems.”</span> In <em>Advances in neural information processing systems</em>, ed by. J. Lafferty, C. Williams, J. Shawe-Taylor, R. Zemel, and A. Culotta. Vol. 23. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2010/file/03c6b06952c750899bb03d998e631860-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2010/file/03c6b06952c750899bb03d998e631860-Paper.pdf</a>.
+</div>
+<div id="ref-LussRossetEfficientRegularizedIsotonicRegression" class="csl-entry" role="doc-biblioentry">
+Luss, Rosset, Ronny, and Moni Shahar. 2012. <span>“Efficient regularized isotonic regression with application to gene–gene interaction search.”</span> <em>The Annals of Applied Statistics</em> 6 (1): 253–283. doi:<a href="https://doi.org/10.1214/11-AOAS504">10.1214/11-AOAS504</a>. <a href="https://doi.org/10.1214/11-AOAS504">https://doi.org/10.1214/11-AOAS504</a>.
+</div>
+</div>
+
+            </div>
+            <div id="footer">
+                Site proudly generated by
+                <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+            </div>
+        </div>
+
+        <!-- TODO Includes need to be cleaned up. -->
+        <link rel="stylesheet" href="../katex/katex.min.css">
+        <script defer src="../katex/katex.min.js"></script>
+        <script type="text/javascript" script defer src="../katex/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+        
+        
+        <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+        
+        
+        <script src="../js/GeneralisedIsotonicRegressionPlots.min.js"></script>
+        
+        <!-- TODO Includes need to be cleaned up. -->
+
+    </body>
+</html>
