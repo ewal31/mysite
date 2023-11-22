@@ -456,61 +456,55 @@ $$
     to $y_i \geq 0$. In my full implementation, I have actually implemented
     this opposite variant following the implementation from the author.
 
----
-
 ## Implementation
 
-Now that we have come to implementing the algorithm, we consider an approach
-to determining and storing our isotonicity constraints $\mathfrak{I}$, before
-we then implement a `minimum_cut` method to solve the above Linear Program.
-Finally, we discuss briefly how they can fit together as an implemention
-to the algorithm in the paper.
+Having discussed the core of the paper, we now implement the algorithm for
+solving the generalised isotonic regression problem. To start, we need a method
+to discover and store the monotonicity constraints between a set of points
+`points_to_adjacency`. Then, we need to be able to encode these constraints
+into a matrix, `adjacency_to_LP_standard_form`. Finally, we set up our linear
+program and solve it, `minimum_cut`.
 
 ### Isotonic Constraints
 
-In a single dimension, points can be ordered unambigiously according to a
-traditional $\leq$ operator, whereby $0 \leq 2 \leq 5$, etc. Once we have
-at least $2$-dimensions, however, things aren't so simple. Which of the
-two points $(1, 3)$ and $(3, 1)$ are larger? One option would be to order
-the pairs lexicographically, in which case the second is larger. Here, however,
-we consider a domination based ordering, whereby a point $(x_1, x_2)$ is
-considered smaller than another point $(y_1, y_2)$ if both $x_1 \leq y_1$ and
-$x_2 \leq y_2$. Following this relation, the two points $(1, 3)$ and $(3, 1)$
-have no relation to on another. The are both, however, larger than the point
-$(1, 1)$ and smaller than the point $(3, 3)$. Following this relation, we
-construct the ordering below, for a number of points in $2$-dimensional space.
+Points can be ordered unambiguously in a single dimension according to the
+traditional $\leq$ operator, whereby $0 \leq 1 \leq 2 \leq ...$. With at least
+$2$-dimensions, however, things are more complex. Which of the two points $(1,
+3)$ and $(3, 1)$ are larger? One option would be to order the pairs
+lexicographically, in which case the second is larger. Here, however, we
+consider a domination-based ordering, whereby a point $(x_1, x_2)$ is
+considered smaller than or equal to another point $(y_1, y_2)$ if both $x_1
+\leq y_1$ and $x_2 \leq y_2$. Following this relation, the two points $(1, 3)$
+and $(3, 1)$ have no relation to each another. They are both, however, larger
+than the point $(1, 1)$ and smaller than the point $(3, 3)$. Following this
+relation, we graphically show the ordering for several points in
+$2$-dimensional space below.
 
 ```{=html}
 <div id="AdjacencyMatrix"></div>
 ```
 
-To save space, we save this ordering as a sparse adjacency matrix. Clicking
-on the "Adjacency Matrix" button, we see as is typical of an adjacency matrix
-that where there is a $1$ at entry $i, j$ the point $i$ is less than or equal to
-point $j$. We haven't, however, added a $1$ for every point $i$ that is less
-that or equal to point $j$. We could have included all of these and the
-implementation would still have worked. Removing them is an optimisation
-which removes redundant information and consequently the number of constraints
-passed into the Linear Program solver improving performance.
+We save this ordering as a sparse adjacency matrix to reduce memory
+consumption. Clicking on the "Adjacency Matrix" button, we see, as is typical
+of an adjacency matrix, that where there is a $1$, the column corresponding
+point is less than or equal to the row corresponding point. However, we have
+not added a $1$ for every point smaller than another. We could have included
+all of these, and the implementation would still have worked. The additional
+$1$'s are redundant; removing them is an optimisation to reduce the number of
+constraints passed into the linear program solver to improve performance.
 
 [^BruteForceAlternatives]
 
-[^BruteForceAlternatives]: A potential alternative to the brute force
-approach I have coded here, might be to make use of the approach of
-[@BentleyMultidimensionalDivideAndConquer] determining a ranking based
-on the number of points dominated by each point. This can be done in
-$T(N, k) = O \left ( N \text{log}^{k-1} N \right )$ time, with $k$
-dimensions and $N$ points. We would then need to only compared points
-with those of the previous rank.
+[^BruteForceAlternatives]: A potential alternative to the brute force approach
+    I have coded here might be to make use of the approach of
+    [@BentleyMultidimensionalDivideAndConquer] determining a ranking based on
+    the number of points dominated by each point. This can be done in
+    $T(N, k) = O \left ( N \text{log}^{k-1} N \right )$ time, with $k$
+    dimensions and $N$ points. We would then only need to compare points with
+    those of the previous rank.
 
-Roughly speaking, we build this simplified adjacency matrix,
-by sorting lexicographically, then comparing each point, with each of
-its predecessors according to the lexicographic ordering. We add any
-points that smaller than the current point to the matrix, unless,
-they have a successor that is also a predececssor of the currently
-considered point. Ignoring the possibility of duplicate points
-this leads to the following implementation, which does $N^2 / 2$
-comparisons.
+
+We now introduce a function for creating this reduced adjacency matrix.
 
 ```cpp
 template<typename V>
@@ -526,12 +520,23 @@ points_to_adjacency(const Eigen::MatrixXd& points) {
       Eigen::VectorX<bool>::Zero(total_points);
   Eigen::VectorX<bool> is_equal =
       Eigen::VectorX<bool>::Zero(total_points);
+```
 
-  // Lexicographic Sorting
+First, we sort the points lexicographically in $O(N \text{log} N)$ time in
+order to reduce the total comparisons.
+
+```cpp
   const auto& sorted_idxs = argsort(points);
   const Eigen::MatrixXd sorted_points =
       points(sorted_idxs, Eigen::all).transpose();
+```
 
+Next, we iterate through the points and compare each with all previous points.
+We add any points smaller than the current point without a successor also
+smaller than the current point. This we complete with roughly $O(N^2/2)$
+comparisons.
+
+```cpp
   for (uint64_t i = 1; i < total_points; ++i) {
 
     const auto& previous_points = sorted_points(
@@ -579,12 +584,9 @@ points_to_adjacency(const Eigen::MatrixXd& points) {
 
 ### Minimum Cut / Maximum Flow
 
-An implementation therefore amounts to reapplying a minimin cut /maximum flow function
-to the subset of points with the previously largest serparation
-until blocks can no longer be cut.
-
-HiGHS solves the LP in matrix form. which is just
-another way of representing the same set of problems.
+To solve the optimal cut, we use the open-source linear solver
+[HiGHS](https://highs.dev/). This requires us to convert our linear program
+into matrix form.
 
 $$\begin{aligned}
 \text{minimise}    &\quad \bm{b}^T \bm{x} \\
@@ -592,20 +594,7 @@ $$\begin{aligned}
 \end{aligned}
 $$
 
-For our example adjacency matrix, our objective is
-
-$$
-\bm{b} = \begin{bmatrix}
-\frac{\partial f_1(\hat{y})}{\partial \hat{y}} \\
-\frac{\partial f_2(\hat{y})}{\partial \hat{y}} \\
-\frac{\partial f_3(\hat{y})}{\partial \hat{y}} \\
-\frac{\partial f_4(\hat{y})}{\partial \hat{y}} \\
-\frac{\partial f_5(\hat{y})}{\partial \hat{y}} \\
-\frac{\partial f_6(\hat{y})}{\partial \hat{y}}
-\end{bmatrix}
-$$
-
-and we build our constraint matrix
+Our example adjacency matrix from above in this matrix form is as follows:
 
 $$\begin{aligned}
 &\bm{A} &\bm{x} &\leq &\bm{c} \\
@@ -663,48 +652,31 @@ x_6
 \end{aligned}
 $$
 
-The first 6 rows then represent $x_i \leq 1$.
+The first six rows represent the $x_i \leq 1$ constraints. We multiply each
+side of the $-1 \leq x_1$ constraints by $-1$ to get $-x_i \leq 1$ filling the
+next six rows. The last seven correspond to the isotonicity constraints
+$x_i - x_j \leq 0$ from the adjacency matrix. We encode the objective with the
+matrix $b$.
 
-The next 6 rows correspond to the constraint $-1 \leq x_i$, where we first
-multiplied each side by $-1$ to get $-x_i \leq 1$.
-
-We then have a row for each entry in our adjacency matrix, corresponding
-to a constraint $x_i - x_j \leq 0$.
+$$
+\bm{b} = \begin{bmatrix}
+\frac{\partial f_1(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_2(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_3(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_4(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_5(\hat{y})}{\partial \hat{y}} \\
+\frac{\partial f_6(\hat{y})}{\partial \hat{y}}
+\end{bmatrix}
+$$
 
 [^MatrixFormAnotherExample]
 
-[^MatrixFormAnotherExample]: Another example of converting a Linear Program
-to matrix form can be seen on the first few slides
-[here](https://vanderbei.princeton.edu/542/lectures/lec6.pdf).
+[^MatrixFormAnotherExample]: Another example of converting a Linear Program to
+    matrix form can be seen on the first few slides
+    [here](https://vanderbei.princeton.edu/542/lectures/lec6.pdf).
 
-We could solve this problem, but following the suggestions of the paper's author,
-in the name of performance, we instead implement the dual Linear Program switching
-from the optimal or minimum cut variant above to a maximum flow variant. As
-we have already converted our problem to the matrix form, this is a relatively
-mechanical process, where we just need to apply the rules under *Constructing the dual LP*
-[here](https://en.wikipedia.org/wiki/Dual_linear_program#Constructing_the_dual_LP).
-Our new LP is
-
-$$\begin{aligned}
-\text{minimise}    &\quad \bm{b}^T \bm{x}                             &\quad \text{maximise}    &\quad \bm{c}^T \bm{y} \\
-\text {subject to} &\quad \bm{A} \bm{x} \leq \bm{c} \quad \rightarrow &\quad \text {subject to} &\quad \bm{A}^T \bm{y} = \bm{b} \\
-                   &\quad \bm{x} \in \mathbb{R}^N                     &\quad                    &\quad \bm{y} \leq 0
-\end{aligned}
-$$
-
-[^DualLinearProgram]
-
-[^DualLinearProgram]: Realising that this Min-Cut problem can be reformulated
-as a Max-Flow problem, permits the use of many other algorithms. Just recently,
-this was even discussed on [Quanta](https://www.quantamagazine.org/researchers-achieve-absurdly-fast-algorithm-for-network-flow-20220608/)
-or the more technical presentation [here](https://www.youtube.com/watch?v=KsMtVthpkzI).
-There are also other algorithms such as [Ford Fulkerson](https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm)
-which operate directly on a maximum flow graph. For more information above the correspondence between
-the [Max-Flow and Min-Cut problems](https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem#Linear_program_formulation).
-
-The matrix $A^T$ we build directly as follows
-we use `considered_idxs` to select a subset of points instead of
-building subsets of the sparse matrix `adjacency_matrix` to pass around
+The function `adjacency_to_LP_standard_form` builds the constraint matrix $A^T$
+for a selected subset of points `considered_idxs`.
 
 ```cpp
 Eigen::SparseMatrix<int>
@@ -754,7 +726,7 @@ adjacency_to_LP_standard_form(
       }
     }
 
-    // Add slack/surplus variables (source and sink)
+    // bound x by -1 and 1 (source and sink)
     standard_form.insert(j, j) = 1;
     standard_form.insert(j, j + total_observations) = -1;
   }
@@ -764,10 +736,35 @@ adjacency_to_LP_standard_form(
 }
 ```
 
-now that we can build our constraint matrix
-we can set up and solve our linear program
-with HiGHS
-we start by setting the optimistation direction
+We could put this into the solver as formulated. Instead, following the
+suggestion of the paper's author, we implement the dual linear program,
+switching from the minimum cut to the maximum flow variant, a relatively
+mechanical process, now that we have put it into the matrix form. The
+conversion rules are detailed under *Constructing the dual LP*
+[here](https://en.wikipedia.org/wiki/Dual_linear_program#Constructing_the_dual_LP).
+
+$$\begin{aligned}
+\text{minimise}    &\quad \bm{b}^T \bm{x}                             &\quad \text{maximise}    &\quad \bm{c}^T \bm{y} \\
+\text {subject to} &\quad \bm{A} \bm{x} \leq \bm{c} \quad \rightarrow &\quad \text {subject to} &\quad \bm{A}^T \bm{y} = \bm{b} \\
+                   &\quad \bm{x} \in \mathbb{R}^N                     &\quad                    &\quad \bm{y} \leq 0
+\end{aligned}
+$$
+
+[^DualLinearProgram]
+
+[^DualLinearProgram]: Realising that this Min-Cut problem can be reformulated
+    as a Max-Flow problem permits using many other algorithms. Just recently,
+    this was even discussed on
+    [Quanta](https://www.quantamagazine.org/researchers-achieve-absurdly-fast-algorithm-for-network-flow-20220608/)
+    or the more technical presentation
+    [here](https://www.youtube.com/watch?v=KsMtVthpkzI). Other algorithms, such
+    as [Ford Fulkerson](https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm),
+    operate directly on the maximum flow graph. For more information about the
+    correspondence between the
+    [Max-Flow and Min-Cut problems](https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem#Linear_program_formulation).
+
+The first step to setting up HiGHS for solving our linear program is to declare
+the optimisation direction.
 
 ```cpp
 Eigen::VectorX<bool>
@@ -781,7 +778,7 @@ minimum_cut(
   model.lp_.sense_ = ObjSense::kMaximize;
 ```
 
-create our matrix $A^T$
+Next, we create the matrix $A^T$.
 
 ```cpp
   const auto A =
@@ -792,10 +789,11 @@ create our matrix $A^T$
   model.lp_.num_row_ = A.rows();
 ```
 
-HiGHS requires that we flatten the contents of the matrix
-into a single vector (in this case column wise),
-with an additional vector specifying
-where each new column starts.
+HiGHS requires that we flatten the matrix $A^T$ into three vectors
+corresponding to the compressed column scheme. The first contains the contents
+- in this case, column-wise - the second, the corresponding row for each value
+and the third, the index where each new column starts. This is actually the
+same format the Eigen uses for its compressed sparse matrices by default.
 
 ```cpp
   std::vector<int64_t> column_start_positions(A.cols() + 1);
@@ -818,7 +816,15 @@ where each new column starts.
   model.lp_.a_matrix_.value_ = nonzero_values;
 ```
 
-add the last constraint that $\bm{y} \leq 0$
+Next, we add the equality constraint $= \bm{b}$
+
+```cpp
+  std::vector<double> b(loss_gradient.begin(), loss_gradient.end());
+  model.lp_.row_lower_ = b;
+  model.lp_.row_upper_ = b;
+```
+
+and the upper bound $\bm{y} \leq 0$.
 
 ```cpp
   model.lp_.col_lower_ =
@@ -828,31 +834,24 @@ add the last constraint that $\bm{y} \leq 0$
       std::vector<double>(A.cols(), 0);
 ```
 
-calculating our objective, we sum ...
+Finally, we determine how the objective is calculated via the vector $\bm{c}$.
+In this case, $1$ for each bounding constraint $-1 \leq x_i \leq 1$ and $0$ for
+each isotonicity constraint.
 
 ```cpp
-  std::vector<double> b(A.cols());
+  std::vector<double> c(A.cols());
   for (size_t i = 0; i < total_observations * 2; ++i)
-    b[i] = 1;
+    c[i] = 1;
   for (size_t i = 0; i < total_constraints; ++i)
-    b[2 * total_observations + i] = 0;
+    c[2 * total_observations + i] = 0;
 
-  model.lp_.col_cost_ = std::move(b);
+  model.lp_.col_cost_ = std::move(c);
 ```
 
-and we set gradient
-
-```cpp
-  std::vector<double> c(loss_gradient.begin(), loss_gradient.end());
-  model.lp_.row_lower_ = c;
-  model.lp_.row_upper_ = c;
-```
-
-Finally, we run the solver and retrieve the values of $x$
-that produce the minimum. Here we take row of the solution
-to the dual linear program. (as from original)
-The dual provides a single
-value for each point, our partitioning.
+Running the solver, we retrieve the values of interest - the vector $\bm{x}$ -
+the solution to the optimal cut or original matrix form of the linear program.
+These are contained in the `row_dual` variable, as it is the solution to the
+program dual to which we tasked HiGHS with solving.
 
 ```cpp
   Highs highs;
@@ -865,11 +864,18 @@ value for each point, our partitioning.
       &highs.getSolution().row_dual[0],
       highs.getSolution().row_dual.size()).array() > 0;
 
-  return solution.array() > 0; // 0 left = 1 right
+  return solution.array() > 0; // -1 := V- and 1 := V+
 }
 ```
 
-### Algorithm Overview
+All that remains is continuously iterating, selecting the block with the
+largest between-group variation and attempting to partition it further until
+all blocks are optimal.
+
+The full, non-simplified version of the implementation is available at
+[GeneralisedIsotonicRegression](https://github.com/ewal31/GeneralisedIsotonicRegression),
+where I will continue to add features and attempt to improve the code's
+performance.
 
 ---
 
