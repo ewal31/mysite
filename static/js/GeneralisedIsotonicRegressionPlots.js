@@ -157,8 +157,8 @@
      *   with loss values along the bottom
      */
     const uni_iso_plot = "UniIsoPlot";
-    d3.csv("/plotdata/uni-iso-regression.csv", function(err, rows){
-        d3.csv("/plotdata/uni-iso-regression-iterations.csv", function(err, rows_anim){
+    d3.csv("../plotdata/uni-iso-regression.csv", function(err, rows){
+        d3.csv("../plotdata/uni-iso-regression-iterations.csv", function(err, rows_anim){
 
             var active_iteration = 3;
             var iterations = { };
@@ -410,8 +410,8 @@
      *   with loss values along the bottom
      */
     multi_iso_plot = "MultiIsoPlot";
-    d3.csv("/plotdata/multi-iso-regression.csv", function(err, rows){
-        d3.csv("/plotdata/multi-iso-regression-iterations.csv", function(err, rows_anim){
+    d3.csv("../plotdata/multi-iso-regression.csv", function(err, rows){
+        d3.csv("../plotdata/multi-iso-regression-iterations.csv", function(err, rows_anim){
 
             var active_iteration = 7;
             var iterations = { };
