@@ -324,7 +324,7 @@ As a starting point, we consider the corresponding dual Lagrangian objective
 function and the KKT conditions. For a single point, $i$, the Lagrangian is:
 
 $$
-L_i(\hat{y}, \bm{\lambda})_i = f_i(\hat{y}_i)  + \sum_j \lambda_{ij} \left ( \hat{y}_i  - \hat{y}_j \right ) + \sum_k \lambda_{ki} \left ( \hat{y}_k  - \hat{y}_i \right )
+L_i(\hat{\bm{y}}, \bm{\lambda}) = f_i(\hat{y}_i)  + \sum_j \lambda_{ij} \left ( \hat{y}_i  - \hat{y}_j \right ) + \sum_k \lambda_{ki} \left ( \hat{y}_k  - \hat{y}_i \right )
 $$
 
 In the first summation, we include the constraints for all points larger than
@@ -340,133 +340,123 @@ $$\begin{aligned}
 \end{aligned}
 $$
 
----
+These conditions reveal several properties of the optimal solution:
 
-so our optimal solution, satisfies the constraints and
-the last condition implies that all $y_i^*$ are the same
-if $\lambda > 0$. So our optimal solution will have blocks
-of monotonic values $y_i^*$ with each estimate in a block
-being identical due to lamba > 0. In cases where lamba
-is equal to zero, the estimates can be different/separable.
+1. From conditions two and four, we conclude that optimal estimates
+   $\hat{y}_i^*$ and $\hat{y}_j^*$ for isotonically constrained points $i
+   \preceq j$ are either identical, as would be the case when the unconstrained
+   estimate otherwise produces $\hat{y}_i > \hat{y}_j$, or the two estimates
+   trivially satisfy the constraint and $\lambda_{ij} = 0$.
+2. Consequently, the optimal solution partitions the space into blocks $V$,
+   where every point within a block has the identical estimate $\hat{y}_V^*$
+3. The second condition, furthermore, implies isotonicity at the optimum.
 
-solution is made of blocks with lambda > 0
-with the estimate $\hat{y}$ for each block being identical
-for each point in the block
-
-isotonicity between blocks is guaranteed by the second condition above
-the last says each subset has the same estimate $y^*$
-which minimises the loss in each block
-
-so our optimal solution is a partitioning of the space into $N$ blocks
-each of whose optimal value minimises our function $f$ within the block
-
-roughly, the algorithm
-
-1. chooses the block which currently has the highest loss
-2. solves a linear program on this block
-   if the solution partitions the block then we have two blocks to consider in the future
-   otherwise the result of this subset is considered optimal
+Therefore, the paper's authors suggest an algorithm which iteratively selects
+the block $V$ with the largest between-group variance and seeks to partition
+this group or conclude that it is already optimal and move on to the next. An
+example can be seen in the plot below. As with many statistical and machine
+learning algorithms, with too many iterations, it appears to overfit the
+solution.
 
 ```{=html}
 <div id="UniIsoPlot"></div>
 ```
 
-determining how and whether to partition points within a block is solved
-as an optimal cut problem (which can be solved as a Linear Program) 
+### Optimal Cut
+
+From the first KKT condition above, we know that a block $V$ that is already
+optimally partitioned will satisfy:
+
+$$
+\sum_{i \in V} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} = 0
+$$
+
+[^TelescopingEquivalence]
+
+[^TelescopingEquivalence]: Our first KKT condition is a telescopic series that
+    sums to zero. Consider three points $a$, $b$ and $c$; all terms cancel out
+    when summed.
+    $$
+    \begin{aligned}
+    a&: 0 - \lambda_{ab} - \lambda_{ac} \\
+    b&: \lambda_{ab} - \lambda_{bc} \\
+    c&: \lambda_{ac} + \lambda_{bc} \\
+    \end{aligned}
+    $$
+
+If, however, this is not the case, we can find a more optimal solution by
+partitioning our block into two subblocks $V_-$ and $V_+$, where all points
+$i\in V_-$ are smaller than those $j \in V_+$ according to our isotonicity
+constraints.
+
+$$
+\sum_{j \in V_+} \frac{\partial f_j(\hat{y}_V)}{\partial \hat{y}_V} - \sum_{i \in V_-} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} < 0
+$$
+
+However, this only happens if the first summand has a net negative gradient and
+the second a net positive. In other words, a better partitioning implies that
+our estimates $\hat{y}_j$ want to increase in magnitude, while $\hat{y}_i$
+wants to decrease, maintaining isotonicity. After partitioning a block, this
+difference also measures how well separated the two new blocks are and is used
+to guide the iterative splitting. At each iteration, therefore, we select the
+block with the maximal difference and search for a new optimal cut or to verify
+that the block is already optimal.
+
+[^ConsiderL2]: Consider, for example, the $L_2$ loss. In this case
+    $\frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} = 2 (\hat{y}_V - y_i)$.
+    Where $y_i$ is on average larger than $\hat{y}_V$, as should be the case
+    with the left summand for a non-optimal block, we have a net negative
+    total.
+
+$$
+\text{minimise}_{\left ( V^-, V^+ \right ) \in V} \left ( \sum_{j \in V^+} \frac{\partial f_j(\hat{y}_V)}{\partial \hat{y}_V} - \sum_{i \in V^-} \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \right )
+$$
+
 [^EquivalentMaxVariance]
-this we conclude from the requirement that the optimal solution
-satisfies
 
 [^EquivalentMaxVariance]: This is equivalent to maximising the between-group
-variance at each step. This is detailed in [@LussRossetEfficientRegularizedIsotonicRegression]
+    variance at each step. For details see
+    [@LussRossetEfficientRegularizedIsotonicRegression]
 
-$$
-\sum_i \frac{\delta f_0(y_i)}{\delta y_i} = 0
-$$
-
-consider three points a < b < c
-
-then summing over first kkt gives
-
-$$
-\begin{aligned}
-a&: 0 - \lambda_{ab} - \lambda_{ac} \\
-b&: \lambda_{ab} - \lambda_{bc} \\
-c&: \lambda_{ac} + \lambda_{bc} \\
-\end{aligned}
-$$
-
-which sums to zero leading to the requirement above
-
-so if a group isn't optimal we will be able to find a partitioning
-
-$$
-\sum_i \frac{\delta f_0(y_i)}{\delta y_i} - \sum_i \frac{\delta f_0(y_i)}{\delta y_i} < 0
-$$
-
-such a partition increases the estimate of larger ys
-while decreasing estimate of smaller ys
-thus maintaining isotonicity while improving the overall objective
-
-consequently we want
-
-$$
-\text{minimise}_{\left ( V^-, V^+ \right ) \in V} \left ( \sum_{i \in V^+} \frac{\partial f_i(\hat{y}_i)}{\partial \hat{y}_i} - \sum_{i \in V^-} \frac{\partial f_i(\hat{y}_i)}{\partial \hat{y}_i} \right )
-$$
-
-[^MinimisationVsMaximisation]
-
-[^MinimisationVsMaximisation]: Previous work from the author of the here
-discussed paper typcially considers a maximisation problem instead of
-the minimisation problem we discuss here. See for example,
-[@LussRossetDecomposingIsotonicRegression{}, equation 3] and
-[@LussRossetEfficientRegularizedIsotonicRegression{}, equation 3].
-These two variants are equivalent, but the order of comparison is reversed. In
-this paper, we take the derivative of the $L_2$ loss to be $2 (\hat{y}_i - y_i)$
-whereas, the previous works take this to be $2 (y_i - \hat{y}_i)$. The rest of
-the equations presented here remain almost identical if we switch from a
-minimisation to a maximisation. In the case of the matrix form below, however,
-we both switch from a maximisation to a minimisation and swap the domain of
-our varables $y_i$ from $y_i \geq 0$ to $y_i \leq 0$. The full implementation
-following the authors work, actually implements the opposite variant.
-
-which leads to the binary program
+Introducing a new variable $x_i$, which can be either $1$ or $-1$, this
+minimisation problem is equivalent to the following binary program:
 
 $$\begin{aligned}
-&\text{minimise}   &\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_i)}{\partial \hat{y}_i} \\
-&\text{subject to} &\quad x_i \leq x_j                      &\quad \forall (i,j) \in \mathfrak{I} \\
+&\text{minimise}   &\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \\
+&\text{subject to} &\quad x_i \leq x_j                      &\quad \forall (i,j) \in \mathfrak{I}_V \\
 &                  &\quad x_i \in \left \{ -1, +1 \right \} &\quad \forall i \in V
 \end{aligned}
 $$
 
-which then through the relaxation of the constraint leads to linear program
-used in the paper's algorithm. $-1 \leq x_i \leq 1$
+Finally, relaxing the integer constraint, allowing $x_i$ to vary continuously
+between $-1$ and $1$, and converting it to our standard form, we reach the
+linear program from the paper:
 
 $$\begin{aligned}
-&\text{minimise}   &\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_i)}{\partial \hat{y}_i} \\
-&\text{subject to} &\quad x_i \leq x_j       &\quad \forall (i,j) \in \mathfrak{I} \\
-&                  &\quad -1 \leq x_i \leq 1 &\quad \forall i \in V
+&\text{minimise}    &\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_V)}{\partial \hat{y}_V} \\
+&\text{subject to}  &\quad  x_i - x_j \leq 0 &\quad \forall (i,j) \in \mathfrak{I}_V \\
+&                   &\quad -x_i - 1   \leq 0 &\quad \forall i \in V \\
+&                   &\quad  x_i - 1   \leq 0 &\quad \forall i \in V
 \end{aligned}
 $$
 
-can also put this in our standard form from above
+[^MinimisationVsMaximisation]
 
-$$\begin{aligned}
-&\text{minimise}     &\quad \sum_{i \in V} x_i \frac{\partial f_i(\hat{y}_i)}{\partial \hat{y}_i} \\
-&\text{subject to}_i &\quad  x_i - x_j \leq 0 &\quad \forall (i,j) \in \mathfrak{I}_V \\
-&                    &\quad -x_i - 1   \leq 0 &\quad \forall i \in V \\
-&                    &\quad  x_i - 1   \leq 0 &\quad \forall i \in V
-\end{aligned}
-$$
+[^MinimisationVsMaximisation]: Previous work from the author of the discussed
+    paper typically considers a maximisation problem instead of the
+    minimisation problem we discuss here. See for example,
+    [@LussRossetDecomposingIsotonicRegression{}, equation 3] and
+    [@LussRossetEfficientRegularizedIsotonicRegression{}, equation 3]. These
+    two variants are equivalent, but the order of comparison is reversed. Here
+    we take the derivative of the $L_2$ loss to be $2 (\hat{y}_V - y_i)$,
+    whereas the previous works take this to be $2 (y_i - \hat{y}_V)$. Switching
+    from a minimisation to a maximisation requires few changes. In the case of
+    the final matrix form below, we would swap the maximisation for
+    minimisation and swap the domain of our variables $y_i$ from $y_i \leq 0$
+    to $y_i \geq 0$. In my full implementation, I have actually implemented
+    this opposite variant following the implementation from the author.
 
-so this zTc loss value that weights what to do next
-is somehow a measure of how well separated the points are either side of the most recent split
-loss could be really large, but there might be little potentially gained
-but this derivative measure says more something like
-the points on the right of split are on mostly larger than the estimator
-and the points on the left are mostly smaller.
-it might be worth normalising this by the number of points though
-which isn't done in the post or code
+---
 
 ## Implementation
 
