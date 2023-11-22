@@ -11,6 +11,13 @@ packages:
       size: 322
   original:
     hackage: pandoc-sidenote-0.23.0.0
+- completed:
+    hackage: hakyll-process-0.0.3.0@sha256:0650ac0dfdc93b52d2b571b437ec8950cc34ee6b4767694a9c7fe84581c441e9,1118
+    pantry-tree:
+      sha256: db3f522f8a9e2c77cb45ef0701ed7738faef8718d74e68ddfb8994b5b148001e
+      size: 321
+  original:
+    hackage: hakyll-process-0.0.3.0
 snapshots:
 - completed:
     sha256: 126fa33ceb11f5e85ceb4e86d434756bd9a8439e2e5776d306a15fbc63b01e89

@@ -1,5 +1,6 @@
 ---
 title: Implementing Kernel Density Estimation - Univariate
+summary: Kernel Density Estimation approximates a probability density function from collected samples. In contrast to a histogram, we do not need first to discretise the data by placing it into bins, instead building a continuous estimate. Applied to height measurements of adults, for example, we obtain a continuous density describing the likelihood of each possible height. This article will first introduce the concept of a Kernel as applied to smoothing data points before implementing it in the Julia programming language. Next, this implementation will be modified to calculate the Kernel Density Estimate of 1-dimensional data before exploring possibilities for determining an optimal bandwidth.
 ---
 
 ![distribution.gif](/img/2023/Hist2Kernel.gif){#img#imgexpandtoborder .img}

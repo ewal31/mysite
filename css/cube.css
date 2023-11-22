@@ -1,0 +1,160 @@
+.homepagetext {
+    color: black;
+    font-size: 20px;
+    width: 65%;
+}
+
+.padding {
+    padding: clamp(10px, 1vw, 30px);
+    clear: both;
+}
+
+.cubeslider {
+    width: clamp(80px, 12vw, 200px); /* pictures size */
+    height: clamp(80px, 12vw, 200px); /* picture size */
+    /* margin-left: auto; */
+    float: right;
+    perspective: 30vw;
+}
+
+.cubeslider * {
+    -webkit-transition: all 1s cubic-bezier(0.5, -0.75, 0.2, 1.5);
+            transition: all 1s cubic-bezier(0.5, -0.75, 0.2, 1.5);
+}
+
+.cubecontainer {
+    width: inherit;
+    height: inherit;
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+    -webkit-transform: rotateY(0deg) rotateX(0deg);
+            transform: rotateY(0deg) rotateX(0deg);
+}
+
+.cube, .cube:after, .cube:before {
+    display: block;
+    width: inherit;
+    height: inherit;
+    position: absolute;
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+    background-size: cover;
+    background-position: center;
+}
+
+.cube.x {
+  -webkit-transform: rotateY(90deg);
+          transform: rotateY(90deg);
+}
+
+.cube.x:after {
+    content: '';
+    background-image: url('/img/index/videogames.png');
+    -webkit-transform: translateZ(clamp(40px, 6vw, 100px)) rotateZ(-90deg); /* shift from center to make cube */
+            transform: translateZ(clamp(40px, 6vw, 100px)) rotateZ(-90deg); /* shift from center to make cube */
+}
+
+.cube.x:before {
+    content: '';
+    background-image: url('/img/index/mountain.png');
+    -webkit-transform: translateZ(clamp(-100px, -6vw, -40px)) rotateZ(-90deg); /* shift from center to make cube */
+            transform: translateZ(clamp(-100px, -6vw, -40px)) rotateZ(-90deg); /* shift from center to make cube */
+}
+
+.cube.y {
+  -webkit-transform: rotateX(90deg);
+          transform: rotateX(90deg);
+}
+
+.cube.y:after {
+    content: '';
+    background-image: url('/img/index/coffee.png');
+    -webkit-transform: translateZ(clamp(40px, 6vw, 100px)) scale(-1); /* shift from center to make cube */
+            transform: translateZ(clamp(40px, 6vw, 100px)) scale(-1); /* shift from center to make cube */
+}
+
+.cube.y:before {
+    content: '';
+    background-image: url('/img/index/coding.png');
+    -webkit-transform: translateZ(clamp(-100px, -6vw, -40px)); /* shift from center to make cube */
+            transform: translateZ(clamp(-100px, -6vw, -40px)); /* shift from center to make cube */
+}
+
+.cube.z {
+  -webkit-transform: rotateX(0);
+          transform: rotateX(0);
+}
+
+.cube.z:after {
+    content: '';
+    background-image: url('/img/index/camera.png');
+    -webkit-transform: translateZ(clamp(40px, 6vw, 100px)); /* shift from center to make cube */
+            transform: translateZ(clamp(40px, 6vw, 100px)); /* shift from center to make cube */
+}
+
+.cube.z:before {
+    content: '';
+    background-image: url('/img/index/datasciencemath.png');
+    -webkit-transform: translateZ(clamp(-100px, -6vw, -40px)); /* shift from center to make cube */
+            transform: translateZ(clamp(-100px, -6vw, -40px)); /* shift from center to make cube */
+}
+
+
+.cubecontainer {
+    -webkit-animation: rotate 15s infinite cubic-bezier(1, -0.75, 0.5, 1.2);
+    animation: rotate 15s infinite cubic-bezier(1, -0.75, 0.5, 1.2);
+}
+
+@-webkit-keyframes rotate {
+    0%, 10% {-webkit-transform: rotateY(0deg) rotateX(0deg);transform: rotateY(0deg) rotateX(0deg);}
+    15%, 20% {-webkit-transform: rotateY(180deg) rotateX(0deg);transform: rotateY(180deg) rotateX(0deg);}
+    25%, 35% {-webkit-transform: rotateY(180deg) rotateX(270deg);transform: rotateY(180deg) rotateX(270deg);}
+    40%, 50% {-webkit-transform: rotateY(180deg) rotateX(90deg);transform: rotateY(180deg) rotateX(90deg);}
+    55%, 65% {-webkit-transform: rotateY(-90deg) rotateX(90deg);transform: rotateY(-90deg) rotateX(90deg);}
+    70%, 80% {-webkit-transform: rotateY(90deg) rotateX(90deg);transform: rotateY(90deg) rotateX(90deg);}
+    90%, 95% {-webkit-transform: rotateY(0deg) rotateX(90deg);transform: rotateY(0deg) rotateX(90deg);}
+}
+
+@keyframes rotate {
+    0%, 10% {-webkit-transform: rotateY(0deg) rotateX(0deg);transform: rotateY(0deg) rotateX(0deg);}
+    15%, 20% {-webkit-transform: rotateY(180deg) rotateX(0deg);transform: rotateY(180deg) rotateX(0deg);}
+    25%, 35% {-webkit-transform: rotateY(180deg) rotateX(270deg);transform: rotateY(180deg) rotateX(270deg);}
+    40%, 50% {-webkit-transform: rotateY(180deg) rotateX(90deg);transform: rotateY(180deg) rotateX(90deg);}
+    55%, 65% {-webkit-transform: rotateY(-90deg) rotateX(90deg);transform: rotateY(-90deg) rotateX(90deg);}
+    70%, 80% {-webkit-transform: rotateY(90deg) rotateX(90deg);transform: rotateY(90deg) rotateX(90deg);}
+    90%, 95% {-webkit-transform: rotateY(0deg) rotateX(90deg);transform: rotateY(0deg) rotateX(90deg);}
+}
+
+.cubeshadow {
+    display: block;
+    width: clamp(80px, 12vw, 200px);  /* shadow width and shift */
+    height: clamp(80px, 12vw, 200px); /* shadow width and shift */
+    background: rgba(0,0,0,0.75);
+    position: absolute;
+    top: 60%;
+    -webkit-transform: rotateX(90deg);
+            transform: rotateX(90deg);
+    z-index: -1;
+    -webkit-filter: blur(20px);
+    filter: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="filter"><feGaussianBlur stdDeviation="20" /></filter></svg>#filter');
+    -webkit-filter: blur(20px);
+            filter: blur(20px);
+    left: 0;
+    right: 0;
+    margin: auto;
+    -webkit-animation: rotateShadow 15s infinite cubic-bezier(1, -0.75, 0.5, 1.2);
+    animation: rotateShadow 15s infinite cubic-bezier(1, -0.75, 0.5, 1.2);
+}
+
+@-webkit-keyframes rotateShadow {
+    0%, 10% {-webkit-transform: rotateY(0deg) rotateX(90deg);}
+    15%, 20% {-webkit-transform: rotateY(180deg) rotateX(90deg);}
+    20.1%, 20.9% {-webkit-transform: rotateY(180deg) rotateX(90deg) translatez(5px);}
+    25%, 35% {-webkit-transform: rotateY(180deg) rotateX(90deg);}
+    35.1%, 35.9% {-webkit-transform: rotateY(180deg) rotateX(90deg) translatez(-5px);}
+    40%, 50% {-webkit-transform: rotateY(180deg) rotateX(90deg);}
+    55%, 65% {-webkit-transform: rotateY(0deg) rotateX(90deg);}
+    70%, 80% {-webkit-transform: rotateY(180deg) rotateX(90deg);}
+    90%, 99% {-webkit-transform: rotateY(90deg) rotateX(90deg);}
+    99.1%, 99.9% {-webkit-transform: rotateY(90deg) rotateX(90deg) translatez(-5px);}
+}
