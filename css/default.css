@@ -1,3 +1,17 @@
+/*
+ * *,
+ * *::before,
+ * *::after {
+ *     box-sizing: border-box;
+ * }
+ *
+ * * {
+ *     margin: 0;
+ *     padding: 0;
+ *     line-height: 1.5;
+ * }
+ */
+
 .backgroundpattern {
     /* More options can be found here https://www.magicpattern.design/tools/css-backgrounds */
     z-index: -999;
@@ -11,26 +25,32 @@
     background-position: 0 0, 0 0, 9px 16px, 9px 16px, 0 0, 9px 16px;
 }
 
-div#body {
+.debug {
+    /* outline: 1px solid red; */
+}
+
+div#contents {
     background-color: #ffffff;
     color: black;
-    font-size: 16px;
-    margin: 0px 30% 0px auto;
-    padding-left: 2%;
-    padding-right: 2%;
-    width: clamp(200px, 87.5%, 800px); /* min width, preferred, max width */
+    margin: auto;
+    width: 120ch;
+    padding-right: 20ch;
+    padding-left: 20ch;
+    transform: translate(-10%);
+    font-size: clamp(16px, 0.8vw, 20px);
 }
 
 div#header {
     border-bottom: 2px solid black;
     margin-bottom: 30px;
     padding: 12px 0px 12px 0px;
+    font-size: 1.8rem;
 }
 
 div#logo a {
     color: black;
     float: left;
-    font-size: 18px;
+    font-size: 1.8rem;
     font-weight: bold;
     text-decoration: none;
 }
@@ -41,7 +61,7 @@ div#header #navigation {
 
 div#header #navigation a {
     color: black;
-    font-size: 18px;
+    font-size: 1.8rem;
     font-weight: bold;
     margin-left: 12px;
     text-decoration: none;
@@ -51,23 +71,23 @@ div#header #navigation a {
 div#footer {
     border-top: solid 2px black;
     color: #555;
-    font-size: 12px;
+    font-size: 0.65em;
     margin-top: 30px;
     padding: 12px 0px 12px 0px;
     text-align: right;
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 1.3em;
 }
 
 h2 {
-    font-size: 20px;
+    font-size: 1.2em;
 }
 
 div.info {
     color: #555;
-    font-size: 14px;
+    font-size: 0.85em;
     font-style: italic;
 }
 
@@ -83,7 +103,7 @@ ul#post-summary-list {
 }
 
 h3#post-summary-name {
-    font-size: 17px;
+    font-size: 1.1em;
 }
 
 div#post-summary-date {
@@ -118,18 +138,19 @@ div.csl-entry {
 
 /* Sidenotes */
 .sidenote {
+    /* outline: 1px solid red; */
     float: right;
     clear: right;
-    margin-right: -55%;
-    width: 50%;
+    margin-right: -80ch;
+    width: 55ch;
     margin-top: 0;
     margin-bottom: 0;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.9em;
+    line-height: 1.3em;
     vertical-align: baseline;
     position: relative;
     background: #eee;
-    padding: 0.4rem;
+    padding: 0.4em;
     transform: translate(0, -50%)
 }
 
@@ -137,21 +158,73 @@ input.margin-toggle {
     display: none;
 }
 
-@media (max-width: 760px) {
-    body {
-        padding-right: 0%;
+@media (max-width: 1900px) {
+    div#contents {
+        margin-left: 1vw;
+        transform: translate(0);
+    }
+}
+
+@media (max-width: 1730px) {
+    div#contents {
+        margin: auto;
     }
 
     .sidenote {
         display: block;
         float: left;
-        left: 1rem;
+        /* left: 1rem;*/
         clear: both;
-        width: 95%;
-        margin: 1rem 2.5%;
-        vertical-align: baseline;
+        width: 80%;
+        margin: 5% 10%;
         position: relative;
-        transform: translate(0, 0)
+        transform: translate(0)
+    }
+}
+
+@media (max-width: 1290px) {
+    div#contents {
+        padding-right: 0;
+        padding-left: 0;
     }
 
+    .backgroundpattern {
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 1000px) {
+    div#contents {
+        width: clamp(30ch, 80vw, 120ch);
+    }
+}
+
+
+@media (max-width: 750px) {
+    div#header #navigation {
+        text-align: center;
+    }
+
+    div#navigation {
+        clear: both;
+    }
+
+    div#header #navigation a {
+        font-size: 4vw;
+    }
+
+    div#logo {
+        width: 100%;
+        text-align: center;
+    }
+
+    div#logo a {
+        float: none;
+        line-height: 50px;
+        font-size: 2.3rem;
+    }
+
+    span .katex-display {
+        font-size: clamp(12px, 0.8vw, 20px);
+    }
 }

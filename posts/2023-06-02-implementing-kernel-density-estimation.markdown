@@ -187,8 +187,10 @@ $$
 K(u) = \frac{1}{\sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} u^2 \right )
 $$
 This results in the same form as we had above
-$$
-\frac{K \left( \left ( x - y \right ) / \sigma \right )}{\sigma} = \frac{1}{\sigma \sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} \left( \frac{x -y}{\sigma} \right )^2 \right ) = K_\sigma(x, y)
+$$\begin{aligned}
+\frac{K \left( \left ( x - y \right ) / \sigma \right )}{\sigma} &= \frac{1}{\sigma \sqrt{2\pi}} \text{exp} \left ( - \frac{1}{2} \left( \frac{x -y}{\sigma} \right )^2 \right ) \\
+                                                                 &= K_\sigma(x, y)
+\end{aligned}
 $$
 
 To simplify the **bias** term we make use of the variable substitution  $y = x - hu$, $\text{d}y = h \text{d}u$ and the Taylor expansion 
