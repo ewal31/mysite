@@ -1,16 +1,29 @@
-/*
- * *,
- * *::before,
- * *::after {
- *     box-sizing: border-box;
- * }
- *
- * * {
- *     margin: 0;
- *     padding: 0;
- *     line-height: 1.5;
- * }
- */
+:root {
+    --content-width: min(60vw, 120ch);
+    --content-padding: min(5vw, 10ch);
+
+    --sidenote-width: min(30vw, 60ch);
+    --sidenote-content-gap: 0.5vw;
+
+    --sidenote-right-margin: calc(-1 * var(--sidenote-content-gap) - var(--sidenote-width) - var(--content-padding));
+    --content-left-margin: calc(min(
+        50vw - var(--content-width) / 2,
+        100vw - var(--content-width) - var(--sidenote-width) - 2 * var(--sidenote-content-gap)
+    ));
+}
+
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
 
 .backgroundpattern {
     /* More options can be found here https://www.magicpattern.design/tools/css-backgrounds */
@@ -32,12 +45,12 @@
 div#contents {
     background-color: #ffffff;
     color: black;
-    margin: auto;
-    width: 120ch;
-    padding-right: 20ch;
-    padding-left: 20ch;
-    transform: translate(-10%);
-    font-size: clamp(16px, 0.8vw, 20px);
+    margin-left: var(--content-left-margin);
+    width: var(--content-width);
+    padding-right: var(--content-padding);
+    padding-left: var(--content-padding);
+    /* font-size: clamp(16px, 0.8vw, 20px);*/
+    font-size: 1rem;
 }
 
 div#header {
@@ -141,11 +154,11 @@ div.csl-entry {
     /* outline: 1px solid red; */
     float: right;
     clear: right;
-    margin-right: -80ch;
-    width: 55ch;
+    margin-right: var(--sidenote-right-margin);
+    width: var(--sidenote-width);
     margin-top: 0;
     margin-bottom: 0;
-    font-size: 0.9em;
+    font-size: 1rem;
     line-height: 1.3em;
     vertical-align: baseline;
     position: relative;
@@ -158,73 +171,8 @@ input.margin-toggle {
     display: none;
 }
 
-@media (max-width: 1900px) {
+@media (max-width: 1600px) {
     div#contents {
-        margin-left: 1vw;
-        transform: translate(0);
-    }
-}
-
-@media (max-width: 1730px) {
-    div#contents {
-        margin: auto;
-    }
-
-    .sidenote {
-        display: block;
-        float: left;
-        /* left: 1rem;*/
-        clear: both;
-        width: 80%;
-        margin: 5% 10%;
-        position: relative;
-        transform: translate(0)
-    }
-}
-
-@media (max-width: 1290px) {
-    div#contents {
-        padding-right: 0;
-        padding-left: 0;
-    }
-
-    .backgroundpattern {
-        visibility: hidden;
-    }
-}
-
-@media (max-width: 1000px) {
-    div#contents {
-        width: clamp(30ch, 80vw, 120ch);
-    }
-}
-
-
-@media (max-width: 750px) {
-    div#header #navigation {
-        text-align: center;
-    }
-
-    div#navigation {
-        clear: both;
-    }
-
-    div#header #navigation a {
-        font-size: 4vw;
-    }
-
-    div#logo {
-        width: 100%;
-        text-align: center;
-    }
-
-    div#logo a {
-        float: none;
-        line-height: 50px;
-        font-size: 2.3rem;
-    }
-
-    span .katex-display {
-        font-size: clamp(12px, 0.8vw, 20px);
+        margin-left: 0;
     }
 }
