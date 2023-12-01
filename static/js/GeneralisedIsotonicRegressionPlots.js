@@ -1,29 +1,53 @@
 (function() {
 
-    function new_plot_height(plot_id, mult=0.5) {
-        // Relative to viewport
-        var vh = mult * Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-        return Math.min(Math.max(300, vh), 1200);
-    }
-
-    function new_plot_width(plot_id, mult=1) {
-        // Width of parent
-        var parentNode = document.getElementById(plot_id).parentNode
-        var vw = mult * Math.max(parentNode.clientWidth || 0, parentNode.innerWidth || 0);
-        return vw;
-    }
-
-    function register_relayout_on_window_resize(
+    function register_relayout_on_resize(
         plot_id,
-        new_height = new_plot_height,
-        new_width = new_plot_width
+        get_size_func
     ) {
         window.addEventListener('resize', function(){
-            Plotly.relayout(plot_id, {
-                width: new_width(plot_id),
-                height: new_height(plot_id)
-            });
+            Plotly.relayout(
+                plot_id,
+                get_size_func(plot_id)
+            );
         })
+    }
+
+    function new_plot_size(plot_id, width_mult, height_mult, legend_mult) {
+        // Width is based on parent
+        var parentNode = document.getElementById(plot_id).parentNode
+        var vw = width_mult * Math.max(parentNode.clientWidth || 0, parentNode.innerWidth || 0);
+
+        // Height is based on width
+        var v_client = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        var vh = height_mult * vw; // * Math.min(Math.max(300, vh), vw);
+
+        if (vw < 650) {
+            return {
+                width: vw,
+                height: vw * 1.4,
+                legend: {
+                    orientation: "h",
+                    // 240, -0.8 : 334, -0.38 : 457, -0.25 : 647, -0.16 -> y = 0.001530516*x - 1.02922
+                    y: legend_mult * (-4.37961 + 0.02515089*vw - 0.0000508202*Math.pow(vw, 2) + 3.40451e-8*Math.pow(vw, 3)),
+                },
+            };
+        } else {
+            return {
+                width: vw,
+                height: vh,
+                legend: {
+                    orientation: "v",
+                    y: 1,
+                },
+            };
+        }
+
+    }
+
+    function set_plot_size(plot_id, width_mult=1, height_mult=0.8, legend_mult=1) {
+        const get_size = (plot_id) => new_plot_size(plot_id, width_mult, height_mult, legend_mult)
+        register_relayout_on_resize(plot_id, get_size)
+        return get_size(plot_id)
     }
 
     function get_column(rows, key) {
@@ -85,16 +109,19 @@
                 },
             ],
             {
-                width: new_plot_width(lp_plot),
-                height: new_plot_height(lp_plot, 0.4),
+                ...set_plot_size(lp_plot, width_mult=1, height_mult=0.5, legend_mult=0.8),
                 margin: {
                     l: 40,
                     r: 40,
-                    b: 40,
+                    b: 40, // TODO
                     t: 40,
                     pad: 0,
                 },
                 showlegend: true,
+                // legend: {  // TODO
+                //     orientation: "h",
+                //     y: -0.4,
+                // },
                 xaxis: {
                     range: [-1, 2.5],
                     title: {text: 'p'}
@@ -144,11 +171,6 @@
                 displayModeBar: false,
             },
         );
-        register_relayout_on_window_resize(
-            lp_plot,
-            id => new_plot_height(id, 0.4),
-        );
-
     })()
 
     /*
@@ -326,8 +348,7 @@
                         }
                     ],
                     layout: {
-                        width: new_plot_width(uni_iso_plot),
-                        height: new_plot_height(uni_iso_plot),
+                        ...set_plot_size(uni_iso_plot, width_mult=1, height_mult=0.6),
                         margin: {
                             l: 20,
                             r: 20,
@@ -397,9 +418,6 @@
                     },
                     frames: frames
                 }
-            );
-            register_relayout_on_window_resize(
-                uni_iso_plot,
             );
         });
     });
@@ -550,8 +568,7 @@
                         },
                     ],
                     layout: {
-                        width: new_plot_width(multi_iso_plot),
-                        height: new_plot_height(multi_iso_plot),
+                        ...set_plot_size(multi_iso_plot, width_mult=1, height_mult=0.6),
                         margin: {
                             l: 20,
                             r: 20,
@@ -640,7 +657,6 @@
                     frames: frames
                 }
             );
-            register_relayout_on_window_resize(multi_iso_plot);
         })
     });
 
@@ -664,307 +680,329 @@
      *   with loss values along the bottom
      */
     (function() {
-        var animation_state = 0;
+        const parentNode = document.getElementById("AdjacencyMatrix").parentNode
+        const diagram_breakpoint = 450;
 
-        // TODO resize with window instead of just on reload
-        const width = new_plot_width("AdjacencyMatrix")
-        const height = width * 0.6
-        const textwidth = 35;
-        const textheight = 25;
+        function get_font_size(vw) {
+            return vw <= diagram_breakpoint ? '12px' : 'none';
+        }
 
-        const svg = d3.select("#AdjacencyMatrix")
-            .append("svg")
-            .attr("width", width + 'px')
-            .attr("height", height + 'px');
+        function get_stroke_width(vw) {
+            return vw <= diagram_breakpoint ? 1.3 : 2;
+        }
 
-        /*
-         * Frame 1. Graph showing points and links
-         *          between
-         */
-        const points = [
-            { x: width * 2 / 9, y: height * 2 / 9, text: "(1, 1)"},
-            { x: width * 3 / 9, y: height * 3 / 9, text: "(1, 1)"},
-            { x: width * 4 / 9, y: height * 4 / 9, text: "(3, 1)"},
-            { x: width * 5 / 9, y: height * 5 / 9, text: "(1, 3)"},
-            { x: width * 6 / 9, y: height * 6 / 9, text: "(2, 3)"},
-            { x: width * 7 / 9, y: height * 7 / 9, text: "(3, 3)"},
-        ]
+        function get_height(vw) {
+            return vw <= diagram_breakpoint ? vw : vw * 0.6;
+        }
 
-        const links = [
-            { source: 0, dest: 1, dir: true },
-            { source: 1, dest: 0, dir: true, rev: true },
-            { source: 1, dest: 2, dir: true },
-            { source: 1, dest: 3, dir: true },
-            { source: 2, dest: 5, dir: false },
-            { source: 3, dest: 4, dir: true },
-            { source: 4, dest: 5, dir: true },
-        ]
+        function build_adjacency_diagram() {
 
-        // Defines how an arrow head should be drawn
-        svg
-            .append("svg:defs")
-            .append("svg:marker")
-            .attr("id", "arrow")
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", 0)
-            .attr("refY", 5)
-            .attr("markerUnits", "strokeWidth")
-            .attr("markerWidth", 8)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("svg:path")
-            .attr("d", "M 0 0 L 10 5 L 0 10 z")
+            var animation_state = 0;
+            const width = Math.max(parentNode.clientWidth || 0, parentNode.innerWidth || 0);
+            const height = get_height(width)
+            const textwidth = 35;
+            const textheight = 25;
 
-        // Draw Points
-        for (c of ['pointHoriz', 'pointVert']) {
+            d3.select("#AdjacencyMatrix").select("svg").remove()
+            const svg = d3.select("#AdjacencyMatrix")
+                .append("svg")
+                .attr("width", width + 'px')
+                .attr("height", height + 'px');
+
+            /*
+            * Frame 1. Graph showing points and links
+            *          between
+            */
+            const points = [
+                { x: width * 2 / 9, y: height * 2 / 9, text: "(1, 1)"},
+                { x: width * 3 / 9, y: height * 3 / 9, text: "(1, 1)"},
+                { x: width * 4 / 9, y: height * 4 / 9, text: "(3, 1)"},
+                { x: width * 5 / 9, y: height * 5 / 9, text: "(1, 3)"},
+                { x: width * 6 / 9, y: height * 6 / 9, text: "(2, 3)"},
+                { x: width * 7 / 9, y: height * 7 / 9, text: "(3, 3)"},
+            ]
+
+            const links = [
+                { source: 0, dest: 1, dir: true },
+                { source: 1, dest: 0, dir: true, rev: true },
+                { source: 1, dest: 2, dir: true },
+                { source: 1, dest: 3, dir: true },
+                { source: 2, dest: 5, dir: false },
+                { source: 3, dest: 4, dir: true },
+                { source: 4, dest: 5, dir: true },
+            ]
+
+            // Defines how an arrow head should be drawn
             svg
-                .selectAll(c)
-                .data(points)
+                .append("svg:defs")
+                .append("svg:marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", 0)
+                .attr("refY", 5)
+                .attr("markerUnits", "strokeWidth")
+                .attr("markerWidth", 8)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("svg:path")
+                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+
+            // Draw Points
+            for (c of ['pointHoriz', 'pointVert']) {
+                svg
+                    .selectAll(c)
+                    .data(points)
+                    .enter().append('text')
+                    .attr('class', c)
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y)
+                    .text(d => d.text)
+                    .attr({
+                        //dy: 6, // account for text height
+                        'text-anchor': 'middle',
+                        'dominant-baseline': 'middle',
+                        'font-size': get_font_size(width),
+                    })
+            }
+
+            // Draw Arrows
+            svg
+                .selectAll('links')
+                .data(links)
+                .enter().append('path')
+                .attr('class', 'link')
+                .attr('d', function(d) {
+                    op = d.rev ? (a, b) => a - b : (a, b) => a + b
+                    if (d.dir) {
+                        return d3.svg.line()([
+                            [op(points[d.source].x, width <= diagram_breakpoint ? textwidth / 1.5 : textwidth), points[d.source].y],
+                            [points[d.dest].x, points[d.source].y],
+                            [points[d.dest].x, op(points[d.dest].y, -textheight)],
+                        ])
+                    } else {
+                        return d3.svg.line()([
+                            [points[d.source].x, op(points[d.source].y, textheight - 10)],
+                            [points[d.source].x, points[d.dest].y],
+                            [op(points[d.dest].x, -textwidth), points[d.dest].y],
+                        ])
+                    }
+                })
+                .attr({
+                    stroke: 'black',
+                    'stroke-width': get_stroke_width(width),
+                    fill: 'none',
+                    'marker-end': 'url(\#arrow)'
+                })
+
+            /*
+            * Frame 2. Matrix with 1's for simplified
+            *          less than
+            */
+            var matrixcontents = []
+            for (i = 0; i < points.length; i++) {
+                for (j = 0; j < points.length; j++) {
+                    matrixcontents.push({
+                        x: (i+2) / 9 * width,
+                        y: (j+2) / 9 * height,
+                        text: '0'
+                    })
+                }
+            }
+
+            for (link of links) {
+                var {source, dest} = link;
+                matrixcontents[source + points.length * dest].text = "1";
+            }
+
+            // Draw Matrix Brackets
+            svg
+                .selectAll('matrixborder')
+                .data([
+                    [
+                        [1.7/9 * width, 1.5/9 * height],
+                        [1.5/9 * width, 1.5/9 * height],
+                        [1.5/9 * width, 7.5/9 * height],
+                        [1.7/9 * width, 7.5/9 * height],
+                    ],
+                    [
+                        [7.3/9 * width, 1.5/9 * height],
+                        [7.5/9 * width, 1.5/9 * height],
+                        [7.5/9 * width, 7.5/9 * height],
+                        [7.3/9 * width, 7.5/9 * height],
+                    ],
+                ]).enter().append('path')
+                .attr('class', 'matrixborder')
+                .attr('d', d => d3.svg.line()(d))
+                .attr({
+                    stroke: 'black',
+                    'stroke-width': 0,
+                    'fill': 'none'
+                })
+
+            // Draw Matrix Contents
+            svg
+                .selectAll('matrixcontents')
+                .data(matrixcontents)
                 .enter().append('text')
-                .attr('class', c)
+                .attr('class', 'matrixcontents')
                 .attr('x', d => d.x)
                 .attr('y', d => d.y)
                 .text(d => d.text)
+                //.attr('dy', 6) // account for text height
                 .attr({
-                    //dy: 6, // account for text height
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'middle',
+                    'visibility': 'hidden',
+                    'font-size': get_font_size(width),
+                })
+
+            /*
+            * Buttons. For switching between different states
+            */
+            var button_data = [
+                [{x: -1 * (230 / 2 - 70 / 2) - 1, width: 70, height: 33, text: "Graph", state: 0, selected: true}],
+                [{x:  (230/2 - 160 / 2) + 1, width: 160, height: 33, text: "Adjacency Matrix", state: 1, selected: false}]
+            ]
+
+            function update_adjacency_matrix_state(button) {
+                var chosen_state = button.state;
+
+                if (chosen_state == animation_state) {
+                    return;
+                }
+
+                animation_state = chosen_state
+
+                button_group
+                    .selectAll('.button')
+                    .transition()
+                    .attr('fill', d => d.state == chosen_state ? '#f4faff' : '#ffffff')
+
+                if (chosen_state == 0) {
+                    d3
+                        .selectAll('.pointHoriz')
+                        .transition()
+                        .attr('x', d => d.x)
+                        .duration(2000)
+                        .delay(500)
+
+                    d3
+                        .selectAll('.pointVert')
+                        .transition()
+                        .attr('y', d => d.y)
+                        .duration(2000)
+                        .delay(500)
+
+                    d3
+                        .selectAll('.link')
+                        .transition()
+                        .attr('stroke-width', 2)
+                        .duration(2500)
+                        .delay(2000)
+
+                    d3
+                        .selectAll('.matrixborder')
+                        .transition()
+                        .attr('stroke-width', 0)
+                        .duration(500)
+
+                    d3
+                        .selectAll('.matrixcontents')
+                        .transition()
+                        .attr('visibility', 'hidden')
+                        .duration(500)
+
+                } else if (chosen_state == 1) {
+                    d3
+                        .selectAll('.pointHoriz')
+                        .transition()
+                        .attr('x', 1/9 * width)
+                        .duration(2000)
+                        .delay(500)
+
+                    d3
+                        .selectAll('.pointVert')
+                        .transition()
+                        .attr('y', 1/9 * height)
+                        .duration(2000)
+                        .delay(500)
+
+                    d3
+                        .selectAll('.link')
+                        .transition()
+                        .attr('stroke-width', 0)
+                        .duration(700)
+
+                    d3
+                        .selectAll('.matrixborder')
+                        .transition()
+                        .attr('stroke-width', get_stroke_width(width)*2)
+                        .duration(2500)
+                        .delay(2000)
+
+                    d3
+                        .selectAll('.matrixcontents')
+                        .transition()
+                        .attr('visibility', 'visible')
+                        .delay(2500)
+                }
+
+            }
+
+            // Outside group containing rectangle for button
+            // and text
+            var button_group = svg
+                .selectAll('button-group')
+                .data(button_data)
+                .enter().append('g')
+                .attr('class', 'button-group')
+                .attr('transform', d => 'translate(' + (width / 2 - d[0].width / 2 + d[0].x) + ',' + (height - 33 - 2) + ')')
+                .on('click', d => update_adjacency_matrix_state(d[0]))
+                .on({
+                    "mouseover": function(d) {
+                        d3.select(this).style("cursor", "pointer");
+                    },
+                    "mouseout": function(d) {
+                        d3.select(this).style("cursor", "default");
+                    }
+                });
+
+            // rectangle for button
+            button_group
+                .selectAll('button')
+                .data(d => d)
+                .enter().append('rect')
+                .attr('class', 'button')
+                .attr('fill', d => d.selected ? '#f4faff' : '#ffffff')
+                .attr('width', d => d.width)
+                .attr('height', d => d.height)
+                .attr({
+                    rx: 2,
+                    ry: 2,
+                    stroke: '#bec8d9',
+                    'stroke-opacity': 1,
+                    'fill-opacity': 1,
+                    'stroke-width': '1px',
+                    'shape-rendering': 'crispEdges',
+                })
+
+            // text for button
+            button_group
+                .selectAll('buttontext')
+                .data(d => d)
+                .enter().append('text')
+                .attr('class', 'buttontext')
+                .attr('dx', d => d.width / 2)
+                .attr('dy', d => d.height / 2)
+                .text(d => d.text)
+                .attr({
                     'text-anchor': 'middle',
                     'dominant-baseline': 'middle'
                 })
         }
 
-        // Draw Arrows
-        svg
-            .selectAll('links')
-            .data(links)
-            .enter().append('path')
-            .attr('class', 'link')
-            .attr('d', function(d) {
-                op = d.rev ? (a, b) => a - b : (a, b) => a + b
-                if (d.dir) {
-                    return d3.svg.line()([
-                        [op(points[d.source].x, textwidth), points[d.source].y],
-                        [points[d.dest].x, points[d.source].y],
-                        [points[d.dest].x, op(points[d.dest].y, -textheight)],
-                    ])
-                } else {
-                    return d3.svg.line()([
-                        [points[d.source].x, op(points[d.source].y, textheight - 10)],
-                        [points[d.source].x, points[d.dest].y],
-                        [op(points[d.dest].x, -textwidth), points[d.dest].y],
-                    ])
-                }
-            })
-            .attr({
-                stroke: 'black',
-                'stroke-width': 2,
-                fill: 'none',
-                'marker-end': 'url(\#arrow)'
-            })
-
-        /*
-         * Frame 2. Matrix with 1's for simplified
-         *          less than
-         */
-        var matrixcontents = []
-        for (i = 0; i < points.length; i++) {
-            for (j = 0; j < points.length; j++) {
-                matrixcontents.push({
-                    x: (i+2) / 9 * width,
-                    y: (j+2) / 9 * height,
-                    text: '0'
-                })
-            }
-        }
-
-        for (link of links) {
-            var {source, dest} = link;
-            matrixcontents[source + points.length * dest].text = "1";
-        }
-
-        // Draw Matrix Brackets
-        svg
-            .selectAll('matrixborder')
-            .data([
-                [
-                    [1.7/9 * width, 1.5/9 * height],
-                    [1.5/9 * width, 1.5/9 * height],
-                    [1.5/9 * width, 7.5/9 * height],
-                    [1.7/9 * width, 7.5/9 * height],
-                ],
-                [
-                    [7.3/9 * width, 1.5/9 * height],
-                    [7.5/9 * width, 1.5/9 * height],
-                    [7.5/9 * width, 7.5/9 * height],
-                    [7.3/9 * width, 7.5/9 * height],
-                ],
-            ]).enter().append('path')
-            .attr('class', 'matrixborder')
-            .attr('d', d => d3.svg.line()(d))
-            .attr({
-                stroke: 'black',
-                'stroke-width': 0,
-                'fill': 'none'
-            })
-
-        // Draw Matrix Contents
-        svg
-            .selectAll('matrixcontents')
-            .data(matrixcontents)
-            .enter().append('text')
-            .attr('class', 'matrixcontents')
-            .attr('x', d => d.x)
-            .attr('y', d => d.y)
-            .text(d => d.text)
-            //.attr('dy', 6) // account for text height
-            .attr({
-                'text-anchor': 'middle',
-                'dominant-baseline': 'middle',
-                'visibility': 'hidden',
-            })
-
-        /*
-         * Buttons. For switching between different states
-         */
-        var button_data = [
-            [{x: -1 * (230 / 2 - 70 / 2) - 1, width: 70, height: 33, text: "Graph", state: 0, selected: true}],
-            [{x:  (230/2 - 160 / 2) + 1, width: 160, height: 33, text: "Adjacency Matrix", state: 1, selected: false}]
-        ]
-
-        function update_adjacency_matrix_state(button) {
-            var chosen_state = button.state;
-
-            if (chosen_state == animation_state) {
-                return;
-            }
-
-            animation_state = chosen_state
-
-            button_group
-                .selectAll('.button')
-                .transition()
-                .attr('fill', d => d.state == chosen_state ? '#f4faff' : '#ffffff')
-
-            if (chosen_state == 0) {
-                d3
-                    .selectAll('.pointHoriz')
-                    .transition()
-                    .attr('x', d => d.x)
-                    .duration(2000)
-                    .delay(500)
-
-                d3
-                    .selectAll('.pointVert')
-                    .transition()
-                    .attr('y', d => d.y)
-                    .duration(2000)
-                    .delay(500)
-
-                d3
-                    .selectAll('.link')
-                    .transition()
-                    .attr('stroke-width', 2)
-                    .duration(2500)
-                    .delay(2000)
-
-                d3
-                    .selectAll('.matrixborder')
-                    .transition()
-                    .attr('stroke-width', 0)
-                    .duration(500)
-
-                d3
-                    .selectAll('.matrixcontents')
-                    .transition()
-                    .attr('visibility', 'hidden')
-                    .duration(500)
-
-            } else if (chosen_state == 1) {
-                d3
-                    .selectAll('.pointHoriz')
-                    .transition()
-                    .attr('x', 1/9 * width)
-                    .duration(2000)
-                    .delay(500)
-
-                d3
-                    .selectAll('.pointVert')
-                    .transition()
-                    .attr('y', 1/9 * height)
-                    .duration(2000)
-                    .delay(500)
-
-                d3
-                    .selectAll('.link')
-                    .transition()
-                    .attr('stroke-width', 0)
-                    .duration(700)
-
-                d3
-                    .selectAll('.matrixborder')
-                    .transition()
-                    .attr('stroke-width', 6)
-                    .duration(2500)
-                    .delay(2000)
-
-                d3
-                    .selectAll('.matrixcontents')
-                    .transition()
-                    .attr('visibility', 'visible')
-                    .delay(2500)
-            }
-
-        }
-
-        // Outside group containing rectangle for button
-        // and text
-        var button_group = svg
-            .selectAll('button-group')
-            .data(button_data)
-            .enter().append('g')
-            .attr('class', 'button-group')
-            .attr('transform', d => 'translate(' + (width / 2 - d[0].width / 2 + d[0].x) + ',' + (height - 33 - 2) + ')')
-            .on('click', d => update_adjacency_matrix_state(d[0]))
-            .on({
-                "mouseover": function(d) {
-                    d3.select(this).style("cursor", "pointer");
-                },
-                "mouseout": function(d) {
-                    d3.select(this).style("cursor", "default");
-                }
-            });
-
-        // rectangle for button
-        button_group
-            .selectAll('button')
-            .data(d => d)
-            .enter().append('rect')
-            .attr('class', 'button')
-            .attr('fill', d => d.selected ? '#f4faff' : '#ffffff')
-            .attr('width', d => d.width)
-            .attr('height', d => d.height)
-            .attr({
-                rx: 2,
-                ry: 2,
-                stroke: '#bec8d9',
-                'stroke-opacity': 1,
-                'fill-opacity': 1,
-                'stroke-width': '1px',
-                'shape-rendering': 'crispEdges',
-            })
-
-        // text for button
-        button_group
-            .selectAll('buttontext')
-            .data(d => d)
-            .enter().append('text')
-            .attr('class', 'buttontext')
-            .attr('dx', d => d.width / 2)
-            .attr('dy', d => d.height / 2)
-            .text(d => d.text)
-            .attr({
-                'text-anchor': 'middle',
-                'dominant-baseline': 'middle'
-            })
+        build_adjacency_diagram();
+        window.addEventListener('resize', build_adjacency_diagram);
 
     })()
 

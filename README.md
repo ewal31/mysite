@@ -18,6 +18,10 @@ The resulting website that is then provided by Github Pages is located within th
 - https://github.com/clean-css/clean-css-cli
 - https://www.npmjs.com/package/terser
 
+## Requirements
+
+* zlib1g-dev
+
 ## TODO
 
 - [ ] make use of the above compression tools
@@ -30,3 +34,5 @@ The resulting website that is then provided by Github Pages is located within th
 - [ ] purescript instead of javascript
 - [ ] perhaps change sidenotes, to fix to html markers in the text
 - [ ] add contents for posts
+- [ ] support dark mode
+- [ ] support different text sizes
