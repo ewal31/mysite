@@ -89,7 +89,17 @@ div#footer {
     text-align: right;
 }
 
+span.katex-display {
+    overflow-x: auto;
+}
+
 ol {
+    padding-left: 40px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ul {
     padding-left: 40px;
     padding-top: 10px;
     padding-bottom: 10px;

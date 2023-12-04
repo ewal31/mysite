@@ -28,7 +28,7 @@ The resulting website that is then provided by Github Pages is located within th
     - [x] javascript
     - [ ] css
     - [ ] svg
-- [ ] make site usable on different screen sizes
+- [x] make site usable on different screen sizes
 - [ ] clean up presentation of references
 - [ ] nix in place of docker for building
 - [ ] purescript instead of javascript
