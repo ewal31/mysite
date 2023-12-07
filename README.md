@@ -36,3 +36,4 @@ The resulting website that is then provided by Github Pages is located within th
 - [ ] add contents for posts
 - [ ] support dark mode
 - [ ] support different text sizes
+- [ ] remove extra newline added in sidenotes

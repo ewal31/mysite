@@ -35,6 +35,7 @@ jsToCompress = fromGlob "static/**.js" .&&. (complement . fromGlob $ "static/**.
 
 main :: IO ()
 main = hakyllWith config $ do
+    -- Javascript
     match (fromGlob "static/**" .&&. complement jsToCompress) $ do
         route   rootRoute
         compile copyFileCompiler
@@ -43,6 +44,7 @@ main = hakyllWith config $ do
         route $ rootRoute `composeRoutes` setExtension "min.js"
         compile $ execCompilerWith (execName "terser") [HakFilePath, ProcArg "--compress"] CStdOut
 
+    -- CSS
     match "css/*" $ do
         route   idRoute
         compile compressCssCompiler
@@ -56,12 +58,7 @@ main = hakyllWith config $ do
     match "assets/bibliography/*" $ compile biblioCompiler
     match "assets/csl/*" $ compile cslCompiler
 
-    -- match (fromList ["about.rst", "contact.markdown"]) $ do
-    --     route   $ setExtension "html"
-    --     compile $ pandocCompiler
-    --         >>= loadAndApplyTemplate "templates/default.html" defaultContext
-    --         >>= relativizeUrls
-
+    -- Posts
     match "posts/*" $ do
         route $ setExtension "html"
         compile $ postCompiler
@@ -83,6 +80,7 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx
                 >>= relativizeUrls
 
+    -- Notes
     match "notes/**" $ do
         route $ setExtension "html"
         compile $ postCompiler
@@ -112,6 +110,30 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" notesCtx
                 >>= relativizeUrls
 
+    -- Tools
+    match "tools/**" $ do
+        route $ setExtension "html"
+        compile $ postCompiler
+            >>= loadAndApplyTemplate "templates/note.html"    postCtx
+            >>= loadAndApplyTemplate "templates/default.html" postCtx
+            >>= relativizeUrls
+
+    create ["tools.html"] $ do
+        route idRoute
+        compile $ do
+            tools <- loadAll "tools/**"
+
+            let toolsCtx =
+                    listField "tools" defaultContext (return tools) `mappend`
+                    constField "title" "Tools"                      `mappend`
+                    defaultContext
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/tools.html" toolsCtx
+                >>= loadAndApplyTemplate "templates/default.html" toolsCtx
+                >>= relativizeUrls
+
+    -- Homepage
     match "index.html" $ do
         route idRoute
         compile $ do
@@ -133,19 +155,12 @@ rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
         dropDirectory ("/":ds) = dropDirectory ds
         dropDirectory ds       = tail ds
 
--- csl <- load (fromFilePath "assets/csl/chicago.csl")
--- bib <- load (fromFilePath "assets/bibliography/General.bib")
--- liftM (writePandocWith postWriterOptions) (getResourceBody >>= readPandocBiblio postReaderOptions csl bib)
--- TODO need to modify this to only include what is necessary for the page
 postCompiler :: Compiler (Item String)
-postCompiler = do --pandocCompilerWith postReaderOptions postWriterOptions
+postCompiler = do
     csl <- load (fromFilePath "assets/csl/chicago.csl")
     bib <- load (fromFilePath "assets/bibliography/General.bib")
     writePandocWith postWriterOptions <$> (getResourceBody >>= readPandocBiblio postReaderOptions csl bib
                                                            >>= traverse (return . usingSideNotes))
-    --body <- getResourceBody
-    --parsed <- (readPandocBiblio postReaderOptions csl bib body)
-    --return (writePandocWith postWriterOptions parsed)
     where
         postReaderOptions = defaultHakyllReaderOptions {
             readerExtensions = extensionsFromList

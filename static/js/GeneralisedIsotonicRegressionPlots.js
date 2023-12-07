@@ -440,7 +440,6 @@
                 return 'Iteration: ' + iter + '<br>Loss: ' + round(iterations[iter].loss);
             }
 
-
             // The uniqe x and y values.
             var x = Array.from(new Set(get_column(rows, 'X_1')));
             var y = Array.from(new Set(get_column(rows, 'X_2')));

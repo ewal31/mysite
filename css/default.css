@@ -42,6 +42,10 @@
     /* outline: 1px solid red; */
 }
 
+p {
+    margin-bottom: 1.2ch;
+}
+
 div#contents {
     background-color: #ffffff;
     color: black;
@@ -150,6 +154,20 @@ div#post-summary-date {
 }
 
 section#post-summary {
+    line-height: 1.2;
+    margin-top: 10px;
+}
+
+ul#tool-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+h3#tool-name {
+    font-size: 1.1em;
+}
+
+section#tool-summary {
     line-height: 1.2;
     margin-top: 10px;
 }

@@ -1,0 +1,40 @@
+div#regression-form {
+    margin-top: 20px;
+}
+
+.text-label-block {
+    float: left;
+    width: 50%;
+}
+
+textarea {
+    width: 100%;
+    resize: none;
+}
+
+.option {
+    padding-bottom: 1.5ch;
+}
+
+.buttons {
+    float: left;
+    width: 50%;
+    margin-top: 10px;
+}
+
+.buttons-block {
+    padding-bottom: 1.5ch;
+}
+
+button {
+    padding: 4px;
+    min-width: 110px;
+}
+
+select {
+    padding: 4px;
+}
+
+input#iterations {
+    width: min(40%, 100px);
+}
