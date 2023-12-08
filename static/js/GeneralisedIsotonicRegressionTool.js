@@ -3576,14 +3576,33 @@ function plot3d(plot_id, data) {
     );
 }
 
+function set_output() {
+    var select = document.getElementById('iteration-select');
+    var output = document.getElementById('output')
+    output.value = result.get_formatted(parseInt(select.value))
+}
+
 function run_regression() {
     result && result.delete()
     var input = document.getElementById('input')
     var loss = document.getElementById('loss-function')
     var iterations = document.getElementById('iterations')
-    var output = document.getElementById('output')
     result = Module.run_iso_regression(loss.value, input.value.trim(), iterations.value)
-    output.value = result.get_formatted(Math.max(result.iterations - 1, 0))
+
+    document
+        .querySelectorAll('#iteration-select option')
+        .forEach(option => option.remove())
+
+    var select = document.getElementById('iteration-select');
+    for (var i = 0; i < result.iterations; i++) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.innerHTML = i;
+        select.appendChild(opt);
+    }
+    select.disabled = false;
+    select.selectedIndex = result.iterations - 1;
+    set_output();
 }
 
 function clear_console() {
@@ -3627,6 +3646,7 @@ function set_console_element() {
 
 function init(){
     set_example();
+    document.getElementById('iteration-select').onchange = set_output;
     document.getElementById('run').onclick = run_regression;
     document.getElementById('clear').onclick = clear_console;
     document.getElementById('plot').onclick = plot_result;

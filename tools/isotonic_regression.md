@@ -18,12 +18,21 @@ it [here](../posts/2023-11-22-generalised-isotonic-regression.html).
 ```{=html}
 <div id="regression-form">
     <div class="text-label-block">
-    <label for="input">Input: </label><br>
-    <textarea id="input" name="input" rows="20"></textarea>
+        <div class="text-label-block-label">
+            <label for="input">Input: </label>
+        </div>
+        <textarea id="input" name="input" rows="20"></textarea>
     </div>
 
     <div class="text-label-block">
-        <label for="output">Result: </label><br>
+        <div class="text-label-block-label">
+            <label for="output">Result: </label>
+            <div class="result-iteration">
+                <label for="iteration">Iteration: </label>
+                <select name="iteration" id="iteration-select" disabled>
+                </select>
+            </div>
+        </div>
         <textarea id="output" name="output" rows="20" readonly></textarea>
     </div>
 
@@ -54,7 +63,9 @@ it [here](../posts/2023-11-22-generalised-isotonic-regression.html).
     </div>
 
     <div class="text-label-block">
-        <label for="console">Runtime Log: </label><br>
+        <div class="text-label-block-label">
+            <label for="console">Runtime Log: </label>
+        </div>
         <textarea id="console" name="console" rows="20" readonly></textarea>
     </div>
 

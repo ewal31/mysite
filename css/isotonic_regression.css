@@ -7,6 +7,11 @@ div#regression-form {
     width: 50%;
 }
 
+.text-label-block-label {
+    padding-bottom: 5px;
+    width: 100%;
+}
+
 textarea {
     width: 100%;
     resize: none;
@@ -33,6 +38,10 @@ button {
 
 select {
     padding: 4px;
+}
+
+.result-iteration {
+    float: right;
 }
 
 input#iterations {
