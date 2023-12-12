@@ -47,3 +47,7 @@ select {
 input#iterations {
     width: min(40%, 100px);
 }
+
+input#loss-param {
+    width: min(40%, 100px);
+}

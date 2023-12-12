@@ -43,9 +43,15 @@ it [here](../posts/2023-11-22-generalised-isotonic-regression.html).
         </div>
 
         <div class="option">
+            <label for="loss-param" id="loss-param-text">Loss Parameter: </label>
+            <input type="text" id="loss-param" name="loss-param" value="0.5" disabled>
+        </div>
+
+        <div class="option">
             <label for="loss-function">Choose a Loss Function: </label>
             <select name="loss-function" id="loss-function">
-                <option value="L2">L2 Weighted</option>
+                <option value="L2">L2</option>
+                <option value="HUBER">Huber</option>
             </select>
         </div>
 

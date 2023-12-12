@@ -733,10 +733,10 @@ function createWasm() {
 var tempDouble;
 var tempI64;
 var ASM_CONSTS = {
-    107596: $0 => {
+    107692: $0 => {
         console.log(Module.UTF8ToString($0))
     },
-    107638: $0 => {
+    107734: $0 => {
         var element = document.getElementById("console");
         element.value += Module.UTF8ToString($0);
         element.scrollTop = element.scrollHeight
@@ -3483,6 +3483,7 @@ function plot3d(plot_id, data) {
         var data = [];
         data[1] = {
             z: iterations[iter].z.slice(),
+            intensity: iterations[iter].z.slice(),
         }
 
         frames.push({
@@ -3490,6 +3491,8 @@ function plot3d(plot_id, data) {
             data: data,
         })
     }
+
+    var total_iterations = Object.keys(iterations).length
 
     Plotly.newPlot(
         plot_id,
@@ -3512,10 +3515,13 @@ function plot3d(plot_id, data) {
                     x: x1.slice(),
                     y: x2.slice(),
                     z: iterations[active_iteration].z.slice(),
+                    intensity: iterations[active_iteration].z.slice(),
+                    cmin: Math.min.apply(Math, iterations[total_iterations-1].z),
+                    cmax: Math.max.apply(Math, iterations[total_iterations-1].z),
                     type: 'mesh3d',
                     showscale: false,
-                    opacity: 0.7,
                     colorscale: 'YlOrRd',
+                    opacity: 0.5,
                     name: "Isotonic Regression",
                     showlegend: true,
                 },
@@ -3582,12 +3588,32 @@ function set_output() {
     output.value = result.get_formatted(parseInt(select.value))
 }
 
-function run_regression() {
+function set_loss_param() {
+    var label = document.getElementById('loss-param-text');
+    var param_input = document.getElementById('loss-param');
+    var loss_function = document.getElementById('loss-function').value;
+    console.log(loss_function)
+
+    if (loss_function == "L2") {
+        label.innerHTML = "Loss Parameter: ";
+        param_input.disabled = true;
+    } else if (loss_function == "HUBER") {
+        label.innerHTML = "Delta: ";
+        param_input.disabled = false;
+    }
+}
+
+async function run_regression() {
     result && result.delete()
     var input = document.getElementById('input')
     var loss = document.getElementById('loss-function')
     var iterations = document.getElementById('iterations')
-    result = Module.run_iso_regression(loss.value, input.value.trim(), iterations.value)
+    var param = document.getElementById('loss-param')
+    result = Module.run_iso_regression(
+        loss.value,
+        input.value.trim(),
+        param.value.trim(),
+        iterations.value)
 
     document
         .querySelectorAll('#iteration-select option')
@@ -3611,7 +3637,8 @@ function clear_console() {
 
 function plot_result() {
     if (!result) {
-        run_regression()
+        run_regression().then(plot_result);
+        return;
     }
 
     if (result.cols == 1) {
@@ -3647,6 +3674,7 @@ function set_console_element() {
 function init(){
     set_example();
     document.getElementById('iteration-select').onchange = set_output;
+    document.getElementById('loss-function').onchange = set_loss_param;
     document.getElementById('run').onclick = run_regression;
     document.getElementById('clear').onclick = clear_console;
     document.getElementById('plot').onclick = plot_result;

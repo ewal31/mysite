@@ -7,6 +7,7 @@
         <title>Blog</title>
         <link rel="stylesheet" href="./css/syntax.css" />
         <link rel="stylesheet" type="text/css" href="./css/default.css" />
+        
     </head>
     <body>
         <div class="backgroundpattern"></div>
@@ -17,11 +18,9 @@
                 </div>
                 <div id="navigation">
                     <a href="./">Home</a>
-                    <!-- <a href="/about.html">About</a> -->
-                    <!-- <a href="/contact.html">Contact</a> -->
                     <a href="./blog.html">Blog</a>
                     <a href="./notes.html">Notes</a>
-                    <a href="http://github.com/ewal31/mysite">Source</a>
+                    <a href="./tools.html">Tools</a>
                 </div>
             </div>
 
@@ -32,16 +31,16 @@
         <li>
             <h3 id="post-summary-name"><a href="./posts/2023-11-22-generalised-isotonic-regression.html">Generalised Isotonic Regression - In Depth</a></h3>
             <div id="post-summary-date">November 22, 2023</div>
-			
-			<div id="post-library-link">Implementation: <a href="https://github.com/ewal31/GeneralisedIsotonicRegression">github.com/ewal31/GeneralisedIsotonicRegression</a></div>
-			
+            
+            <div id="post-library-link">Implementation: <a href="https://github.com/ewal31/GeneralisedIsotonicRegression">github.com/ewal31/GeneralisedIsotonicRegression</a></div>
+            
             <section id="post-summary">Isotonic Regression tries to fit a line/plane/hyperplane to a sequence of observations that lies as "close" as possible to the observations while maintaining monotonicity. This post takes an in-depth look at how the paper Generalized Isotonic Regression solves this problem in an arbitrary number of dimensions while supporting any convex differentiable loss function. First, Linear Programming is introduced, and then it is shown how the partitioning-based algorithm follows from the KKT conditions.</section>
         </li>
     
         <li>
             <h3 id="post-summary-name"><a href="./posts/2023-06-02-implementing-kernel-density-estimation.html">Implementing Kernel Density Estimation - Univariate</a></h3>
             <div id="post-summary-date">June  2, 2023</div>
-			
+            
             <section id="post-summary">Kernel Density Estimation approximates a probability density function from collected samples. In contrast to a histogram, we do not need first to discretise the data by placing it into bins, instead building a continuous estimate. Applied to height measurements of adults, for example, we obtain a continuous density describing the likelihood of each possible height. This article will first introduce the concept of a Kernel as applied to smoothing data points before implementing it in the Julia programming language. Next, this implementation will be modified to calculate the Kernel Density Estimate of 1-dimensional data before exploring possibilities for determining an optimal bandwidth.</section>
         </li>
     
