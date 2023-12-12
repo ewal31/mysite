@@ -875,7 +875,8 @@ all blocks are optimal.
 The full, non-simplified version of the implementation is available at
 [GeneralisedIsotonicRegression](https://github.com/ewal31/GeneralisedIsotonicRegression),
 where I will continue to add features and attempt to improve the code's
-performance.
+performance. You can also play around with a version that I compiled to
+WebAssembly [here](../tools/isotonic_regression.html).
 
 ---
 
