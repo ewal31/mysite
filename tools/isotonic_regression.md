@@ -52,6 +52,8 @@ it [here](../posts/2023-11-22-generalised-isotonic-regression.html).
             <select name="loss-function" id="loss-function">
                 <option value="L2">L2</option>
                 <option value="HUBER">Huber</option>
+                <option value="POISSON">Poisson</option>
+                <option value="PNORM">p-Norm</option>
             </select>
         </div>
 

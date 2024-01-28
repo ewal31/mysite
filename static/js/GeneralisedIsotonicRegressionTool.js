@@ -627,10 +627,10 @@ function dbg(text) {
     console.warn.apply(console, arguments)
 }
 var ASM_CONSTS = {
-    108248: $0 => {
+    108328: $0 => {
         console.log(Module.UTF8ToString($0))
     },
-    108290: $0 => {
+    108370: $0 => {
         var element = document.getElementById("console");
         element.value += Module.UTF8ToString($0);
         element.scrollTop = element.scrollHeight
@@ -3037,7 +3037,7 @@ function plot2d(plot_id, data) {
                     line: {shape: 'hvh'},
                     type: 'scatter',
                     mode: "lines",
-                    name: "Isotonic Regression (L2)",
+                    name: "Isotonic Regression",
                 },
             ],
             layout: {
@@ -3271,6 +3271,14 @@ function set_loss_param() {
     } else if (loss_function == "HUBER") {
         label.innerHTML = "Delta: ";
         param_input.disabled = false;
+        param_input.value = 0.5;
+    } else if (loss_function == "POISSON") {
+        label.innerHTML = "Loss Parameter: ";
+        param_input.disabled = true;
+    } else if (loss_function == "PNORM") {
+        label.innerHTML = "1 < p < 2: ";
+        param_input.disabled = false;
+        param_input.value = 1.5;
     }
 }
 
