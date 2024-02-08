@@ -4,7 +4,7 @@ import Data.Function (on)
 import Data.Functor ((<&>))
 import Hakyll.Process
 import Data.List (groupBy)
-import System.FilePath (joinPath, splitPath, takeDirectory)
+import System.FilePath (joinPath, splitPath, takeDirectory, takeBaseName, takeExtension)
 import Text.Pandoc.Highlighting (Style, kate, styleToCss)
 import Text.Pandoc.Options (
                              extensionsFromList
@@ -133,12 +133,31 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" toolsCtx
                 >>= relativizeUrls
 
+    create ["photography.html"] $ do
+        route idRoute
+        compile $ do
+            let photoDir = "static/img/photography/**"
+            photos <- loadAll photoDir >>= mapM (buildPhotoHtml "templates/photo.html") . zip [1..]
+            lightboxes <- loadAll photoDir >>= mapM (buildPhotoHtml "templates/lightbox.html") . zip [1..]
+
+            let photoCtx =
+                    listField "photos" defaultContext (return photos) `mappend`
+                    listField "lightboxes" defaultContext (return lightboxes) `mappend`
+                    constField "title" "Photography" `mappend`
+                    constField "css_file" "/css/gallery.css" `mappend`
+                    defaultContext
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/gallery.html" photoCtx
+                >>= loadAndApplyTemplate "templates/default.html" photoCtx
+                >>= relativizeUrls
+
     -- Homepage
     match "index.html" $ do
         route idRoute
         compile $ do
             let indexCtx =
-                    constField "title" "Home"                `mappend`
+                    constField "title" "Home" `mappend`
                     defaultContext
             getResourceBody
                 >>= applyAsTemplate indexCtx
@@ -147,13 +166,29 @@ main = hakyllWith config $ do
 
     match "templates/*" $ compile templateCompiler
 
+dropDirectory :: [String] -> [String]
+dropDirectory []       = []
+dropDirectory ("/":ds) = dropDirectory ds
+dropDirectory ds       = tail ds
+
+buildPhotoHtml :: Identifier -> (Int, Item CopyFile) -> Compiler (Item String)
+buildPhotoHtml template (idx, photo) = makeItem ""
+    >>= loadAndApplyTemplate template context
+    where context = constField "name" name `mappend`
+                    constField "file" (name ++ extension) `mappend`
+                    constField "path" url `mappend`
+                    constField "href" href `mappend`
+                    constField "id" photoId `mappend`
+                    defaultContext
+          filePath = toFilePath . itemIdentifier $ photo
+          name = takeBaseName filePath
+          extension = takeExtension filePath
+          url = tail . toUrl . joinPath . dropDirectory . splitPath $ filePath
+          href = "#portfolio-item-" ++ show idx
+          photoId = tail href
 
 rootRoute :: Routes
 rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
-    where
-        dropDirectory []       = []
-        dropDirectory ("/":ds) = dropDirectory ds
-        dropDirectory ds       = tail ds
 
 postCompiler :: Compiler (Item String)
 postCompiler = do
