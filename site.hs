@@ -28,6 +28,7 @@ import Text.Pandoc.Options (
                            , writerHTMLMathMethod
                            )
 import Text.Pandoc.SideNote (usingSideNotes)
+import Hakyll.Images (Image, loadImage, scaleImageCompiler)
 import Hakyll
 
 jsToCompress :: Pattern
@@ -43,6 +44,11 @@ main = hakyllWith config $ do
     match jsToCompress $ do
         route $ rootRoute `composeRoutes` setExtension "min.js"
         compile $ execCompilerWith (execName "terser") [HakFilePath, ProcArg "--compress"] CStdOut
+
+    match (fromGlob "static/img/photography/**") $ version "compressed" $ do
+        route $ customRoute getCompressedPhotoUrl
+        compile $ loadImage
+            >>= scaleImageCompiler 300 300
 
     -- CSS
     match "css/*" $ do
@@ -137,8 +143,8 @@ main = hakyllWith config $ do
         route idRoute
         compile $ do
             let photoDir = "static/img/photography/**"
-            photos <- loadAll photoDir >>= mapM (buildPhotoHtml "templates/photo.html") . zip [1..]
-            lightboxes <- loadAll photoDir >>= mapM (buildPhotoHtml "templates/lightbox.html") . zip [1..]
+            photos <- loadAll (photoDir .&&. hasVersion "compressed") >>= mapM buildPhotoHtml . zip [1..]
+            lightboxes <- loadAll (photoDir .&&. hasNoVersion) >>= mapM buildLightboxHtml . zip [1..]
 
             let photoCtx =
                     listField "photos" defaultContext (return photos) `mappend`
@@ -171,21 +177,31 @@ dropDirectory []       = []
 dropDirectory ("/":ds) = dropDirectory ds
 dropDirectory ds       = tail ds
 
-buildPhotoHtml :: Identifier -> (Int, Item CopyFile) -> Compiler (Item String)
-buildPhotoHtml template (idx, photo) = makeItem ""
+getCompressedPhotoUrl :: Identifier -> FilePath
+getCompressedPhotoUrl = joinPath . addComp . dropDirectory . splitPath . toFilePath
+    where addComp (x : xs) = x : "compressed" : xs
+
+buildGalleryHtmlHelper :: Identifier -> Int -> FilePath -> Compiler (Item String)
+buildGalleryHtmlHelper template idx filePath = makeItem ""
     >>= loadAndApplyTemplate template context
     where context = constField "name" name `mappend`
                     constField "file" (name ++ extension) `mappend`
-                    constField "path" url `mappend`
+                    constField "path" filePath `mappend`
                     constField "href" href `mappend`
                     constField "id" photoId `mappend`
                     defaultContext
-          filePath = toFilePath . itemIdentifier $ photo
           name = takeBaseName filePath
           extension = takeExtension filePath
-          url = tail . toUrl . joinPath . dropDirectory . splitPath $ filePath
           href = "#portfolio-item-" ++ show idx
           photoId = tail href
+
+buildPhotoHtml :: (Int, Item Image) -> Compiler (Item String)
+buildPhotoHtml (idx, photo) = buildGalleryHtmlHelper "templates/photo.html" idx filePath
+    where filePath = getCompressedPhotoUrl . itemIdentifier $ photo
+
+buildLightboxHtml :: (Int, Item CopyFile) -> Compiler (Item String)
+buildLightboxHtml (idx, photo) = buildGalleryHtmlHelper "templates/lightbox.html" idx filePath
+    where filePath = joinPath . dropDirectory . splitPath . toFilePath . itemIdentifier $ photo
 
 rootRoute :: Routes
 rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
