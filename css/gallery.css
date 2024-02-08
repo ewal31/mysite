@@ -8,10 +8,11 @@
 
 .portfolio {
     display: grid;
+    // Might want to change the values here with smaller screens;
     grid: auto / repeat(auto-fit, minmax(15em, 1fr));
     grid-gap: 1em;
     background: #333;
-    padding: 7em 4em;
+    padding: 1em 1em;
 }
 
 .portfolio_item {
