@@ -7,6 +7,11 @@ include_d3: true
 js_file: /js/GeneralisedIsotonicRegressionPlots.min.js
 ---
 
+The final C++ implementation is available on GitHub at
+[Generalised Isotonic Regression](https://github.com/ewal31/GeneralisedIsotonicRegression),
+and a variant compiled to WebAssembly for experimentation in the browser can be
+found [here](../tools/isotonic_regression.html).
+
 ```{=html}
 <div id="MultiIsoPlot"></div>
 ```
@@ -38,10 +43,7 @@ $$
 Throughout this post, we will discuss what a Linear Program is and how it leads
 to the algorithm discussed in [@LussRossetGeneralizedIsotonicRegression] for
 solving the Isotonic Regression problem in an arbitrary number of dimensions
-while supporting any convex differentiable loss function. The final implementation
-is available at [GeneralisedIsotonicRegression](https://github.com/ewal31/GeneralisedIsotonicRegression),
-and a variant compiled to WebAssembly for experimentation in the browser can be
-found [here](../tools/isotonic_regression.html).
+while supporting any convex differentiable loss function.
 
 ## Linear Programming
 
