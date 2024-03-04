@@ -24,13 +24,21 @@ The resulting website that is then provided by Github Pages is located within th
 
 ## TODO
 
+**High Priority**
+
+- [ ] rework the github action to build the project itself, so that the doc folder doesn't
+      have to be checked in and the repository size can be reduced. (especially adding photos)
+- [ ] nix in place of docker for building
+
+
+**Low Priority**
+
 - [ ] make use of the above compression tools
     - [x] javascript
     - [ ] css
     - [ ] svg
 - [x] make site usable on different screen sizes
 - [ ] clean up presentation of references
-- [ ] nix in place of docker for building
 - [ ] purescript instead of javascript
 - [ ] perhaps change sidenotes, to fix to html markers in the text
 - [ ] add contents for posts
