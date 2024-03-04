@@ -4,7 +4,7 @@ import Data.Function (on)
 import Data.Functor ((<&>))
 import Hakyll.Process
 import Data.List (groupBy)
-import System.FilePath (joinPath, splitPath, takeDirectory)
+import System.FilePath (joinPath, splitPath, takeDirectory, takeBaseName, takeExtension)
 import Text.Pandoc.Highlighting (Style, kate, styleToCss)
 import Text.Pandoc.Options (
                              extensionsFromList
@@ -28,6 +28,7 @@ import Text.Pandoc.Options (
                            , writerHTMLMathMethod
                            )
 import Text.Pandoc.SideNote (usingSideNotes)
+import Hakyll.Images (Image, loadImage, scaleImageCompiler)
 import Hakyll
 
 jsToCompress :: Pattern
@@ -43,6 +44,11 @@ main = hakyllWith config $ do
     match jsToCompress $ do
         route $ rootRoute `composeRoutes` setExtension "min.js"
         compile $ execCompilerWith (execName "terser") [HakFilePath, ProcArg "--compress"] CStdOut
+
+    match (fromGlob "static/img/photography/**") $ version "compressed" $ do
+        route $ customRoute getCompressedPhotoUrl
+        compile $ loadImage
+            >>= scaleImageCompiler 400 400
 
     -- CSS
     match "css/*" $ do
@@ -133,12 +139,31 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" toolsCtx
                 >>= relativizeUrls
 
+    create ["photography.html"] $ do
+        route idRoute
+        compile $ do
+            let photoDir = "static/img/photography/**"
+            photos <- loadAll (photoDir .&&. hasVersion "compressed") >>= mapM buildPhotoHtml . zip [1..]
+            lightboxes <- loadAll (photoDir .&&. hasNoVersion) >>= mapM buildLightboxHtml . zip [1..]
+
+            let photoCtx =
+                    listField "photos" defaultContext (return photos) `mappend`
+                    listField "lightboxes" defaultContext (return lightboxes) `mappend`
+                    constField "title" "Photography" `mappend`
+                    constField "css_file" "/css/gallery.css" `mappend`
+                    defaultContext
+
+            makeItem ""
+                >>= loadAndApplyTemplate "templates/gallery.html" photoCtx
+                >>= loadAndApplyTemplate "templates/default.html" photoCtx
+                >>= relativizeUrls
+
     -- Homepage
     match "index.html" $ do
         route idRoute
         compile $ do
             let indexCtx =
-                    constField "title" "Home"                `mappend`
+                    constField "title" "Home" `mappend`
                     defaultContext
             getResourceBody
                 >>= applyAsTemplate indexCtx
@@ -147,13 +172,39 @@ main = hakyllWith config $ do
 
     match "templates/*" $ compile templateCompiler
 
+dropDirectory :: [String] -> [String]
+dropDirectory []       = []
+dropDirectory ("/":ds) = dropDirectory ds
+dropDirectory ds       = tail ds
+
+getCompressedPhotoUrl :: Identifier -> FilePath
+getCompressedPhotoUrl = joinPath . addComp . dropDirectory . splitPath . toFilePath
+    where addComp (x : xs) = x : "compressed" : xs
+
+buildGalleryHtmlHelper :: Identifier -> Int -> FilePath -> Compiler (Item String)
+buildGalleryHtmlHelper template idx filePath = makeItem ""
+    >>= loadAndApplyTemplate template context
+    where context = constField "name" name `mappend`
+                    constField "file" (name ++ extension) `mappend`
+                    constField "path" filePath `mappend`
+                    constField "href" href `mappend`
+                    constField "id" photoId `mappend`
+                    defaultContext
+          name = takeBaseName filePath
+          extension = takeExtension filePath
+          href = "#portfolio-item-" ++ show idx
+          photoId = tail href
+
+buildPhotoHtml :: (Int, Item Image) -> Compiler (Item String)
+buildPhotoHtml (idx, photo) = buildGalleryHtmlHelper "templates/photo.html" idx filePath
+    where filePath = getCompressedPhotoUrl . itemIdentifier $ photo
+
+buildLightboxHtml :: (Int, Item CopyFile) -> Compiler (Item String)
+buildLightboxHtml (idx, photo) = buildGalleryHtmlHelper "templates/lightbox.html" idx filePath
+    where filePath = joinPath . dropDirectory . splitPath . toFilePath . itemIdentifier $ photo
 
 rootRoute :: Routes
 rootRoute = customRoute (joinPath . dropDirectory . splitPath . toFilePath)
-    where
-        dropDirectory []       = []
-        dropDirectory ("/":ds) = dropDirectory ds
-        dropDirectory ds       = tail ds
 
 postCompiler :: Compiler (Item String)
 postCompiler = do
