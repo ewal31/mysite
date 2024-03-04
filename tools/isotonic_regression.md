@@ -14,6 +14,13 @@ of the algorithm. For more background on the algorithm see the paper
 [Generalized Isotonic Regression](https://arxiv.org/abs/1104.1779) or my attempt at explaining
 it [here](../posts/2023-11-22-generalised-isotonic-regression.html).
 
+1. Paste your data into the "Input" box. Examples of the supported format can
+   be seen by clicking on one of the "Example" buttons.
+2. Click the "Run Regression" button to run the algorithm with the currently
+   selected loss function. The result at each iteration can be displayed by
+   selecting a chosen iteration from the drop-down box above the "Result".
+3. The "Plot" button can then be used to visualise how the space is partitioned
+   at each iteration. This only supports 2- and 3-dimensional data.
 
 ```{=html}
 <div id="regression-form">
