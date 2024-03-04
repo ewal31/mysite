@@ -48,7 +48,7 @@ main = hakyllWith config $ do
     match (fromGlob "static/img/photography/**") $ version "compressed" $ do
         route $ customRoute getCompressedPhotoUrl
         compile $ loadImage
-            >>= scaleImageCompiler 300 300
+            >>= scaleImageCompiler 400 400
 
     -- CSS
     match "css/*" $ do

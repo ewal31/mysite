@@ -226,7 +226,7 @@ input.margin-toggle {
     }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     div#contents {
         margin: auto;
         width: min(100%, 120ch);
