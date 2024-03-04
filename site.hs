@@ -133,6 +133,13 @@ main = hakyllWith config $ do
                 >>= loadAndApplyTemplate "templates/default.html" toolsCtx
                 >>= relativizeUrls
 
+    -- Tools
+    match "presentations/**" $ do
+        route $ setExtension "html"
+        compile $ presentationCompiler
+            >>= loadAndApplyTemplate "templates/presentation.html" postCtx
+            >>= relativizeUrls
+
     -- Homepage
     match "index.html" $ do
         route idRoute
@@ -183,6 +190,10 @@ postCompiler = do
             writerHTMLMathMethod = MathJax ""
           , writerHighlightStyle = Just pandocCodeStyle
         }
+
+presentationCompiler :: Compiler (Item String)
+presentationCompiler = do
+    pandocCompilerWith defaultHakyllReaderOptions defaultHakyllWriterOptions
 
 -- Styles for code highlighting
 -- https://hackage.haskell.org/package/pandoc-3.1.2/docs/Text-Pandoc-Highlighting.html
