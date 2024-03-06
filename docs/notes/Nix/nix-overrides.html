@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <title>Override vs OverrideAttrs</title>
+        <link rel="stylesheet" href="../../css/syntax.css" />
+        <link rel="stylesheet" type="text/css" href="../../css/default.css" />
+        
+    </head>
+    <body>
+        <div class="backgroundpattern"></div>
+        <div id="contents" class="debug">
+            <div id="header" class="debug">
+                <div id="logo">
+                    <a href="../../">Ed's Site</a>
+                </div>
+                <div id="navigation">
+                    <a href="../../blog.html">Blog</a>
+                    <a href="../../notes.html">Notes</a>
+                    <a href="../../tools.html">Tools</a>
+                    <a href="../../photography.html">Photos</a>
+                </div>
+            </div>
+
+            <div id="post">
+                <h1>Override vs OverrideAttrs</h1>
+                <p>Given a simple derivation, such as</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode nix"><code class="sourceCode nix"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">stdenv</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">bar</span><span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="va">baz</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>stdenv.mkDerivation <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">pname</span> <span class="op">=</span> <span class="st">&quot;test&quot;</span><span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">version</span> <span class="op">=</span> <span class="st">&quot;0.0.1&quot;</span><span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="va">buildInputs</span> <span class="op">=</span> <span class="op">[</span>bar baz<span class="op">];</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="va">phases</span> <span class="op">=</span> <span class="op">[</span><span class="st">&quot;installPhase&quot;</span><span class="op">];</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="va">installPhase</span> <span class="op">=</span> <span class="st">&quot;touch $out&quot;</span><span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We can overide the arguments/inputs via <code>override</code>. For example,</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode nix"><code class="sourceCode nix"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>example.override <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">baz</span> <span class="op">=</span> customBaz<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>would use a different derivation in place of <code>baz</code>.</p>
+<p>If, however, we want to change one of the build phases, or the version of the
+resulting derivation, we can run</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode nix"><code class="sourceCode nix"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>example.overrideAttrs <span class="op">(</span><span class="va">_</span><span class="op">:</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">version</span> <span class="op">=</span> <span class="st">&quot;0.0.2&quot;</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">installPhase</span> <span class="op">=</span> <span class="st">''</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">        echo &quot;Some Information&quot; &gt; $out</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">    ''</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="er">}</span><span class="op">)</span></span></code></pre></div>
+<p>For many programming lanugages there are also special wrappers and possibilites
+for overriding derivations. Documentation for specific languages is available
+<a href="https://github.com/NixOS/nixpkgs/tree/master/doc/languages-frameworks">here</a>.</p>
+
+            </div>
+            <div id="footer" class="debug">
+                Site proudly generated by
+                <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+            </div>
+        </div>
+
+        <!-- TODO Includes need to be cleaned up. -->
+        <link rel="stylesheet" href="../../katex/katex.min.css">
+        <script defer src="../../katex/katex.min.js"></script>
+        <script type="text/javascript" script defer src="../../katex/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+        
+        
+        
+        <!-- TODO Includes need to be cleaned up. -->
+
+    </body>
+</html>
