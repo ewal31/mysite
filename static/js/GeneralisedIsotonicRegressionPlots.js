@@ -68,6 +68,10 @@
     const lp_plot = "LinearProgram";
     (function() {
 
+        if (document.getElementById(lp_plot) == null) {
+            return;
+        }
+
         Plotly.newPlot(
             lp_plot,
             [
@@ -181,6 +185,10 @@
     const uni_iso_plot = "UniIsoPlot";
     d3.csv("../plotdata/uni-iso-regression.csv", function(err, rows){
         d3.csv("../plotdata/uni-iso-regression-iterations.csv", function(err, rows_anim){
+
+            if (document.getElementById(uni_iso_plot) == null) {
+                return;
+            }
 
             var active_iteration = 3;
             var iterations = { };
@@ -320,7 +328,7 @@
                             type: 'scatter',
                             mode: "lines",
                             name: "Linear Regression (L2)",
-                            visible: 'legendonly',
+                            // visible: 'legendonly',
                         },
                         {
                             x: get_values(iterations[active_iteration].groups, "x"),
@@ -430,6 +438,10 @@
     multi_iso_plot = "MultiIsoPlot";
     d3.csv("../plotdata/multi-iso-regression.csv", function(err, rows){
         d3.csv("../plotdata/multi-iso-regression-iterations.csv", function(err, rows_anim){
+
+            if (document.getElementById(multi_iso_plot) == null) {
+                return;
+            }
 
             var active_iteration = 7;
             var iterations = { };
@@ -679,7 +691,12 @@
      *   with loss values along the bottom
      */
     (function() {
-        const parentNode = document.getElementById("AdjacencyMatrix").parentNode
+        const matrix_div = document.getElementById("AdjacencyMatrix")
+        if (matrix_div == null) {
+            return
+        }
+
+        const parentNode = matrix_div.parentNode
         const diagram_breakpoint = 450;
 
         function get_font_size(vw) {

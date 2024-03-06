@@ -8,6 +8,9 @@ import System.FilePath (joinPath, splitPath, takeDirectory, takeBaseName, takeEx
 import Text.Pandoc.Highlighting (Style, kate, styleToCss)
 import Text.Pandoc.Options (
                              extensionsFromList
+                           , enableExtension
+                           , disableExtension
+                           , pandocExtensions
                            , Extension (
                                  Ext_backtick_code_blocks
                                , Ext_citations
@@ -18,6 +21,8 @@ import Text.Pandoc.Options (
                                , Ext_link_attributes
                                --, Ext_markdown_in_html_blocks
                                , Ext_raw_attribute
+                               , Ext_raw_tex
+                               , Ext_smart
                                , Ext_tex_math_dollars
                                , Ext_tex_math_double_backslash
                                , Ext_tex_math_single_backslash
@@ -28,6 +33,7 @@ import Text.Pandoc.Options (
                            , writerHTMLMathMethod
                            )
 import Text.Pandoc.SideNote (usingSideNotes)
+-- import Text.Pandoc.Extensions (pandocExtensions)
 import Hakyll.Images (Image, loadImage, scaleImageCompiler)
 import Hakyll
 
@@ -221,6 +227,7 @@ postCompiler = do
     writePandocWith postWriterOptions <$> (getResourceBody >>= readPandocBiblio postReaderOptions csl bib
                                                            >>= traverse (return . usingSideNotes))
     where
+        -- TODO can probably delete this, the defaults look good
         postReaderOptions = defaultHakyllReaderOptions {
             readerExtensions = extensionsFromList
                 [ -- https://hackage.haskell.org/package/pandoc-3.1.2/docs/Text-Pandoc-Extensions.html#t:Extension
@@ -245,7 +252,14 @@ postCompiler = do
 
 presentationCompiler :: Compiler (Item String)
 presentationCompiler = do
-    pandocCompilerWith defaultHakyllReaderOptions defaultHakyllWriterOptions
+    pandocCompilerWith presentationReaderOptions presentationWriterOptions
+    where
+        presentationReaderOptions = defaultHakyllReaderOptions {
+            readerExtensions = disableExtension Ext_raw_tex pandocExtensions
+        }
+        presentationWriterOptions = defaultHakyllWriterOptions {
+            writerHTMLMathMethod = MathJax ""
+        }
 
 -- Styles for code highlighting
 -- https://hackage.haskell.org/package/pandoc-3.1.2/docs/Text-Pandoc-Highlighting.html

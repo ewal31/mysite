@@ -22,14 +22,20 @@
         <script src="/reveal.js/plugin/notes/notes.min.js"></script>
         <script src="/reveal.js/plugin/markdown/markdown.min.js"></script>
         <script src="/reveal.js/plugin/highlight/highlight.min.js"></script>
+        <script src="/reveal.js/plugin/math/math.min.js"></script>
         <script>
             // More info about initialization & config:
             // - https://revealjs.com/initialization/
             // - https://revealjs.com/config/
             Reveal.initialize({
-            hash: true,
-            // Learn about plugins: https://revealjs.com/plugins/
-            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+                hash: true,
+                center: true,
+                showNotes: true,
+                katex: {
+                    local: '../katex',
+                },
+                // Learn about plugins: https://revealjs.com/plugins/
+                plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
             });
         </script>
         $if(include_d3)$
