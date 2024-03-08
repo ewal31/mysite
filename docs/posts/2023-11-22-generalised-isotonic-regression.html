@@ -263,9 +263,11 @@ paper we are looking at here are convex and the objective is restricted to
 convex differentiable functions.<br />
 <br />
 </span></span> Without this convexity guarantee, the gradient of the
-Lagrangian equating to zero does not imply it has been minimised. When
-convexity does hold, though, we can use the KKT conditions to show that the
-following equality holds:</p>
+Lagrangian equating to zero does not imply it has been maximised, meaning
+<span class="math inline">\(g(\hat{\bm{\lambda}}, \hat{\bm{v}})\)</span> doesn't necessarily equal
+<span class="math inline">\(L(\hat{\bm{x}}, \hat{\bm{\lambda}}, \hat{\bm{v}})\)</span> for a point <span class="math inline">\(\hat{\bm{x}}\)</span>
+satisfying the conditions. When convexity does hold, though, we can use the KKT
+conditions to show that the following equality holds:</p>
 <p><span class="math display">\[\begin{aligned}
 g(\hat{\bm{\lambda}}, \hat{\bm{v}}) &amp;= L(\hat{\bm{x}}, \hat{\bm{\lambda}}, \hat{\bm{v}}) \\
                                     &amp;= o(\hat{\bm{x}}) + \sum_i \hat{\lambda}_i b_i(\hat{\bm{x}}) + \sum_j \hat{v}_i c_i(\hat{\bm{x}}) \\

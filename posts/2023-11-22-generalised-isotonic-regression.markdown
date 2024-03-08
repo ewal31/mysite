@@ -293,9 +293,11 @@ solution. If, however, our problem is convex, as in our example above, then we
 always have a zero duality gap when together values $\hat{\bm{x}}$,
 $\hat{\bm{\lambda}}$ and $\hat{\bm{v}}$ satisfy the KKT conditions.
 [^PapersConvexity] Without this convexity guarantee, the gradient of the
-Lagrangian equating to zero does not imply it has been minimised. When
-convexity does hold, though, we can use the KKT conditions to show that the
-following equality holds:
+Lagrangian equating to zero does not imply it has been maximised, meaning
+$g(\hat{\bm{\lambda}}, \hat{\bm{v}})$ doesn't necessarily equal
+$L(\hat{\bm{x}}, \hat{\bm{\lambda}}, \hat{\bm{v}})$ for a point $\hat{\bm{x}}$
+satisfying the conditions. When convexity does hold, though, we can use the KKT
+conditions to show that the following equality holds:
 
 [^PapersConvexity]: Luckily, the constraints in the linear program from the
     paper we are looking at here are convex and the objective is restricted to
