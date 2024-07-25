@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="/reveal.js/reset.css">
         <link rel="stylesheet" href="/reveal.js/reveal.css">
         <link rel="stylesheet" href="/reveal.js/theme/$theme$.css" id="theme">
-        <link rel="stylesheet" href="/reveal.js/plugin/highlight/monokai.css" id="highlight-theme">
+        <link rel="stylesheet" href="/reveal.js/plugin/highlight/zenburn.css" id="highlight-theme">
     </head>
     <body>
 
@@ -27,10 +27,14 @@
             // More info about initialization & config:
             // - https://revealjs.com/initialization/
             // - https://revealjs.com/config/
+            // Open Overview Mode with 'o'
+            // Open Fullscreen Mode with 'f'
+            // Open Speaker Second Screen Overview with 's'
+            // includes Timer and Notes and View of Next Slide
             Reveal.initialize({
                 hash: true,
                 center: true,
-                showNotes: true,
+                // showNotes: true,
                 katex: {
                     local: '../katex',
                 },
@@ -39,10 +43,10 @@
             });
         </script>
         $if(include_d3)$
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js'></script>
+        <script src='/plotly/d3.min.js'></script>
         $endif$
         $if(include_plotly)$
-        <script src='https://cdn.plot.ly/plotly-2.27.0.min.js'></script>
+        <script src='/plotly/plotly-2.27.0.min.js'></script>
         $endif$
         $if(js_file)$
         <script src=$js_file$></script>

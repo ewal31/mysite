@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <title>Isotonic Regression</title>
+        <link rel="stylesheet" href="../reveal.js/reset.css">
+        <link rel="stylesheet" href="../reveal.js/reveal.css">
+        <link rel="stylesheet" href="../reveal.js/theme/serif.css" id="theme">
+        <link rel="stylesheet" href="../reveal.js/plugin/highlight/zenburn.css" id="highlight-theme">
+    </head>
+    <body>
+
+        <div class="reveal">
+            <div class="slides">
+            <section>
+<section>
+<h2>
+Isotonic Regression
+</h2>
+<h4>
+Edward Wall
+</h4>
+<aside class="notes">
+</aside>
+</section>
+<section>
+<h2>
+Isotonic Regression
+</h2>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\text{minimise}   &amp;\quad \sum_i \text{loss} (\hat{y}_i, y_i) &amp; \\
+&amp;\text{subject to} &amp;\quad \hat{y}_i \preceq \hat{y}_j, &amp;\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+\end{aligned}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(y_i\)</span>: input/measured value</li>
+<li><span class="math inline">\(\hat{y}_i\)</span>: regressed value</li>
+<li><span class="math inline">\(\mathfrak{I}\)</span>: constraints</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>Generalised Isotonic Regression Framework</li>
+<li>Very general formulation; the constraints can be expressed via
+any arbitrary graph.</li>
+</ul>
+</aside>
+</section>
+<section>
+<div id="UniIsoPlot">
+
+</div>
+<aside class="notes">
+<ul>
+<li>example</li>
+<li>fitting to blue points</li>
+<li>green is typical linear regression</li>
+<li>and orange is the result of the algorithm I implemented</li>
+<li>comparatively less shape constraints (linear, polynomial)</li>
+<li>spoiler, can visualise iterative algorithm</li>
+</ul>
+</aside>
+</section>
+<section>
+<h3>
+Constraints of existing solutions
+</h3>
+<ul>
+<li>either limited to 2-dimensions</li>
+<li>or process only a few hundred points</li>
+<li>or only support grids in 3-dimensions</li>
+<li>limited loss function support</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>there are plenty of implementatons available to solve
+this 1-dimensional version</li>
+<li>especially non-discretised form</li>
+<li>searched for available implementation
+<ol type="1">
+<li>written in R only handle few hundred points not graph etc</li>
+<li>in cpp</li>
+</ol></li>
+<li>both could only supporting grids, not arbitrary loss only l2 l1</li>
+</ul>
+</aside>
+</section>
+<section>
+<p><img src="../img/presentations/GeneralisedIsotonicRegressionAbstract.png" /></p>
+<aside class="notes">
+<ul>
+<li>potential solution is 2014 …</li>
+<li>what is it about</li>
+<li>set about understanding and implementing to plug this gap
+in open source</li>
+</ul>
+</aside>
+</section>
+<section>
+<p><span class="math display">\[
+\begin{aligned}
+&amp;\text{minimise}   &amp;\quad \sum_i \text{loss} (\hat{y}_i, y_i) &amp; \\
+&amp;\text{subject to} &amp;\quad \hat{y}_i \preceq \hat{y}_j, &amp;\quad \forall \left ( i, j \right ) \in \mathfrak{I}
+\end{aligned}
+\]</span></p>
+<hr>
+<div class="fragment fade-in">
+<p><span class="math display">\[\begin{aligned}
+&amp;\text{minimise}    &amp;\quad \sum_{i \in V} x_i \frac{\partial \text{loss}_i(\hat{y}_V, y_V)}{\partial \hat{y}_V} \\
+&amp;\text{subject to}  &amp;\quad  x_i - x_j \leq 0 &amp;\quad \forall (i,j) \in \mathfrak{I}_V \\
+&amp;                   &amp;\quad -x_i - 1   \leq 0 &amp;\quad \forall i \in V \\
+&amp;                   &amp;\quad  x_i - 1   \leq 0 &amp;\quad \forall i \in V
+\end{aligned}
+\]</span></p>
+</div>
+<aside class="notes">
+<ul>
+<li>paper provides algorithm to change the</li>
+<li>ISO Problem (in case of L2 quadratic constraint weakly polynomial)</li>
+<li>into an iterative series of linear constraint problems faster solve</li>
+<li>if you would like details
+<ul>
+<li>the paper is freely available on arxiv</li>
+<li>or you can check my blog post on it</li>
+</ul></li>
+</ul>
+</aside>
+</section>
+<section>
+<h3>
+C++ Implementation
+</h3>
+<ul>
+<li>higher potential speed</li>
+<li>interface to many languages with<br />
+minimal adjustments</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>lower memory usage</li>
+<li>decided to do in Cpp, for the speed and to minitgate ram usage</li>
+<li>and means, can somewhat easily add bindings for other languages</li>
+<li>supporting more at once, e.g R and Python</li>
+<li>I have even worked on a WASM interface which demo at end</li>
+</ul>
+</aside>
+</section>
+<section data-background-iframe="../posts/2023-11-22-generalised-isotonic-regression.html" data-background-interactive data-preload>
+</section>
+<section>
+<pre><code class="language-plaintext" data-trim data-noescape>
+FetchContent_Declare(
+    GIR
+    GIT_REPOSITORY "https://github.com/ewal31/GeneralisedIsotonicRegression"
+    GIT_TAG 0.3.0
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(
+    GIR
+)
+</code></pre>
+<pre><code class="language-cpp" data-trim data-noescape>
+std::tuple&lt;Eigen::SparseMatrix&lt;bool&gt;, VectorXu, VectorXu&gt;
+points_to_adjacency(
+    const Eigen::MatrixX&lt;V&gt;&amp; points
+);
+
+std::pair&lt;VectorXu, Eigen::VectorXd&gt;
+generalised_isotonic_regression(
+    const Eigen::SparseMatrix&lt;bool&gt;&amp; adjacency_matrix,
+    YType&amp;&amp; _y,
+    WeightsType&amp;&amp; _weights,
+    const LossFunction&lt;LossType&gt;&amp; loss_fun,
+    uint64_t max_iterations = 0
+);
+</code></pre>
+<aside class="notes">
+</aside>
+</section>
+<section>
+<pre><code class="language-python" data-trim data-noescape style="max-height: 100%" data-line-numbers="|13,19-24">
+import multivariate_isotonic_regression as mir
+
+# create some test roughly monotonic points
+X = np.array([(i, j)
+              for i in range(width)
+              for j in range(width)])
+
+y = 3 * ((X[:, 0] // 7) + (X[:, 1] // 4)) + 1 + \
+    1.5 * np.random.rand(width ** 2)
+
+# points_to_adjacency rearranges the points roughly
+# according to how many other points they dominate
+adj, orig_idxs, new_idxs = mir.points_to_adjacency(X)
+
+# we rearrange X and y to have the same ordering
+X_reordered = X[new_idxs, :]
+y_reordered = y[new_idxs]
+
+group, yhat = mir.generalised_isotonic_regression(
+    adj,
+    y_reordered,
+    loss_function = "pnorm",
+    p = 1.1
+)
+</code></pre>
+<aside class="notes">
+probs show same picture from above
+</aside>
+</section>
+<section>
+<p><img src="../img/presentations/Multidim_Example.png" /></p>
+</section>
+<section>
+<h3>
+Implementation Advantages
+</h3>
+<ul>
+<li>open source</li>
+<li>more than 2-dimensions</li>
+<li>arbitrary graph structures</li>
+<li>duplicates points</li>
+<li>any convex loss functions</li>
+</ul>
+<aside class="notes">
+<p>I did
+* open source
+* duplicate points</p>
+<ul>
+<li>compared to other implementations is only version that…
+<ul>
+<li>uses barely any RAM</li>
+<li>can process 80 times more points in same time compared to original solution</li>
+</ul></li>
+<li>the implementation gets more frustrating when we want to allow for duplicate
+points</li>
+<li>it could handle 500’000 points with barely memory usage finishing faster than
+the dynamic programming solution while solving a much more general and
+complicated problem processes about 80 times more points in the same amount
+of time</li>
+</ul>
+</aside>
+</section>
+<section>
+<h3>
+Next Steps
+</h3>
+<ul>
+<li>interface more robust to user error</li>
+<li>R interface</li>
+<li>improve speed with more than 3-dimensions</li>
+<li>replace linear programming with faster<br />
+Maximum-Flow algorithm</li>
+<li>support even more loss functions</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>few potential options
+<ul>
+<li>easiest to try would be a divide and conquer that should be somethin like klog(n) check this</li>
+<li>Directed Minimum Spanding Tree</li>
+<li>efficient orthogonal range search</li>
+</ul></li>
+<li>Non-convex via submodular supports some more loss functions</li>
+</ul>
+</aside>
+</section>
+<section data-background-iframe="../tools/isotonic_regression.html" data-background-interactive data-preload>
+<aside class="notes">
+<ul>
+<li>show simple</li>
+<li>show pnorm, close to median/mean</li>
+<li>show duplicate points</li>
+<li>compiled to WASM</li>
+<li>setup web visualisation so one can try out for their needs</li>
+</ul>
+</aside>
+</section>
+<section>
+<h2>
+Thank You
+</h2>
+<aside class="notes">
+</aside>
+</section>
+            </div>
+        </div>
+
+        <script src="../reveal.js/reveal.min.js"></script>
+        <script src="../reveal.js/plugin/notes/notes.min.js"></script>
+        <script src="../reveal.js/plugin/markdown/markdown.min.js"></script>
+        <script src="../reveal.js/plugin/highlight/highlight.min.js"></script>
+        <script src="../reveal.js/plugin/math/math.min.js"></script>
+        <script>
+            // More info about initialization & config:
+            // - https://revealjs.com/initialization/
+            // - https://revealjs.com/config/
+            // Open Overview Mode with 'o'
+            // Open Fullscreen Mode with 'f'
+            // Open Speaker Second Screen Overview with 's'
+            // includes Timer and Notes and View of Next Slide
+            Reveal.initialize({
+                hash: true,
+                center: true,
+                // showNotes: true,
+                katex: {
+                    local: '../katex',
+                },
+                // Learn about plugins: https://revealjs.com/plugins/
+                plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
+            });
+        </script>
+        
+        <script src="../plotly/d3.min.js"></script>
+        
+        
+        <script src="../plotly/plotly-2.27.0.min.js"></script>
+        
+        
+        <script src="../js/GeneralisedIsotonicRegressionPlots.min.js"></script>
+        
+
+    </body>
+</html>
