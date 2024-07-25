@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <title>$title$</title>
+        <link rel="stylesheet" href="/reveal.js/reset.css">
+        <link rel="stylesheet" href="/reveal.js/reveal.css">
+        <link rel="stylesheet" href="/reveal.js/theme/$theme$.css" id="theme">
+        <link rel="stylesheet" href="/reveal.js/plugin/highlight/zenburn.css" id="highlight-theme">
+    </head>
+    <body>
+
+        <div class="reveal">
+            <div class="slides">
+            $body$
+            </div>
+        </div>
+
+        <script src="/reveal.js/reveal.min.js"></script>
+        <script src="/reveal.js/plugin/notes/notes.min.js"></script>
+        <script src="/reveal.js/plugin/markdown/markdown.min.js"></script>
+        <script src="/reveal.js/plugin/highlight/highlight.min.js"></script>
+        <script src="/reveal.js/plugin/math/math.min.js"></script>
+        <script>
+            // More info about initialization & config:
+            // - https://revealjs.com/initialization/
+            // - https://revealjs.com/config/
+            // Open Overview Mode with 'o'
+            // Open Fullscreen Mode with 'f'
+            // Open Speaker Second Screen Overview with 's'
+            // includes Timer and Notes and View of Next Slide
+            Reveal.initialize({
+                hash: true,
+                center: true,
+                // showNotes: true,
+                katex: {
+                    local: '../katex',
+                },
+                // Learn about plugins: https://revealjs.com/plugins/
+                plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
+            });
+        </script>
+        $if(include_d3)$
+        <script src='/plotly/d3.min.js'></script>
+        $endif$
+        $if(include_plotly)$
+        <script src='/plotly/plotly-2.27.0.min.js'></script>
+        $endif$
+        $if(js_file)$
+        <script src=$js_file$></script>
+        $endif$
+
+    </body>
+</html>

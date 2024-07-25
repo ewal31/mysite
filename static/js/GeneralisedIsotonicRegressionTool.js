@@ -3332,12 +3332,12 @@ function plot_result() {
 
 function set_example() {
     var example = 'X_1,   y, weight\n' +
-                    '  0,   1,      1\n' +
-                    '  1, 2.2,     10\n' +
-                    '  3, 1.1,      1\n' +
-                    '  4, 1.1,      1\n' +
-                    '  6, 1.1,      1\n' +
-                    ' 10,   4,      6\n';
+                  '  0,   1,      1\n' +
+                  '  1, 2.2,      1\n' +
+                  '  3, 1.1,      1\n' +
+                  '  4, 1.1,      1\n' +
+                  '  6, 1.1,      1\n' +
+                  ' 10,   4,      6\n';
 
     document.getElementById('input').value = example;
 }
