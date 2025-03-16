@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <title>bash</title>
+        <link rel="stylesheet" href="../../css/syntax.css" />
+        <link rel="stylesheet" type="text/css" href="../../css/default.css" />
+        
+    </head>
+    <body>
+        <div class="backgroundpattern"></div>
+        <div id="contents" class="debug">
+            <div id="header" class="debug">
+                <div id="logo">
+                    <a href="../../">Ed's Site</a>
+                </div>
+                <div id="navigation">
+                    <a href="../../blog.html">Blog</a>
+                    <a href="../../notes.html">Notes</a>
+                    <a href="../../tools.html">Tools</a>
+                    <a href="../../photography.html">Photos</a>
+                </div>
+            </div>
+
+            <div id="post">
+                <h1>bash</h1>
+                <h1>Preferred Bash Shebang</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span></code></pre></div>
+<p><code>env</code> runs a program in a modified environment, the command in this case being
+the first copy of <code>bash</code> found within <code>${PATH}</code>.</p>
+<p><a href="https://en.wikipedia.org/wiki/Shebang_(Unix)#Portability">source</a></p>
+<h1>Location of Bash Script</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">SCRIPT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span> <span class="bu">cd</span> <span class="at">-P</span> <span class="at">--</span> <span class="st">&quot;</span><span class="va">$(</span> <span class="fu">dirname</span> <span class="at">--</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">readlink</span> <span class="at">-f</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span> <span class="va">)</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span> <span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p><a href="https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script?page=1&amp;tab=scoredesc#tab-top">source</a></p>
+<h1>Bash Strict Mode</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="va">IFS</span><span class="op">=</span><span class="st">$'</span><span class="dt">\n\t</span><span class="st">'</span></span></code></pre></div>
+<ul>
+<li><code>-e</code>: immediately exit if a command has a non-zero exit status</li>
+<li><code>-u</code>: references to an undefined variable cause the script to exit</li>
+<li><code>-o pipefail</code>: returns non-zero exit statuses from any command in a set of
+piped commands instead of the exit code of the final command</li>
+<li><code>IFS</code>: each character is a delimiter used by bash for separating arguments,
+so we avoid arguments with spaces, for example, being incorrectly parsed in
+bash loops</li>
+</ul>
+<p><a href="http://redsymbol.net/articles/unofficial-bash-strict-mode/">source</a></p>
+<h1>Bash Exit Traps for Cleanup</h1>
+<p>At the start of your file set up a trap with a cleanup function that should be
+run.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span><span class="fu"> finish</span> <span class="kw">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cleanup</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">trap</span> finish EXIT</span></code></pre></div>
+<p><a href="http://redsymbol.net/articles/bash-exit-traps/">source</a></p>
+
+            </div>
+            <div id="footer" class="debug">
+                Site proudly generated by
+                <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+            </div>
+        </div>
+
+        <!-- TODO Includes need to be cleaned up. -->
+        <link rel="stylesheet" href="../../katex/katex.min.css">
+        <script defer src="../../katex/katex.min.js"></script>
+        <script type="text/javascript" script defer src="../../katex/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+        
+        
+        
+        <!-- TODO Includes need to be cleaned up. -->
+
+    </body>
+</html>
